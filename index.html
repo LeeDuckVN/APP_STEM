@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>STEM IoT Shop</title>
+    <meta
+      name="description"
+      content="Trang bán hàng STEM IoT với tìm kiếm, danh mục, bộ lọc sản phẩm, giỏ hàng và đặt hàng."
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="topbar">
+      <div class="container topbar-inner">
+        <div class="topbar-contact">
+          <span><span data-i18n="hotline">Hotline</span>: <strong>0972 924 961</strong></span>
+          <span>Email: <strong>support@stemiot.vn</strong></span>
+          <span><span data-i18n="workHours">Giờ làm việc</span>: 7:30 - 18:00</span>
+        </div>
+        <div class="language-picker">
+          <button class="language-toggle" id="languageToggle" type="button" aria-expanded="false" aria-controls="languageMenu">
+            🌐 <span id="currentLanguage">Việt Nam</span>
+          </button>
+          <div class="language-menu" id="languageMenu" hidden>
+            <button type="button" data-language="ja">日本語</button>
+            <button type="button" data-language="en">English</button>
+            <button type="button" data-language="vi">Việt Nam</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <header class="main-header">
+      <div class="container header-grid">
+        <a class="brand" href="#home" aria-label="STEM IoT Shop">
+          <span class="brand-mark">ST</span>
+          <span>
+            <strong>STEM IoT</strong>
+            <small data-i18n="brandTagline">Linh kiện - Board - Robot</small>
+          </span>
+        </a>
+
+        <form class="search-box" id="searchForm" role="search">
+          <select id="searchScope" aria-label="Phạm vi tìm kiếm">
+            <option value="all" data-i18n="all">Tất cả</option>
+            <option value="board" data-i18n="catBoard">Board IoT</option>
+            <option value="sensors" data-i18n="catSensors">Cảm biến</option>
+            <option value="robot" data-i18n="catRobot">Robot</option>
+          </select>
+          <input
+            id="searchInput"
+            type="search"
+            placeholder="Tìm ESP32, Arduino, relay, sensor..."
+            data-i18n-placeholder="searchPlaceholder"
+            autocomplete="off"
+          />
+          <button type="submit" data-i18n="searchButton">Tìm</button>
+          <div class="suggestions" id="suggestions" hidden></div>
+        </form>
+
+        <div class="header-actions" aria-label="Tiện ích">
+          <button class="cart-action" id="openCart" type="button">
+            <span>🛒</span>
+            <strong data-i18n="cart">Giỏ hàng</strong>
+            <em id="cartCount">0</em>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <nav class="nav-bar" aria-label="Menu chính">
+      <div class="container nav-inner">
+        <button class="category-toggle" id="categoryToggle" type="button" data-i18n="categoryMenu">☰ Danh mục sản phẩm</button>
+        <a href="#products" data-i18n="products">Sản phẩm</a>
+        <a href="#support" data-i18n="warranty">Bảo hành</a>
+        <a href="#checkout" data-i18n="buyGuide">Hướng dẫn mua hàng</a>
+      </div>
+    </nav>
+
+    <main id="home">
+      <section class="container marketplace">
+        <aside class="mega-menu" id="megaMenu" aria-label="Danh mục lớn">
+          <h2 data-i18n="category">Danh mục</h2>
+          <div id="megaCategories"></div>
+        </aside>
+
+        <section class="hero-panel">
+          <img src="assets/stem-iot-banner.png" alt="STEM IoT product set" />
+          <div class="hero-copy">
+            <p data-i18n="heroKicker">Hàng sẵn kho cho lớp học và lab</p>
+            <h1 data-i18n="heroTitle">Board, cảm biến, robot kit và thiết bị tự động hóa</h1>
+            <div class="hero-actions">
+              <a class="primary-link" href="#products" data-i18n="viewProducts">Xem sản phẩm</a>
+              <a class="secondary-link" href="#quote" data-i18n="requestQuote">Gửi yêu cầu báo giá</a>
+            </div>
+          </div>
+        </section>
+
+        <aside class="right-promos" aria-label="Ưu đãi">
+          <div>
+            <strong data-i18n="promoFastTitle">Giao nhanh nội thành</strong>
+            <span data-i18n="promoFastText">Soạn hàng trong ngày cho sản phẩm có tồn kho.</span>
+          </div>
+          <div>
+            <strong data-i18n="promoStemTitle">Hỗ trợ dự án STEM</strong>
+            <span data-i18n="promoStemText">Gợi ý combo theo giáo án, robot, IoT, nhà máy mini.</span>
+          </div>
+        </aside>
+      </section>
+
+      <section class="container service-strip">
+        <div><strong data-i18n="serviceShippingTitle">🚚 Giao hàng</strong><span data-i18n="serviceShippingText">COD, chuyển khoản, lấy tại cửa hàng</span></div>
+        <div><strong data-i18n="serviceInvoiceTitle">🧾 Xuất hóa đơn</strong><span data-i18n="serviceInvoiceText">Hỗ trợ trường học và doanh nghiệp</span></div>
+        <div><strong data-i18n="serviceWarrantyTitle">🔧 Bảo hành</strong><span data-i18n="serviceWarrantyText">Đổi trả theo chính sách kỹ thuật</span></div>
+        <div><strong data-i18n="serviceBulkTitle">📦 Mua số lượng</strong><span data-i18n="serviceBulkText">Chiết khấu cho đơn dự án</span></div>
+      </section>
+
+      <section class="container shop-section" id="products">
+        <aside class="filter-panel">
+          <div class="panel-title" data-i18n="filterTitle">Bộ lọc sản phẩm</div>
+          <label>
+            <span data-i18n="category">Danh mục</span>
+            <select id="categoryFilter"></select>
+          </label>
+          <label>
+            <span data-i18n="subcategory">Nhóm con</span>
+            <select id="subFilter"></select>
+          </label>
+          <label>
+            <span data-i18n="stock">Kho hàng</span>
+            <select id="stockFilter">
+              <option value="all" data-i18n="all">Tất cả</option>
+              <option value="inStock" data-i18n="inStock">Còn hàng</option>
+              <option value="lowStock" data-i18n="lowStock">Sắp hết</option>
+            </select>
+          </label>
+          <label>
+            <span data-i18n="priceRange">Mức giá</span>
+            <select id="priceFilter">
+              <option value="all" data-i18n="all">Tất cả</option>
+              <option value="0-100000" data-i18n="priceUnder100">Dưới 100.000đ</option>
+              <option value="100000-300000" data-i18n="price100to300">100.000đ - 300.000đ</option>
+              <option value="300000-99999999" data-i18n="priceOver300">Trên 300.000đ</option>
+            </select>
+          </label>
+          <button class="reset-filter" id="resetFilter" type="button" data-i18n="clearFilter">Xóa bộ lọc</button>
+        </aside>
+
+        <div class="product-column">
+          <div class="section-head">
+            <div>
+              <p data-i18n="products">Sản phẩm</p>
+              <h2 id="productHeading">Tất cả sản phẩm</h2>
+            </div>
+            <div class="view-tools">
+              <span id="resultCount">0 sản phẩm</span>
+              <select id="sortSelect" aria-label="Sắp xếp">
+                <option value="featured" data-i18n="sortFeatured">Nổi bật</option>
+                <option value="priceAsc" data-i18n="sortPriceAsc">Giá tăng dần</option>
+                <option value="priceDesc" data-i18n="sortPriceDesc">Giá giảm dần</option>
+                <option value="stockDesc" data-i18n="sortStockDesc">Tồn kho nhiều</option>
+              </select>
+            </div>
+          </div>
+          <div class="product-grid" id="productGrid"></div>
+          <div class="empty-state" id="emptyState" hidden data-i18n="emptyState">Không tìm thấy sản phẩm phù hợp.</div>
+        </div>
+      </section>
+
+      <section class="container split-section">
+        <div class="new-box">
+          <div class="section-head compact">
+            <div>
+              <p data-i18n="newProducts">Sản phẩm mới</p>
+              <h2 data-i18n="newArrivals">Hàng mới về</h2>
+            </div>
+          </div>
+          <div class="mini-list" id="newProducts"></div>
+        </div>
+
+        <form class="quote-box" id="quote">
+          <div class="section-head compact">
+            <div>
+              <p data-i18n="quickQuote">Báo giá nhanh</p>
+              <h2 data-i18n="quoteTitle">Gửi yêu cầu mua linh kiện</h2>
+            </div>
+          </div>
+          <input type="text" placeholder="Tên khách hàng" data-i18n-placeholder="customerName" required />
+          <input type="tel" placeholder="Số điện thoại" data-i18n-placeholder="phoneNumber" required />
+          <textarea placeholder="Danh sách linh kiện, số lượng, yêu cầu giao hàng" data-i18n-placeholder="quoteDetails"></textarea>
+          <button class="primary-button" type="submit" data-i18n="sendRequest">Gửi yêu cầu</button>
+        </form>
+      </section>
+    </main>
+
+    <footer class="site-footer" id="support">
+      <div class="container footer-grid">
+        <div>
+          <h2>STEM IoT</h2>
+          <p data-i18n="footerIntro">Cửa hàng mẫu cho linh kiện điện tử, thiết bị STEM, robot và tự động hóa.</p>
+        </div>
+        <div>
+          <h3 data-i18n="aboutStore">Về cửa hàng</h3>
+          <a href="#" data-i18n="intro">Giới thiệu</a>
+          <a href="#" data-i18n="distribution">Hợp tác phân phối</a>
+          <a href="#" data-i18n="recruitment">Tuyển dụng</a>
+        </div>
+        <div>
+          <h3 data-i18n="policies">Chính sách</h3>
+          <a href="#" data-i18n="warranty">Bảo hành</a>
+          <a href="#" data-i18n="returns">Đổi trả hàng</a>
+          <a href="#" data-i18n="shipping">Vận chuyển</a>
+        </div>
+        <div id="checkout">
+          <h3 data-i18n="customerSupport">Hỗ trợ khách hàng</h3>
+          <a href="#" data-i18n="buyGuide">Hướng dẫn mua hàng</a>
+          <a href="#" data-i18n="businessDeals">Ưu đãi doanh nghiệp</a>
+          <a href="#" data-i18n="faq">Câu hỏi thường gặp</a>
+        </div>
+      </div>
+    </footer>
+
+    <div class="cart-backdrop" id="cartBackdrop" hidden></div>
+    <aside class="cart-drawer" id="cartDrawer" aria-label="Giỏ hàng" aria-hidden="true">
+      <div class="drawer-head">
+        <h2 data-i18n="cart">Giỏ hàng</h2>
+        <button class="close-button" id="closeCart" type="button" aria-label="Đóng giỏ hàng">×</button>
+      </div>
+      <div class="cart-items" id="cartItems"></div>
+      <div class="cart-summary">
+        <div><span data-i18n="subtotal">Tạm tính</span><strong id="cartSubtotal">0đ</strong></div>
+        <div><span data-i18n="shippingFee">Phí giao hàng</span><strong id="shippingFee">0đ</strong></div>
+        <div class="total"><span data-i18n="total">Tổng cộng</span><strong id="cartTotal">0đ</strong></div>
+      </div>
+      <form class="checkout-form" id="checkoutForm">
+        <input type="text" placeholder="Họ tên" data-i18n-placeholder="fullName" required />
+        <input type="tel" placeholder="Số điện thoại" data-i18n-placeholder="phoneNumber" required />
+        <input type="text" placeholder="Địa chỉ nhận hàng" data-i18n-placeholder="deliveryAddress" required />
+        <button class="primary-button" type="submit" data-i18n="placeOrder">Đặt hàng</button>
+      </form>
+    </aside>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <nav class="mobile-nav" aria-label="Điều hướng mobile">
+      <a href="#home">⌂<span data-i18n="home">Trang chủ</span></a>
+      <a href="#products">☰<span data-i18n="products">Sản phẩm</span></a>
+      <button id="openCartMobile" type="button">🛒<span data-i18n="cart">Giỏ hàng</span></button>
+    </nav>
+
+    <script src="app.js"></script>
+  </body>
+</html>
