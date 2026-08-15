@@ -861,6 +861,18 @@ const toast = $("#toast");
 const languageToggle = $("#languageToggle");
 const languageMenu = $("#languageMenu");
 const currentLanguage = $("#currentLanguage");
+const productModal = $("#productModal");
+const productModalTitle = $("#productModalTitle");
+const productModalMeta = $("#productModalMeta");
+const productModalPrice = $("#productModalPrice");
+const productModalDescription = $("#productModalDescription");
+const productModalImage = $("#productModalImage");
+const productModalQty = $("#productModalQty");
+const productModalAdd = $("#productModalAdd");
+const productModalThumbs = $("#productModalThumbs");
+const productModalSpecs = $("#productModalSpecs");
+const productModalRelated = $("#productModalRelated");
+const modalTabs = document.querySelectorAll(".tab-button");
 
 function t(key, replacements = {}) {
   const template = i18n[currentLang][key] || i18n.vi[key] || key;
@@ -1006,6 +1018,82 @@ function getVisibleProducts() {
   return visible;
 }
 
+function getProductSpecs(product) {
+  const subName = label(getSub(product.category, product.sub).label);
+  return [
+    `Loại sản phẩm: ${subName}`,
+    `Thương hiệu: ${label(product.badge)}`,
+    `Mã SKU: ${product.sku}`,
+    `Tình trạng: ${product.inventory > 0 ? "Còn hàng" : "Hết hàng"}`,
+    `Phù hợp: ${label(product.description)}`
+  ];
+}
+
+function renderRelatedProducts(product) {
+  const related = products
+    .filter((item) => item.id !== product.id && item.category === product.category)
+    .slice(0, 3);
+
+  productModalRelated.innerHTML = related
+    .map(
+      (item) => `
+        <button class="related-item" type="button" data-related-id="${item.id}">
+          <img src="${item.image}" alt="${label(item.name)}" />
+          <strong>${label(item.name)}</strong>
+          <span>${formatMoney(item.price)}</span>
+        </button>
+      `
+    )
+    .join("");
+
+  productModalRelated.querySelectorAll("[data-related-id]").forEach((button) => {
+    button.addEventListener("click", () => openProductModal(button.dataset.relatedId));
+  });
+}
+
+function openProductModal(productId) {
+  const product = products.find((item) => item.id === productId);
+  if (!product) return;
+
+  productModalTitle.textContent = label(product.name);
+  productModalMeta.textContent = `Thương hiệu: ${label(product.badge)} · ${product.sku}`;
+  productModalPrice.textContent = formatMoney(product.price);
+  productModalDescription.textContent = label(product.description);
+  productModalImage.src = product.image;
+  productModalImage.alt = label(product.name);
+  productModalImage.style.objectPosition = product.imagePosition;
+  productModalSpecs.innerHTML = getProductSpecs(product)
+    .map((spec) => `<li>${spec}</li>`)
+    .join("");
+  renderRelatedProducts(product);
+
+  const thumbs = [product.image, product.image, product.image, product.image];
+  productModalThumbs.innerHTML = thumbs
+    .map(
+      (image, index) => `
+        <button class="modal-thumb ${index === 0 ? "is-selected" : ""}" type="button" data-thumb="${image}">
+          <img src="${image}" alt="${label(product.name)} ${index + 1}" />
+        </button>
+      `
+    )
+    .join("");
+
+  productModalThumbs.querySelectorAll(".modal-thumb").forEach((button) => {
+    button.addEventListener("click", () => {
+      productModalThumbs.querySelectorAll(".modal-thumb").forEach((thumb) => thumb.classList.toggle("is-selected", thumb === button));
+      productModalImage.src = button.dataset.thumb;
+    });
+  });
+
+  productModalQty.value = 1;
+  productModalAdd.dataset.productId = product.id;
+  productModal.classList.remove("hidden");
+}
+
+function closeProductModal() {
+  productModal.classList.add("hidden");
+}
+
 function renderProducts() {
   const visible = getVisibleProducts();
   productHeading.textContent = activeCategory === "all" ? t("allProducts") : label(getCategory(activeCategory).label);
@@ -1025,7 +1113,7 @@ function renderProducts() {
           </div>
           <div class="product-body">
             <span class="sku">${product.sku} ${t("skuSeparator")} ${subName}</span>
-            <h3>${productName}</h3>
+            <h3><button class="product-name-button" type="button" data-product-id="${product.id}">${productName}</button></h3>
             <p class="product-description">${productDescription}</p>
             <span class="stock">${t("inventory")}: <strong>${product.inventory}</strong> ${label(product.unit)}</span>
             <span class="price">${formatMoney(product.price)}</span>
@@ -1042,6 +1130,10 @@ function renderProducts() {
       `;
     })
     .join("");
+
+  document.querySelectorAll("[data-product-id]").forEach((button) => {
+    button.addEventListener("click", () => openProductModal(button.dataset.productId));
+  });
 
   document.querySelectorAll("[data-buy]").forEach((button) => {
     button.addEventListener("click", () => {
@@ -1269,7 +1361,44 @@ document.addEventListener("click", (event) => {
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") {
     closeLanguageMenu();
+    closeProductModal();
   }
+});
+
+productModal.addEventListener("click", (event) => {
+  if (event.target === productModal) {
+    closeProductModal();
+  }
+});
+
+$("#closeProductModal").addEventListener("click", closeProductModal);
+
+productModalAdd.addEventListener("click", () => {
+  const productId = productModalAdd.dataset.productId;
+  const qty = Number(productModalQty.value || 1);
+  if (productId) {
+    addToCart(productId, qty);
+    closeProductModal();
+  }
+});
+
+modalTabs.forEach((button) => {
+  button.addEventListener("click", () => {
+    const activeTab = button.dataset.tab;
+    modalTabs.forEach((tab) => {
+      const isActive = tab === button;
+      tab.classList.toggle("active", isActive);
+      tab.setAttribute("aria-selected", String(isActive));
+    });
+
+    const specPanel = document.getElementById("modalSpecPanel");
+    const descPanel = document.getElementById("modalDescriptionPanel");
+    const isSpec = activeTab === "spec";
+    specPanel.classList.toggle("active", isSpec);
+    descPanel.classList.toggle("active", !isSpec);
+    specPanel.hidden = !isSpec;
+    descPanel.hidden = isSpec;
+  });
 });
 
 $("#quote").addEventListener("submit", (event) => {
@@ -1290,4 +1419,46 @@ $("#checkoutForm").addEventListener("submit", (event) => {
   closeCart();
   event.currentTarget.reset();
   showToast(t("orderSuccess"));
+});
+
+/* Contact Button and Popup */
+const floatingContactBtn = $("#floatingContactBtn");
+const contactPopup = $("#contactPopup");
+const contactPopupBackdrop = $("#contactPopupBackdrop");
+
+function openContactPopup() {
+  contactPopup.removeAttribute("hidden");
+  contactPopupBackdrop.removeAttribute("hidden");
+  floatingContactBtn.classList.add("is-open");
+  floatingContactBtn.setAttribute("aria-label", "Đóng liên hệ");
+}
+
+function closeContactPopup() {
+  contactPopup.setAttribute("hidden", "");
+  contactPopupBackdrop.setAttribute("hidden", "");
+  floatingContactBtn.classList.remove("is-open");
+  floatingContactBtn.setAttribute("aria-label", "Liên hệ với chúng tôi");
+}
+
+function toggleContactPopup(event) {
+  event.stopPropagation();
+  if (contactPopup.hasAttribute("hidden")) {
+    openContactPopup();
+  } else {
+    closeContactPopup();
+  }
+}
+
+floatingContactBtn.addEventListener("click", toggleContactPopup);
+contactPopupBackdrop.addEventListener("click", (event) => {
+  if (event.target === contactPopupBackdrop) {
+    closeContactPopup();
+  }
+});
+
+// Close popup on Escape key
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && !contactPopup.hasAttribute("hidden")) {
+    closeContactPopup();
+  }
 });
