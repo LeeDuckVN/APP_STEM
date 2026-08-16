@@ -1549,3 +1549,112 @@ document.addEventListener("keydown", (event) => {
     closeContactPopup();
   }
 });
+
+// ===================== Floating Social Media Bar =====================
+const socialBar = $("#socialBar");
+
+// Hide social bar when contact popup is open to avoid visual clutter
+if (socialBar && contactPopup) {
+  const observer = new MutationObserver(() => {
+    if (!contactPopup.hasAttribute("hidden")) {
+      socialBar.style.opacity = "0";
+      socialBar.style.pointerEvents = "none";
+    } else {
+      socialBar.style.opacity = "";
+      socialBar.style.pointerEvents = "";
+    }
+  });
+  observer.observe(contactPopup, { attributes: true, attributeFilter: ["hidden"] });
+}
+
+// ===================== Hero Carousel =====================
+const carouselTrack = $("#carouselTrack");
+const carouselDots = $("#carouselDots");
+const carouselPrev = $("#carouselPrev");
+const carouselNext = $("#carouselNext");
+const carouselEl = $("#heroCarousel");
+
+if (carouselTrack && carouselDots) {
+  const slides = Array.from(carouselTrack.querySelectorAll(".carousel-slide"));
+  const slideCount = slides.length;
+  let currentIndex = 0;
+  let autoplayTimer = null;
+  let dots = [];
+  const AUTOPLAY_INTERVAL = 4500; // 4.5s giữa các ảnh
+
+  function setActiveSlide(next) {
+    if (next === currentIndex || next < 0 || next >= slideCount) return;
+    slides[currentIndex].classList.remove("active");
+    slides[next].classList.add("active");
+    dots[currentIndex]?.classList.remove("active");
+    dots[next]?.classList.add("active");
+    currentIndex = next;
+  }
+
+  function nextSlide() {
+    setActiveSlide((currentIndex + 1) % slideCount);
+  }
+
+  function prevSlide() {
+    setActiveSlide((currentIndex - 1 + slideCount) % slideCount);
+  }
+
+  function restartAutoplay() {
+    if (autoplayTimer) clearInterval(autoplayTimer);
+    autoplayTimer = window.setInterval(nextSlide, AUTOPLAY_INTERVAL);
+  }
+
+  // Tạo các dot điều hướng
+  dots = slides.map((_, i) => {
+    const dot = document.createElement("button");
+    dot.type = "button";
+    dot.className = "carousel-dot";
+    if (i === 0) dot.classList.add("active");
+    dot.setAttribute("role", "tab");
+    dot.setAttribute("aria-label", `Chuyển sang banner ${i + 1}`);
+    dot.addEventListener("click", () => {
+      setActiveSlide(i);
+      restartAutoplay();
+    });
+    carouselDots.appendChild(dot);
+    return dot;
+  });
+
+  carouselPrev?.addEventListener("click", () => {
+    prevSlide();
+    restartAutoplay();
+  });
+  carouselNext?.addEventListener("click", () => {
+    nextSlide();
+    restartAutoplay();
+  });
+
+  // Xoay vòng tự động
+  restartAutoplay();
+
+  // Pause autoplay khi rê chuột vào carousel
+  carouselEl?.addEventListener("mouseenter", () => {
+    if (autoplayTimer) clearInterval(autoplayTimer);
+  });
+  carouselEl?.addEventListener("mouseleave", () => {
+    restartAutoplay();
+  });
+
+  // Hỗ trợ touch swipe cho mobile
+  let touchStartX = 0;
+  let touchEndX = 0;
+
+  carouselEl?.addEventListener("touchstart", (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+  }, { passive: true });
+
+  carouselEl?.addEventListener("touchend", (e) => {
+    touchEndX = e.changedTouches[0].screenX;
+    const dx = touchEndX - touchStartX;
+    if (Math.abs(dx) > 50) {
+      if (dx < 0) nextSlide();
+      else prevSlide();
+      restartAutoplay();
+    }
+  }, { passive: true });
+}
