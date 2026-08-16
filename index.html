@@ -268,15 +268,15 @@
           </div>
 
           <div class="modal-body">
-            <h2 id="productModalTitle">Chi tiết sản phẩm</h2>
+            <h2 id="productModalTitle" data-i18n="modalTitle">Chi tiết sản phẩm</h2>
             <div class="modal-meta-line">
               <span id="productModalMeta"></span>
             </div>
             <div class="modal-price" id="productModalPrice"></div>
 
-            <div class="modal-detail-tabs" role="tablist" aria-label="Chi tiết sản phẩm">
-              <button class="tab-button active" type="button" data-tab="spec" role="tab" aria-selected="true">Thông số kỹ thuật</button>
-              <button class="tab-button" type="button" data-tab="description" role="tab" aria-selected="false">Mô tả</button>
+            <div class="modal-detail-tabs" role="tablist" aria-label="Chi tiết sản phẩm" data-i18n-aria="modalTabsAria">
+              <button class="tab-button active" type="button" data-tab="spec" role="tab" aria-selected="true" data-i18n="modalTabSpec">Thông số kỹ thuật</button>
+              <button class="tab-button" type="button" data-tab="description" role="tab" aria-selected="false" data-i18n="modalTabDescription">Mô tả</button>
             </div>
 
             <div class="tab-panel active" id="modalSpecPanel" role="tabpanel">
@@ -286,16 +286,16 @@
               <p class="modal-description" id="productModalDescription"></p>
             </div>
 
-            <div class="modal-actions">
+            <div class="modal-actions" data-i18n-aria="modalActionsAria">
               <label class="modal-qty">
-                <span>Số lượng</span>
+                <span data-i18n="modalQty">Số lượng</span>
                 <input id="productModalQty" type="number" value="1" min="1" />
               </label>
-              <button class="primary-button" id="productModalAdd" type="button">Thêm vào giỏ hàng</button>
+              <button class="primary-button" id="productModalAdd" type="button" data-i18n="modalAddToCart">Thêm vào giỏ hàng</button>
             </div>
 
             <div class="modal-related">
-              <h3>Sản phẩm tương tự</h3>
+              <h3 data-i18n="modalRelated">Sản phẩm tương tự</h3>
               <div class="related-grid" id="productModalRelated"></div>
             </div>
           </div>
@@ -322,39 +322,39 @@
     <div class="contact-popup-backdrop" id="contactPopupBackdrop" hidden></div>
     <div class="contact-popup" id="contactPopup" hidden>
       <div class="popup-header">
-        <h2>Liên hệ với Thegioiic</h2>
+        <h2 data-i18n="contactPopupTitle">Liên hệ với Thegioiic</h2>
       </div>
       
       <div class="popup-content">
         <div class="contact-section">
-          <h3>Kinh Doanh</h3>
+          <h3 data-i18n="contactSectionBusiness">Kinh Doanh</h3>
           <div class="contact-row">
             <span class="contact-logo">thegioiic</span>
-            <span class="contact-role">Kinh Doanh</span>
-            <button class="action-btn" type="button"><span>Zalo</span> Nhắn tin</button>
+            <span class="contact-role" data-i18n="contactRoleBusiness">Kinh Doanh</span>
+            <button class="action-btn" type="button"><span>Zalo</span> <span data-i18n="contactMessage">Nhắn tin</span></button>
           </div>
         </div>
         
         <div class="contact-section">
-          <h3>Hỗ trợ Kỹ Thuật</h3>
+          <h3 data-i18n="contactSectionTech">Hỗ trợ Kỹ Thuật</h3>
           <div class="contact-row">
             <span class="contact-logo">thegioiic</span>
-            <span class="contact-role">Kỹ Thuật</span>
-            <button class="action-btn" type="button"><span>Zalo</span> Nhắn tin</button>
+            <span class="contact-role" data-i18n="contactRoleTech">Kỹ Thuật</span>
+            <button class="action-btn" type="button"><span>Zalo</span> <span data-i18n="contactMessage">Nhắn tin</span></button>
           </div>
         </div>
         
         <div class="contact-section">
-          <h3>Hỗ trợ Bảo hành</h3>
+          <h3 data-i18n="contactSectionWarranty">Hỗ trợ Bảo hành</h3>
           <div class="contact-row">
             <span class="contact-logo">thegioiic</span>
-            <span class="contact-role">Bảo Hành</span>
-            <button class="action-btn" type="button"><span>Zalo</span> Nhắn tin</button>
+            <span class="contact-role" data-i18n="contactRoleWarranty">Bảo Hành</span>
+            <button class="action-btn" type="button"><span>Zalo</span> <span data-i18n="contactMessage">Nhắn tin</span></button>
           </div>
         </div>
         
         <div class="popup-footer">
-          <p>LIÊN HỆ VỚI CHÚNG TÔI TẠI:</p>
+          <p data-i18n="contactPopupFooter">LIÊN HỆ VỚI CHÚNG TÔI TẠI:</p>
           <div class="contact-methods">
             <a href="#" class="contact-method zalo" title="Zalo">
               <svg width="32" height="32" viewBox="0 0 32 32" fill="currentColor" xmlns="http://www.w3.org/2000/svg">

@@ -87,7 +87,34 @@ const i18n = {
     cartEmptyToast: "Giỏ hàng đang trống.",
     orderSuccess: "Đặt hàng thành công. Đây là luồng demo.",
     languageChanged: "Đã chọn ngôn ngữ: {language}",
-    currencySuffix: "đ"
+    currencySuffix: "đ",
+    specProductType: "Loại sản phẩm",
+    specBrand: "Thương hiệu",
+    specSku: "Mã SKU",
+    specStatus: "Tình trạng",
+    specFit: "Phù hợp",
+    inStockStatus: "Còn hàng",
+    outStockStatus: "Hết hàng",
+    modalMetaBrand: "Thương hiệu",
+    closeContactAria: "Đóng liên hệ",
+    contactUsAria: "Liên hệ với chúng tôi",
+    modalTitle: "Chi tiết sản phẩm",
+    modalTabSpec: "Thông số kỹ thuật",
+    modalTabDescription: "Mô tả",
+    modalQty: "Số lượng",
+    modalRelated: "Sản phẩm tương tự",
+    modalAddToCart: "Thêm vào giỏ hàng",
+    modalTabsAria: "Chi tiết sản phẩm",
+    modalActionsAria: "Hành động",
+    contactPopupTitle: "Liên hệ với Thegioiic",
+    contactSectionBusiness: "Kinh Doanh",
+    contactSectionTech: "Hỗ trợ Kỹ Thuật",
+    contactSectionWarranty: "Hỗ trợ Bảo hành",
+    contactRoleBusiness: "Kinh Doanh",
+    contactRoleTech: "Kỹ Thuật",
+    contactRoleWarranty: "Bảo Hành",
+    contactMessage: "Nhắn tin",
+    contactPopupFooter: "LIÊN HỆ VỚI CHÚNG TÔI TẠI:"
   },
   en: {
     pageTitle: "STEM IoT Shop | Components, boards, robots, automation",
@@ -177,7 +204,34 @@ const i18n = {
     cartEmptyToast: "Your cart is empty.",
     orderSuccess: "Order placed successfully. This is a demo flow.",
     languageChanged: "Language selected: {language}",
-    currencySuffix: " VND"
+    currencySuffix: " VND",
+    specProductType: "Product type",
+    specBrand: "Brand",
+    specSku: "SKU",
+    specStatus: "Status",
+    specFit: "Suitable for",
+    inStockStatus: "In stock",
+    outStockStatus: "Out of stock",
+    modalMetaBrand: "Brand",
+    closeContactAria: "Close contact",
+    contactUsAria: "Contact us",
+    modalTitle: "Product details",
+    modalTabSpec: "Specifications",
+    modalTabDescription: "Description",
+    modalQty: "Quantity",
+    modalRelated: "Related products",
+    modalAddToCart: "Add to cart",
+    modalTabsAria: "Product details",
+    modalActionsAria: "Actions",
+    contactPopupTitle: "Contact Thegioiic",
+    contactSectionBusiness: "Business",
+    contactSectionTech: "Technical Support",
+    contactSectionWarranty: "Warranty Support",
+    contactRoleBusiness: "Business",
+    contactRoleTech: "Technical",
+    contactRoleWarranty: "Warranty",
+    contactMessage: "Message",
+    contactPopupFooter: "CONTACT US AT:"
   },
   ja: {
     pageTitle: "STEM IoTショップ | 部品・ボード・ロボット・自動化",
@@ -267,7 +321,34 @@ const i18n = {
     cartEmptyToast: "カートは空です。",
     orderSuccess: "注文が完了しました。これはデモフローです。",
     languageChanged: "言語を選択しました: {language}",
-    currencySuffix: " VND"
+    currencySuffix: " VND",
+    specProductType: "製品タイプ",
+    specBrand: "ブランド",
+    specSku: "SKU",
+    specStatus: "状態",
+    specFit: "適合",
+    inStockStatus: "在庫あり",
+    outStockStatus: "在庫切れ",
+    modalMetaBrand: "ブランド",
+    closeContactAria: "連絡を閉じる",
+    contactUsAria: "お問い合わせ",
+    modalTitle: "商品詳細",
+    modalTabSpec: "仕様",
+    modalTabDescription: "説明",
+    modalQty: "数量",
+    modalRelated: "関連商品",
+    modalAddToCart: "カートに追加",
+    modalTabsAria: "商品詳細",
+    modalActionsAria: "アクション",
+    contactPopupTitle: "Thegioiicへのお問い合わせ",
+    contactSectionBusiness: "営業",
+    contactSectionTech: "技術サポート",
+    contactSectionWarranty: "保証サポート",
+    contactRoleBusiness: "営業",
+    contactRoleTech: "技術",
+    contactRoleWarranty: "保証",
+    contactMessage: "メッセージ",
+    contactPopupFooter: "お問い合わせはこちら:"
   }
 };
 
@@ -919,6 +1000,10 @@ function applyI18n() {
     element.placeholder = t(element.dataset.i18nPlaceholder);
   });
 
+  document.querySelectorAll("[data-i18n-aria]").forEach((element) => {
+    element.setAttribute("aria-label", t(element.dataset.i18nAria));
+  });
+
   document.querySelectorAll("[data-language]").forEach((button) => {
     button.classList.toggle("active", button.dataset.language === currentLang);
   });
@@ -1021,11 +1106,11 @@ function getVisibleProducts() {
 function getProductSpecs(product) {
   const subName = label(getSub(product.category, product.sub).label);
   return [
-    `Loại sản phẩm: ${subName}`,
-    `Thương hiệu: ${label(product.badge)}`,
-    `Mã SKU: ${product.sku}`,
-    `Tình trạng: ${product.inventory > 0 ? "Còn hàng" : "Hết hàng"}`,
-    `Phù hợp: ${label(product.description)}`
+    `${t("specProductType")}: ${subName}`,
+    `${t("specBrand")}: ${label(product.badge)}`,
+    `${t("specSku")}: ${product.sku}`,
+    `${t("specStatus")}: ${product.inventory > 0 ? t("inStockStatus") : t("outStockStatus")}`,
+    `${t("specFit")}: ${label(product.description)}`
   ];
 }
 
@@ -1056,7 +1141,7 @@ function openProductModal(productId) {
   if (!product) return;
 
   productModalTitle.textContent = label(product.name);
-  productModalMeta.textContent = `Thương hiệu: ${label(product.badge)} · ${product.sku}`;
+  productModalMeta.textContent = `${t("modalMetaBrand")}: ${label(product.badge)} · ${product.sku}`;
   productModalPrice.textContent = formatMoney(product.price);
   productModalDescription.textContent = label(product.description);
   productModalImage.src = product.image;
@@ -1430,14 +1515,14 @@ function openContactPopup() {
   contactPopup.removeAttribute("hidden");
   contactPopupBackdrop.removeAttribute("hidden");
   floatingContactBtn.classList.add("is-open");
-  floatingContactBtn.setAttribute("aria-label", "Đóng liên hệ");
+  floatingContactBtn.setAttribute("aria-label", t("closeContactAria"));
 }
 
 function closeContactPopup() {
   contactPopup.setAttribute("hidden", "");
   contactPopupBackdrop.setAttribute("hidden", "");
   floatingContactBtn.classList.remove("is-open");
-  floatingContactBtn.setAttribute("aria-label", "Liên hệ với chúng tôi");
+  floatingContactBtn.setAttribute("aria-label", t("contactUsAria"));
 }
 
 function toggleContactPopup(event) {
@@ -1448,6 +1533,8 @@ function toggleContactPopup(event) {
     closeContactPopup();
   }
 }
+
+applyI18n();
 
 floatingContactBtn.addEventListener("click", toggleContactPopup);
 contactPopupBackdrop.addEventListener("click", (event) => {
