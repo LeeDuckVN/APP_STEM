@@ -1658,3 +1658,60 @@ if (carouselTrack && carouselDots) {
     }
   }, { passive: true });
 }
+
+// ===================== QR Code Modal =====================
+(function setupQrModal() {
+  const qrBackdrop = document.getElementById("qrModalBackdrop");
+  const qrModal = document.getElementById("qrModal");
+  const qrClose = document.getElementById("qrModalClose");
+  const qrImage = document.getElementById("qrModalImage");
+  const qrCaption = document.getElementById("qrModalCaption");
+  const qrTitle = document.getElementById("qrModalTitle");
+
+  if (!qrBackdrop || !qrModal) return;
+
+  const QR_CONFIG = {
+    zalo: { src: "assets/qr/zalo.jpg", title: "Quét mã QR Zalo", caption: "Mở Zalo → Quét mã QR để kết bạn" },
+    line: { src: "assets/qr/line.jpg", title: "Quét mã QR Line", caption: "Mở Line → Quét mã QR để kết bạn" },
+    whatsapp: { src: "assets/qr/whatsapp.jpg", title: "Quét mã QR WhatsApp", caption: "Mở WhatsApp → Quét mã QR để nhắn tin" },
+  };
+
+  function openQrModal(type) {
+    const config = QR_CONFIG[type];
+    if (!config) return;
+    qrImage.src = config.src;
+    qrImage.alt = config.title;
+    if (qrTitle) qrTitle.textContent = config.title;
+    if (qrCaption) qrCaption.textContent = config.caption;
+
+    qrBackdrop.hidden = false;
+    qrModal.hidden = false;
+    void qrBackdrop.offsetWidth;
+    qrBackdrop.classList.add("is-open");
+    qrModal.classList.add("is-open");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeQrModal() {
+    qrBackdrop.classList.remove("is-open");
+    qrModal.classList.remove("is-open");
+    document.body.style.overflow = "";
+    window.setTimeout(() => {
+      qrBackdrop.hidden = true;
+      qrModal.hidden = true;
+      qrImage.src = "";
+    }, 220);
+  }
+
+  document.querySelectorAll("[data-qr]").forEach((btn) => {
+    btn.addEventListener("click", () => openQrModal(btn.getAttribute("data-qr")));
+  });
+
+  qrClose?.addEventListener("click", closeQrModal);
+  qrBackdrop.addEventListener("click", closeQrModal);
+  qrModal.addEventListener("click", (e) => e.stopPropagation());
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !qrModal.hidden) closeQrModal();
+  });
+})();

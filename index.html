@@ -407,9 +407,20 @@
       </div>
     </div>
 
+    <!-- QR Code Modal -->
+    <div class="qr-modal-backdrop" id="qrModalBackdrop" hidden></div>
+    <div class="qr-modal" id="qrModal" hidden role="dialog" aria-modal="true" aria-labelledby="qrModalTitle">
+      <button class="qr-modal-close" id="qrModalClose" type="button" aria-label="Đóng">×</button>
+      <h2 class="qr-modal-title" id="qrModalTitle">Quét mã QR</h2>
+      <div class="qr-modal-image-wrap">
+        <img id="qrModalImage" src="" alt="QR Code" />
+      </div>
+      <p class="qr-modal-caption" id="qrModalCaption"></p>
+    </div>
+
     <!-- Floating Social Media Bar -->
     <div class="social-bar" id="socialBar">
-      <a href="https://zalo.me/0967022006" class="social-icon zalo" target="_blank" rel="noopener" title="Zalo" aria-label="Zalo">
+      <button type="button" class="social-icon zalo" data-qr="zalo" title="Zalo" aria-label="Zalo">
         <svg viewBox="0 0 24 24" width="28" height="28" fill="none" xmlns="http://www.w3.org/2000/svg">
           <rect width="24" height="24" rx="12" fill="#0068FF"/>
           <path d="M11.94 4.5C7.55 4.5 4 7.62 4 11.46c0 2.08 1.04 3.94 2.68 5.2-.1.26-.6 1.96-.68 2.24 0 0-.02.14.07.2.09.06.2.02.2.02.28-.04 2.2-1.44 2.54-1.68.66.16 1.38.24 2.13.24 4.39 0 7.94-3.12 7.94-6.96S16.33 4.5 11.94 4.5z" fill="white"/>
@@ -419,8 +430,8 @@
           <circle cx="10.5" cy="11.8" r="1.3" fill="white"/>
         </svg>
         <span class="social-tooltip">Zalo</span>
-      </a>
-      <a href="https://line.me/ti/p/~luxas" class="social-icon line" target="_blank" rel="noopener" title="Line" aria-label="Line">
+      </button>
+      <button type="button" class="social-icon line" data-qr="line" title="Line" aria-label="Line">
         <svg viewBox="0 0 24 24" width="28" height="28" fill="none" xmlns="http://www.w3.org/2000/svg">
           <rect width="24" height="24" rx="12" fill="#00B900"/>
           <path d="M19.5 11.2c0-3.2-3.2-5.8-7.1-5.8s-7.1 2.6-7.1 5.8c0 2.9 2.5 5.3 5.9 5.7.2.04.5.1.5.2v1.4c0 .1.1.2.2.1.8-.3 3.7-1.8 5.2-3.6.9-.9 1.4-2.2 1.4-3.8z" fill="white"/>
@@ -429,15 +440,15 @@
           <path d="M15.2 9.6h-1.8c-.1 0-.2.1-.2.2v.4c0 .1.1.2.2.2h.5v2.2c0 .1.1.2.2.2h.5c.1 0 .2-.1.2-.2V10.4h.5c.1 0 .2-.1.2-.2v-.4c0-.1-.1-.2-.2-.2z" fill="#00B900"/>
         </svg>
         <span class="social-tooltip">Line</span>
-      </a>
-      <a href="https://wa.me/84967022006" class="social-icon whatsapp" target="_blank" rel="noopener" title="WhatsApp" aria-label="WhatsApp">
+      </button>
+      <button type="button" class="social-icon whatsapp" data-qr="whatsapp" title="WhatsApp" aria-label="WhatsApp">
         <svg viewBox="0 0 24 24" width="28" height="28" fill="none" xmlns="http://www.w3.org/2000/svg">
           <rect width="24" height="24" rx="12" fill="#25D366"/>
           <path d="M17.6 6.3A7.8 7.8 0 0 0 12 4a7.9 7.9 0 0 0-6.8 11.9L4 20l4.2-1.1A7.9 7.9 0 0 0 12 20a7.9 7.9 0 0 0 6.8-11.7zM12 18.5c-1 0-2-.3-2.9-.8l-.2-.1-2.5.7.7-2.4-.2-.2c-.5-.8-.8-1.7-.8-2.7 0-3.2 2.6-5.9 5.9-5.9 1.6 0 3.1.6 4.2 1.7s1.7 2.6 1.7 4.2c0 3.3-2.7 5.5-5.9 5.5z" fill="white"/>
           <path d="M15.6 13.8c-.2-.1-1.2-.6-1.3-.6s-.3-.1-.4.1-.5.6-.6.7-.2.1-.4 0c-.2-.1-.8-.3-1.5-.9-.6-.5-1-1.2-1.1-1.4s0-.2.1-.3l.3-.3.2-.3v-.2l-.6-1.3c-.1-.3-.3-.3-.4-.3h-.4c-.1 0-.3 0-.5.2s-.7.7-.7 1.6.7 1.9.8 2 1.4 2.1 3.4 2.9c.5.2.8.3 1.1.3.4-.1 1.1-.5 1.3-.9.2-.5.2-.8.1-.9l-.2-.1z" fill="white"/>
         </svg>
         <span class="social-tooltip">WhatsApp</span>
-      </a>
+      </button>
       <a href="https://youtube.com/@luxas" class="social-icon youtube" target="_blank" rel="noopener" title="YouTube" aria-label="YouTube">
         <svg viewBox="0 0 24 24" width="28" height="28" fill="none" xmlns="http://www.w3.org/2000/svg">
           <rect width="24" height="24" rx="12" fill="#FF0000"/>
