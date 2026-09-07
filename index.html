@@ -1,487 +1,885 @@
 <!doctype html>
 <html lang="vi">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>STEM IoT Shop</title>
-    <meta
-      name="description"
-      content="Trang bán hàng STEM IoT với tìm kiếm, danh mục, bộ lọc sản phẩm, giỏ hàng và đặt hàng."
-    />
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body>
-    <div class="topbar">
-      <div class="container topbar-inner">
-        <div class="topbar-contact">
-          <span><span data-i18n="hotline">Hotline</span>: <strong>0937 511 617</strong></span>
-          <span>Email: <strong> sales@luxas.com.vn</strong></span>
-          <span><span data-i18n="workHours">Giờ làm việc</span>: 7:30 - 18:00</span>
-        </div>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>STEM IoT Shop - Thiết Bị Tự Động Hóa & Linh Kiện STEM IoT</title>
+  <meta name="description"
+    content="Trang bán hàng STEM IoT chất lượng cao: Vi điều khiển, Cảm biến, Robot kit, IC và Giải pháp Tự động hóa công nghiệp." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <!-- Topbar Announcement & Utility Strip -->
+  <div class="topbar">
+    <div class="container topbar-inner">
+      <div class="topbar-contact">
+        <span class="topbar-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path
+              d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z">
+            </path>
+          </svg>
+          <span data-i18n="hotline">Hotline</span>: <strong>0937 511 617</strong>
+        </span>
+        <span class="topbar-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+            <polyline points="22,6 12,13 2,6"></polyline>
+          </svg>
+          Email: <strong>sales@luxas.com.vn</strong>
+        </span>
+        <span class="topbar-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          <span data-i18n="workHours">Giờ làm việc</span>: 7:30 - 18:00
+        </span>
+      </div>
+
+      <div class="topbar-actions topbar-right">
+        <a href="admin/dashboard.html" class="admin-quick-link admin-portal-link" title="Trang quản trị STEM IoT Admin">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          <span>Quản trị viên</span>
+        </a>
         <div class="language-picker">
-          <button class="language-toggle" id="languageToggle" type="button" aria-expanded="false" aria-controls="languageMenu">
-            🌐 <span id="currentLanguage">Việt Nam</span>
+          <button class="language-toggle" id="languageToggle" type="button" aria-expanded="false"
+            aria-controls="languageMenu">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="2" y1="12" x2="22" y2="12"></line>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z">
+              </path>
+            </svg>
+            <span id="currentLanguage">Việt Nam</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="m6 9 6 6 6-6" />
+            </svg>
           </button>
           <div class="language-menu" id="languageMenu" hidden>
-            <button type="button" data-language="ja">日本語</button>
+            <button type="button" data-language="vi">Tiếng Việt</button>
             <button type="button" data-language="en">English</button>
-            <button type="button" data-language="vi">Việt Nam</button>
+            <button type="button" data-language="ja">日本語</button>
           </div>
         </div>
       </div>
     </div>
+  </div>
 
-    <header class="main-header">
-      <div class="container header-grid">
-        <a class="brand" href="#home" aria-label="STEM IoT Shop">
-          <span class="brand-mark">ST</span>
-          <span>
-            <strong>STEM IoT</strong>
-            <small data-i18n="brandTagline">Linh kiện - Board - Robot</small>
-          </span>
-        </a>
+  <!-- Main Header with Glowing Monogram Brand and Smart Search -->
+  <header class="main-header">
+    <div class="container header-grid">
+      <a class="brand" href="#home" aria-label="STEM IoT Shop">
+        <span class="brand-mark brand-badge">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+        </span>
+        <span class="brand-text">
+          <strong class="brand-name">STEM<span class="brand-accent">IoT</span></strong>
+          <small data-i18n="brandTagline">Linh kiện - Board - Robot</small>
+        </span>
+      </a>
 
-        <form class="search-box" id="searchForm" role="search">
-          <select id="searchScope" aria-label="Phạm vi tìm kiếm">
-            <option value="all" data-i18n="all">Tất cả</option>
-            <option value="board" data-i18n="catBoard">Board IoT</option>
-            <option value="sensors" data-i18n="catSensors">Cảm biến</option>
-            <option value="robot" data-i18n="catRobot">Robot</option>
-          </select>
-          <input
-            id="searchInput"
-            type="search"
-            placeholder="Tìm ESP32, Arduino, relay, sensor..."
-            data-i18n-placeholder="searchPlaceholder"
-            autocomplete="off"
-          />
-          <button type="submit" data-i18n="searchButton">Tìm</button>
-          <div class="suggestions" id="suggestions" hidden></div>
-        </form>
-
-        <div class="header-actions" aria-label="Tiện ích">
-          <button class="cart-action" id="openCart" type="button">
-            <span>🛒</span>
-            <strong data-i18n="cart">Giỏ hàng</strong>
-            <em id="cartCount">0</em>
-          </button>
+      <form class="search-box" id="searchForm" role="search">
+        <select id="searchScope" class="search-scope-select" aria-label="Phạm vi tìm kiếm">
+          <option value="all" data-i18n="all">Tất cả danh mục</option>
+          <option value="board" data-i18n="catBoard">Board IoT</option>
+          <option value="sensors" data-i18n="catSensors">Cảm biến</option>
+          <option value="robot" data-i18n="catRobot">Robot kit</option>
+          <option value="ics">IC tích hợp</option>
+          <option value="wireless">Không dây / LoRa</option>
+        </select>
+        <div class="search-input-wrap">
+          <svg class="search-icon-inside" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input id="searchInput" class="search-input" type="search" placeholder="Tìm ESP32, Arduino, LoRa, cảm biến..."
+            data-i18n-placeholder="searchPlaceholder" autocomplete="off" />
+          <kbd class="search-kbd">Ctrl K</kbd>
         </div>
+        <button type="submit" class="search-button search-submit" data-i18n="searchButton">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <span>Tìm</span>
+        </button>
+        <div class="suggestions" id="suggestions" hidden></div>
+      </form>
+
+      <div class="header-actions" aria-label="Tiện ích">
+        <button class="cart-action" id="openCart" type="button" aria-label="Mở giỏ hàng">
+          <span class="cart-icon-wrap">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <path d="M16 10a4 4 0 0 1-8 0"></path>
+            </svg>
+            <em id="cartCount" class="cart-badge">0</em>
+          </span>
+          <div class="cart-action-text">
+            <span class="cart-title cart-label" data-i18n="cart">Giỏ hàng</span>
+            <span class="cart-subtitle" id="headerCartTotal">0đ</span>
+          </div>
+        </button>
       </div>
-    </header>
+    </div>
+  </header>
 
-    <nav class="nav-bar" aria-label="Menu chính">
-      <div class="container nav-inner">
-        <button class="category-toggle" id="categoryToggle" type="button" data-i18n="categoryMenu">☰ Danh mục sản phẩm</button>
-        <a href="#products" data-i18n="products">Sản phẩm</a>
-        <a href="#support" data-i18n="warranty">Bảo hành</a>
-        <a href="#checkout" data-i18n="buyGuide">Hướng dẫn mua hàng</a>
+  <!-- Modern Navigation Bar -->
+  <nav class="nav-bar" aria-label="Menu chính">
+    <div class="container nav-inner">
+      <button class="category-toggle" id="categoryToggle" type="button">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7"></rect>
+          <rect x="14" y="3" width="7" height="7"></rect>
+          <rect x="14" y="14" width="7" height="7"></rect>
+          <rect x="3" y="14" width="7" height="7"></rect>
+        </svg>
+        <span data-i18n="categoryMenu">Danh mục sản phẩm</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="m6 9 6 6 6-6" />
+        </svg>
+      </button>
+      <div class="nav-links">
+        <a href="#products" class="nav-link">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+            <polyline points="2 17 12 22 22 17"></polyline>
+            <polyline points="2 12 12 17 22 12"></polyline>
+          </svg>
+          <span data-i18n="products">Sản phẩm</span>
+        </a>
+        <a href="#support" class="nav-link">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+          <span data-i18n="warranty">Bảo hành</span>
+        </a>
+        <a href="#checkout" class="nav-link">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+          <span data-i18n="buyGuide">Hướng dẫn mua hàng</span>
+        </a>
       </div>
-    </nav>
+      <div class="nav-right">
+        <span class="free-shipping-tag">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+          <span>Freeship đơn từ 500.000đ</span>
+        </span>
+      </div>
+    </div>
+  </nav>
 
-    <main id="home">
-      <section class="container marketplace">
-        <aside class="mega-menu" id="megaMenu" aria-label="Danh mục lớn">
-          <h2 data-i18n="category">Danh mục</h2>
-          <div id="megaCategories"></div>
-        </aside>
+  <!-- Marketplace Showcase & Hero Banner -->
+  <main id="home">
+    <section class="container marketplace">
+      <aside class="mega-menu" id="megaMenu" aria-label="Danh mục lớn">
+        <div class="mega-menu-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="8" y1="6" x2="21" y2="6"></line>
+            <line x1="8" y1="12" x2="21" y2="12"></line>
+            <line x1="8" y1="18" x2="21" y2="18"></line>
+            <line x1="3" y1="6" x2="3.01" y2="6"></line>
+            <line x1="3" y1="12" x2="3.01" y2="12"></line>
+            <line x1="3" y1="18" x2="3.01" y2="18"></line>
+          </svg>
+          <span data-i18n="category">Danh mục linh kiện</span>
+        </div>
+        <div id="megaCategories"></div>
+      </aside>
 
-        <section class="hero-panel hero-carousel" id="heroCarousel" aria-label="Banner quảng cáo">
-          <div class="carousel-track" id="carouselTrack">
-            <div class="carousel-slide active">
-              <img src="assets/banner/1786872477483_4713952686830299989_4713952686830299989_19618be12b945920688027b0ec6d5037.jpg" alt="Banner STEM IoT 1" loading="lazy" />
+      <section class="hero-panel hero-carousel" id="heroCarousel" aria-label="Banner quảng cáo">
+        <div class="carousel-track" id="carouselTrack">
+          <div class="carousel-slide active">
+            <img
+              src="assets/banner/1786872477483_4713952686830299989_4713952686830299989_19618be12b945920688027b0ec6d5037.jpg"
+              alt="Banner STEM IoT 1" loading="eager" />
+            <div class="hero-overlay">
               <div class="hero-copy">
-                <p data-i18n="heroKicker">Hàng sẵn kho cho lớp học và lab</p>
+                <span class="hero-kicker hero-tag" data-i18n="heroKicker">Hàng sẵn kho cho lớp học và lab</span>
                 <h1 data-i18n="heroTitle">Board, cảm biến, robot kit và thiết bị tự động hóa</h1>
                 <div class="hero-actions">
-                  <a class="primary-link" href="#products" data-i18n="viewProducts">Xem sản phẩm</a>
-                  <a class="secondary-link" href="#quote" data-i18n="requestQuote">Gửi yêu cầu báo giá</a>
+                  <a class="btn-hero-primary primary-link" href="#products">
+                    <span data-i18n="viewProducts">Xem sản phẩm</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <line x1="5" y1="12" x2="19" y2="12"></line>
+                      <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                  </a>
+                  <a class="btn-hero-secondary secondary-link" href="#quote" data-i18n="requestQuote">Gửi yêu cầu báo
+                    giá</a>
                 </div>
               </div>
             </div>
-            <div class="carousel-slide">
-              <img src="assets/banner/1786872515649_4713952686830299989_4713952686830299989_2ca81a4cbcd0fbab3f46ccda71ad163b.jpg" alt="Banner STEM IoT 2" loading="lazy" />
-            </div>
-            <div class="carousel-slide">
-              <img src="assets/banner/1786872547833_4713952686830299989_4713952686830299989_c83b67f1576a17f4788ec9967e918745.jpg" alt="Banner STEM IoT 3" loading="lazy" />
-            </div>
-            <div class="carousel-slide">
-              <img src="assets/banner/1786872593094_4713952686830299989_4713952686830299989_b0715c5f9cbc5577db76f56e7c05735d.jpg" alt="Banner STEM IoT 4" loading="lazy" />
-            </div>
           </div>
-          <button class="carousel-arrow prev" id="carouselPrev" type="button" aria-label="Ảnh trước">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M15 18l-6-6 6-6" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <div class="carousel-slide">
+            <img
+              src="assets/banner/1786872515649_4713952686830299989_4713952686830299989_2ca81a4cbcd0fbab3f46ccda71ad163b.jpg"
+              alt="Banner STEM IoT 2" loading="lazy" />
+          </div>
+          <div class="carousel-slide">
+            <img
+              src="assets/banner/1786872547833_4713952686830299989_4713952686830299989_c83b67f1576a17f4788ec9967e918745.jpg"
+              alt="Banner STEM IoT 3" loading="lazy" />
+          </div>
+          <div class="carousel-slide">
+            <img
+              src="assets/banner/1786872593094_4713952686830299989_4713952686830299989_b0715c5f9cbc5577db76f56e7c05735d.jpg"
+              alt="Banner STEM IoT 4" loading="lazy" />
+          </div>
+        </div>
+        <button class="carousel-arrow prev" id="carouselPrev" type="button" aria-label="Ảnh trước">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
+        </button>
+        <button class="carousel-arrow next" id="carouselNext" type="button" aria-label="Ảnh tiếp theo">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 18l6-6-6-6" />
+          </svg>
+        </button>
+        <div class="carousel-dots" id="carouselDots" role="tablist" aria-label="Chọn banner"></div>
+      </section>
+
+      <aside class="right-promos" aria-label="Ưu đãi nổi bật">
+        <div class="promo-card">
+          <div class="promo-badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
             </svg>
-          </button>
-          <button class="carousel-arrow next" id="carouselNext" type="button" aria-label="Ảnh tiếp theo">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M9 18l6-6-6-6" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <span>Hỏa tốc</span>
+          </div>
+          <strong data-i18n="promoFastTitle">Giao nhanh nội thành</strong>
+          <p data-i18n="promoFastText">Soạn hàng trong ngày cho sản phẩm có sẵn kho.</p>
+        </div>
+        <div class="promo-card">
+          <div class="promo-badge stem-badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <circle cx="12" cy="12" r="4"></circle>
             </svg>
+            <span>Giáo dục</span>
+          </div>
+          <strong data-i18n="promoStemTitle">Hỗ trợ dự án STEM</strong>
+          <p data-i18n="promoStemText">Gợi ý combo theo giáo án, robot, IoT, smart farm.</p>
+        </div>
+      </aside>
+    </section>
+
+    <!-- Bento Value Propositions Strip -->
+    <section class="container service-strip">
+      <div class="service-card">
+        <div class="service-icon-wrap blue">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <rect x="1" y="3" width="15" height="13"></rect>
+            <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+            <circle cx="5.5" cy="18.5" r="2.5"></circle>
+            <circle cx="18.5" cy="18.5" r="2.5"></circle>
+          </svg>
+        </div>
+        <div class="service-info service-text">
+          <strong data-i18n="serviceShippingTitle">Giao hàng toàn quốc</strong>
+          <span data-i18n="serviceShippingText">COD, chuyển khoản, nhận tại cửa hàng</span>
+        </div>
+      </div>
+
+      <div class="service-card">
+        <div class="service-icon-wrap cyan">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
+        </div>
+        <div class="service-info service-text">
+          <strong data-i18n="serviceInvoiceTitle">Hóa đơn VAT điện tử</strong>
+          <span data-i18n="serviceInvoiceText">Hỗ trợ trường học, viện và doanh nghiệp</span>
+        </div>
+      </div>
+
+      <div class="service-card">
+        <div class="service-icon-wrap emerald">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            <polyline points="9 12 11 14 15 10"></polyline>
+          </svg>
+        </div>
+        <div class="service-info service-text">
+          <strong data-i18n="serviceWarrantyTitle">Bảo hành kỹ thuật</strong>
+          <span data-i18n="serviceWarrantyText">Đổi mới linh kiện lỗi, hỗ trợ kỹ thuật tận tâm</span>
+        </div>
+      </div>
+
+      <div class="service-card">
+        <div class="service-icon-wrap amber">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path
+              d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z">
+            </path>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+          </svg>
+        </div>
+        <div class="service-info service-text">
+          <strong data-i18n="serviceBulkTitle">Chiết khấu dự án</strong>
+          <span data-i18n="serviceBulkText">Giá ưu đãi cho trường học & lab nghiên cứu</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Products Catalog Section -->
+    <section class="container shop-section" id="products">
+      <!-- Filter Sidebar -->
+      <aside class="filter-panel">
+        <div class="filter-header panel-title">
+          <h3>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+            </svg>
+            <span data-i18n="filterTitle">Bộ lọc sản phẩm</span>
+          </h3>
+          <button class="reset-filter-btn reset-filter" id="resetFilter" type="button">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path>
+              <path d="M21 3v5h-5"></path>
+              <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path>
+              <path d="M8 16H3v5"></path>
+            </svg>
+            <span data-i18n="clearFilter">Xóa lọc</span>
           </button>
-          <div class="carousel-dots" id="carouselDots" role="tablist" aria-label="Chọn banner"></div>
-        </section>
+        </div>
+        <div class="filter-group">
+          <label for="categoryFilter" data-i18n="category">Danh mục</label>
+          <select id="categoryFilter" class="filter-select"></select>
+        </div>
+        <div class="filter-group">
+          <label for="subFilter" data-i18n="subcategory">Nhóm con</label>
+          <select id="subFilter" class="filter-select"></select>
+        </div>
+        <div class="filter-group">
+          <label for="stockFilter" data-i18n="stock">Kho hàng</label>
+          <select id="stockFilter" class="filter-select">
+            <option value="all" data-i18n="all">Tất cả</option>
+            <option value="inStock" data-i18n="inStock">Còn hàng</option>
+            <option value="lowStock" data-i18n="lowStock">Sắp hết hàng</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label for="priceFilter" data-i18n="priceRange">Mức giá</label>
+          <select id="priceFilter" class="filter-select">
+            <option value="all" data-i18n="all">Tất cả mức giá</option>
+            <option value="0-100000" data-i18n="priceUnder100">Dưới 100.000đ</option>
+            <option value="100000-300000" data-i18n="price100to300">100.000đ - 300.000đ</option>
+            <option value="300000-99999999" data-i18n="priceOver300">Trên 300.000đ</option>
+          </select>
+        </div>
+      </aside>
 
-        <aside class="right-promos" aria-label="Ưu đãi">
-          <div>
-            <strong data-i18n="promoFastTitle">Giao nhanh nội thành</strong>
-            <span data-i18n="promoFastText">Soạn hàng trong ngày cho sản phẩm có tồn kho.</span>
+      <!-- Products Grid & Tools -->
+      <div class="product-column">
+        <div class="section-head">
+          <div class="section-head-title">
+            <p class="section-sub" data-i18n="products">Sản phẩm tuyển chọn</p>
+            <h2 id="productHeading">Tất cả sản phẩm</h2>
           </div>
-          <div>
-            <strong data-i18n="promoStemTitle">Hỗ trợ dự án STEM</strong>
-            <span data-i18n="promoStemText">Gợi ý combo theo giáo án, robot, IoT, nhà máy mini.</span>
-          </div>
-        </aside>
-      </section>
-
-      <section class="container service-strip">
-        <div><strong data-i18n="serviceShippingTitle">🚚 Giao hàng</strong><span data-i18n="serviceShippingText">COD, chuyển khoản, lấy tại cửa hàng</span></div>
-        <div><strong data-i18n="serviceInvoiceTitle">🧾 Xuất hóa đơn</strong><span data-i18n="serviceInvoiceText">Hỗ trợ trường học và doanh nghiệp</span></div>
-        <div><strong data-i18n="serviceWarrantyTitle">🔧 Bảo hành</strong><span data-i18n="serviceWarrantyText">Đổi trả theo chính sách kỹ thuật</span></div>
-        <div><strong data-i18n="serviceBulkTitle">📦 Mua số lượng</strong><span data-i18n="serviceBulkText">Chiết khấu cho đơn dự án</span></div>
-      </section>
-
-      <section class="container shop-section" id="products">
-        <aside class="filter-panel">
-          <div class="panel-title" data-i18n="filterTitle">Bộ lọc sản phẩm</div>
-          <label>
-            <span data-i18n="category">Danh mục</span>
-            <select id="categoryFilter"></select>
-          </label>
-          <label>
-            <span data-i18n="subcategory">Nhóm con</span>
-            <select id="subFilter"></select>
-          </label>
-          <label>
-            <span data-i18n="stock">Kho hàng</span>
-            <select id="stockFilter">
-              <option value="all" data-i18n="all">Tất cả</option>
-              <option value="inStock" data-i18n="inStock">Còn hàng</option>
-              <option value="lowStock" data-i18n="lowStock">Sắp hết</option>
+          <div class="view-tools">
+            <span class="result-count-badge count-badge" id="resultCount">0 sản phẩm</span>
+            <select id="sortSelect" class="sort-select" aria-label="Sắp xếp">
+              <option value="featured" data-i18n="sortFeatured">Nổi bật</option>
+              <option value="priceAsc" data-i18n="sortPriceAsc">Giá tăng dần</option>
+              <option value="priceDesc" data-i18n="sortPriceDesc">Giá giảm dần</option>
+              <option value="stockDesc" data-i18n="sortStockDesc">Tồn kho nhiều</option>
             </select>
-          </label>
-          <label>
-            <span data-i18n="priceRange">Mức giá</span>
-            <select id="priceFilter">
-              <option value="all" data-i18n="all">Tất cả</option>
-              <option value="0-100000" data-i18n="priceUnder100">Dưới 100.000đ</option>
-              <option value="100000-300000" data-i18n="price100to300">100.000đ - 300.000đ</option>
-              <option value="300000-99999999" data-i18n="priceOver300">Trên 300.000đ</option>
-            </select>
-          </label>
-          <button class="reset-filter" id="resetFilter" type="button" data-i18n="clearFilter">Xóa bộ lọc</button>
-        </aside>
-
-        <div class="product-column">
-          <div class="section-head">
-            <div>
-              <p data-i18n="products">Sản phẩm</p>
-              <h2 id="productHeading">Tất cả sản phẩm</h2>
-            </div>
-            <div class="view-tools">
-              <span id="resultCount">0 sản phẩm</span>
-              <select id="sortSelect" aria-label="Sắp xếp">
-                <option value="featured" data-i18n="sortFeatured">Nổi bật</option>
-                <option value="priceAsc" data-i18n="sortPriceAsc">Giá tăng dần</option>
-                <option value="priceDesc" data-i18n="sortPriceDesc">Giá giảm dần</option>
-                <option value="stockDesc" data-i18n="sortStockDesc">Tồn kho nhiều</option>
-              </select>
-            </div>
-          </div>
-          <div class="product-grid" id="productGrid"></div>
-          <div class="empty-state" id="emptyState" hidden data-i18n="emptyState">Không tìm thấy sản phẩm phù hợp.</div>
-        </div>
-      </section>
-
-      <section class="container split-section">
-        <div class="new-box">
-          <div class="section-head compact">
-            <div>
-              <p data-i18n="newProducts">Sản phẩm mới</p>
-              <h2 data-i18n="newArrivals">Hàng mới về</h2>
-            </div>
-          </div>
-          <div class="mini-list" id="newProducts"></div>
-        </div>
-
-        <form class="quote-box" id="quote">
-          <div class="section-head compact">
-            <div>
-              <p data-i18n="quickQuote">Báo giá nhanh</p>
-              <h2 data-i18n="quoteTitle">Gửi yêu cầu mua linh kiện</h2>
-            </div>
-          </div>
-          <input type="text" placeholder="Tên khách hàng" data-i18n-placeholder="customerName" required />
-          <input type="tel" placeholder="Số điện thoại" data-i18n-placeholder="phoneNumber" required />
-          <textarea placeholder="Danh sách linh kiện, số lượng, yêu cầu giao hàng" data-i18n-placeholder="quoteDetails"></textarea>
-          <button class="primary-button" type="submit" data-i18n="sendRequest">Gửi yêu cầu</button>
-        </form>
-      </section>
-    </main>
-
-    <footer class="site-footer" id="support">
-      <div class="container footer-columns">
-        <div class="footer-column">
-          <div class="footer-panel-header">LUX</div>
-          <div class="footer-divider"></div>
-          <div class="footer-content footer-about">
-            <h3>CÔNG TY TNHH LUXAS</h3>
-            <ul>
-              <li>Dịch vụ lắp đặt, sửa chữa và bảo trì</li>
-              <li>Kinh doanh máy móc, thiết bị và phụ tùng máy</li>
-              <li>Cung cấp linh kiện cho máy móc và thiết bị công nghiệp</li>
-              <li>Vật tư tiêu hao trong sản xuất</li>
-              <li>Tư vấn lắp đặt hệ thống IoT</li>
-            </ul>
           </div>
         </div>
-
-        <div class="footer-column">
-          <div class="footer-panel-header">ĐỊA CHỈ</div>
-          <div class="footer-divider"></div>
-          <div class="footer-content">
-            <ul class="footer-address">
-              <li><span class="dot"></span> Head Office : 38/5 Van Kiep Street Ward 1, Binh Thanh District, Ho Chi Minh City, Viet Nam.</li>
-              <li><span class="dot"></span> Representative Office : 284C/3, Thanh Loi Quarter, An Thanh Ward, Thuan An City, Binh Duong Province, Vietnam</li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="footer-column">
-          <div class="footer-panel-header">THÔNG TIN</div>
-          <div class="footer-divider"></div>
-          <div class="footer-content">
-            <ul class="footer-contact">
-              <li><span class="bullet">›</span> <span>Liên hệ</span></li>
-              <li><span class="bullet">›</span> <span>Đường dây nóng: 0937511617</span></li>
-              <li><span class="bullet">›</span> <span>Email: sales@luxas.com.vn</span></li>
-            </ul>
-          </div>
+        <div class="product-grid" id="productGrid"></div>
+        <div class="empty-state-box empty-state" id="emptyState" hidden>
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            <line x1="8" y1="11" x2="14" y2="11"></line>
+          </svg>
+          <p data-i18n="emptyState">Không tìm thấy sản phẩm phù hợp.</p>
         </div>
       </div>
-    </footer>
+    </section>
 
-    <div class="cart-backdrop" id="cartBackdrop" hidden></div>
-    <aside class="cart-drawer" id="cartDrawer" aria-label="Giỏ hàng" aria-hidden="true">
-      <div class="drawer-head">
-        <h2 data-i18n="cart">Giỏ hàng</h2>
-        <button class="close-button" id="closeCart" type="button" aria-label="Đóng giỏ hàng">×</button>
+    <!-- New Arrivals & Quick Quote -->
+    <section class="container split-section">
+      <div class="new-box">
+        <div class="section-head compact">
+          <div>
+            <p class="section-sub" data-i18n="newProducts">Cập nhật kho</p>
+            <h2 data-i18n="newArrivals">Hàng mới về</h2>
+          </div>
+        </div>
+        <div class="mini-list" id="newProducts"></div>
       </div>
-      <div class="cart-items" id="cartItems"></div>
-      <div class="cart-summary">
-        <div><span data-i18n="subtotal">Tạm tính</span><strong id="cartSubtotal">0đ</strong></div>
-        <div><span data-i18n="shippingFee">Phí giao hàng</span><strong id="shippingFee">0đ</strong></div>
-        <div class="total"><span data-i18n="total">Tổng cộng</span><strong id="cartTotal">0đ</strong></div>
-      </div>
-      <form class="checkout-form" id="checkoutForm">
-        <input type="text" placeholder="Họ tên" data-i18n-placeholder="fullName" required />
-        <input type="tel" placeholder="Số điện thoại" data-i18n-placeholder="phoneNumber" required />
-        <input type="text" placeholder="Địa chỉ nhận hàng" data-i18n-placeholder="deliveryAddress" required />
-        <button class="primary-button" type="submit" data-i18n="placeOrder">Đặt hàng</button>
+
+      <form class="quote-box" id="quote">
+        <div class="section-head compact">
+          <div>
+            <p class="section-sub" data-i18n="quickQuote">Báo giá theo dự án</p>
+            <h2 data-i18n="quoteTitle">Gửi yêu cầu mua linh kiện</h2>
+          </div>
+        </div>
+        <input type="text" placeholder="Tên khách hàng hoặc tên trường/đơn vị" data-i18n-placeholder="customerName"
+          required />
+        <input type="tel" placeholder="Số điện thoại Zalo liên hệ" data-i18n-placeholder="phoneNumber" required />
+        <textarea placeholder="Danh sách linh kiện, số lượng, yêu cầu xuất hóa đơn và thời gian giao..."
+          data-i18n-placeholder="quoteDetails" rows="4"></textarea>
+        <button class="primary-button" type="submit">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+          <span data-i18n="sendRequest">Gửi yêu cầu báo giá</span>
+        </button>
       </form>
-    </aside>
+    </section>
+  </main>
 
-    <div class="modal hidden" id="productModal">
-      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="productModalTitle">
-        <button class="close-button" id="closeProductModal" type="button" aria-label="Đóng">×</button>
-        <div class="modal-detail-layout">
-          <div class="modal-gallery-block">
-            <div class="modal-main-image-wrap">
-              <img id="productModalImage" src="" alt="" />
-            </div>
-            <div class="modal-thumbs" id="productModalThumbs"></div>
+  <!-- Corporate Dark High-Tech Footer -->
+  <footer class="site-footer" id="support">
+    <div class="container footer-columns">
+      <div class="footer-column">
+        <div class="footer-panel-header">LUXAS STEM IoT</div>
+        <div class="footer-divider"></div>
+        <div class="footer-content footer-about">
+          <h3>CÔNG TY TNHH LUXAS</h3>
+          <ul>
+            <li>Dịch vụ lắp đặt, sửa chữa và bảo trì thiết bị thí nghiệm</li>
+            <li>Kinh doanh máy móc, bo mạch vi điều khiển và cảm biến IoT</li>
+            <li>Cung cấp linh kiện cho máy móc và thiết bị công nghiệp 4.0</li>
+            <li>Vật tư tiêu hao, phụ kiện Maker & Robot giáo dục STEM</li>
+            <li>Tư vấn thiết kế giải pháp IoT & Smart Agriculture</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-column">
+        <div class="footer-panel-header">ĐỊA CHỈ TRỤ SỞ</div>
+        <div class="footer-divider"></div>
+        <div class="footer-content">
+          <ul class="footer-address">
+            <li>
+              <span class="dot"></span>
+              <strong>Trụ sở chính:</strong> 38/5 Vạn Kiếp, Phường 1, Quận Bình Thạnh, TP. Hồ Chí Minh.
+            </li>
+            <li>
+              <span class="dot"></span>
+              <strong>Văn phòng đại diện:</strong> 284C/3 Khu phố Thạnh Lợi, Phường An Thạnh, TP. Thuận An, Bình Dương.
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-column">
+        <div class="footer-panel-header">LIÊN HỆ & QUẢN TRỊ</div>
+        <div class="footer-divider"></div>
+        <div class="footer-content">
+          <ul class="footer-contact">
+            <li>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path
+                  d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+              </svg>
+              <span>Hotline: <strong>0937 511 617</strong></span>
+            </li>
+            <li>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                <polyline points="22,6 12,13 2,6" />
+              </svg>
+              <span>Email: <strong>sales@luxas.com.vn</strong></span>
+            </li>
+            <li>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+              </svg>
+              <a href="admin/dashboard.html" style="color: var(--cyan); text-decoration: none; font-weight: 600;">Đăng
+                nhập Cổng Quản trị</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="container footer-bottom">
+      <p>© 2026 LUXAS STEM IoT Shop. All rights reserved.</p>
+      <p>Nền tảng thương mại linh kiện điện tử chuyên sâu cho Maker & Lab.</p>
+    </div>
+  </footer>
+
+  <!-- Slide-Over Cart Drawer with Free Shipping Progress Meter -->
+  <div class="cart-backdrop" id="cartBackdrop" hidden></div>
+  <aside class="cart-drawer" id="cartDrawer" aria-label="Giỏ hàng" aria-hidden="true">
+    <div class="drawer-head">
+      <h2>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <path d="M16 10a4 4 0 0 1-8 0"></path>
+        </svg>
+        <span data-i18n="cart">Giỏ hàng của bạn</span>
+      </h2>
+      <button class="close-button" id="closeCart" type="button" aria-label="Đóng giỏ hàng">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Free Shipping Progress Meter -->
+    <div class="free-shipping-meter" id="freeShippingMeter">
+      <div class="free-shipping-label" id="freeShippingLabel">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <rect x="1" y="3" width="15" height="13"></rect>
+          <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+          <circle cx="5.5" cy="18.5" r="2.5"></circle>
+          <circle cx="18.5" cy="18.5" r="2.5"></circle>
+        </svg>
+        <span id="freeShippingText">Mua thêm <strong>500.000đ</strong> để được <strong>Miễn phí vận
+            chuyển</strong></span>
+      </div>
+      <div class="free-shipping-bar">
+        <div class="free-shipping-fill" id="freeShippingFill" style="width: 0%;"></div>
+      </div>
+    </div>
+
+    <div class="cart-items" id="cartItems"></div>
+
+    <div class="cart-summary">
+      <div class="cart-summary-row">
+        <span data-i18n="subtotal">Tạm tính:</span>
+        <strong id="cartSubtotal">0đ</strong>
+      </div>
+      <div class="cart-summary-row">
+        <span data-i18n="shippingFee">Phí giao hàng:</span>
+        <strong id="shippingFee">0đ</strong>
+      </div>
+      <div class="cart-summary-row total">
+        <span data-i18n="total">Tổng cộng:</span>
+        <strong id="cartTotal">0đ</strong>
+      </div>
+    </div>
+
+    <form class="checkout-form" id="checkoutForm">
+      <div class="checkout-form-title">Thông tin giao nhận hàng</div>
+      <input type="text" placeholder="Họ và tên người nhận" data-i18n-placeholder="fullName" required />
+      <input type="tel" placeholder="Số điện thoại nhận hàng" data-i18n-placeholder="phoneNumber" required />
+      <input type="text" placeholder="Địa chỉ chi tiết (Số nhà, đường, phường, quận...)"
+        data-i18n-placeholder="deliveryAddress" required />
+      <button class="primary-button checkout-submit-btn btn-place-order" type="submit">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+        <span data-i18n="placeOrder">Xác nhận đặt hàng (COD)</span>
+      </button>
+    </form>
+  </aside>
+
+  <!-- Interactive Product Detail Modal -->
+  <div class="modal hidden" id="productModal">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="productModalTitle">
+      <button class="close-button" id="closeProductModal" type="button" aria-label="Đóng">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+      <div class="modal-detail-layout">
+        <div class="modal-gallery-block">
+          <div class="modal-main-image-wrap">
+            <img id="productModalImage" src="" alt="" />
+          </div>
+          <div class="modal-thumbs" id="productModalThumbs"></div>
+        </div>
+
+        <div class="modal-body">
+          <h2 id="productModalTitle" data-i18n="modalTitle">Chi tiết sản phẩm</h2>
+          <div class="modal-meta-line">
+            <span id="productModalMeta"></span>
+          </div>
+          <div class="modal-price" id="productModalPrice"></div>
+
+          <div class="modal-detail-tabs" role="tablist" aria-label="Chi tiết sản phẩm" data-i18n-aria="modalTabsAria">
+            <button class="tab-button active" type="button" data-tab="spec" role="tab" aria-selected="true"
+              data-i18n="modalTabSpec">Thông số kỹ thuật</button>
+            <button class="tab-button" type="button" data-tab="description" role="tab" aria-selected="false"
+              data-i18n="modalTabDescription">Mô tả sản phẩm</button>
           </div>
 
-          <div class="modal-body">
-            <h2 id="productModalTitle" data-i18n="modalTitle">Chi tiết sản phẩm</h2>
-            <div class="modal-meta-line">
-              <span id="productModalMeta"></span>
-            </div>
-            <div class="modal-price" id="productModalPrice"></div>
+          <div class="tab-panel active" id="modalSpecPanel" role="tabpanel">
+            <ul class="spec-list" id="productModalSpecs"></ul>
+          </div>
+          <div class="tab-panel" id="modalDescriptionPanel" role="tabpanel" hidden>
+            <p class="modal-description" id="productModalDescription"></p>
+          </div>
 
-            <div class="modal-detail-tabs" role="tablist" aria-label="Chi tiết sản phẩm" data-i18n-aria="modalTabsAria">
-              <button class="tab-button active" type="button" data-tab="spec" role="tab" aria-selected="true" data-i18n="modalTabSpec">Thông số kỹ thuật</button>
-              <button class="tab-button" type="button" data-tab="description" role="tab" aria-selected="false" data-i18n="modalTabDescription">Mô tả</button>
-            </div>
+          <div class="modal-actions" data-i18n-aria="modalActionsAria">
+            <label class="modal-qty">
+              <span data-i18n="modalQty">Số lượng</span>
+              <input id="productModalQty" type="number" value="1" min="1" />
+            </label>
+            <button class="btn-modal-add" id="productModalAdd" type="button">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <path d="M16 10a4 4 0 0 1-8 0"></path>
+              </svg>
+              <span data-i18n="modalAddToCart">Thêm vào giỏ hàng</span>
+            </button>
+          </div>
 
-            <div class="tab-panel active" id="modalSpecPanel" role="tabpanel">
-              <ul class="spec-list" id="productModalSpecs"></ul>
-            </div>
-            <div class="tab-panel" id="modalDescriptionPanel" role="tabpanel" hidden>
-              <p class="modal-description" id="productModalDescription"></p>
-            </div>
-
-            <div class="modal-actions" data-i18n-aria="modalActionsAria">
-              <label class="modal-qty">
-                <span data-i18n="modalQty">Số lượng</span>
-                <input id="productModalQty" type="number" value="1" min="1" />
-              </label>
-              <button class="primary-button" id="productModalAdd" type="button" data-i18n="modalAddToCart">Thêm vào giỏ hàng</button>
-            </div>
-
-            <div class="modal-related">
-              <h3 data-i18n="modalRelated">Sản phẩm tương tự</h3>
-              <div class="related-grid" id="productModalRelated"></div>
-            </div>
+          <div class="modal-related">
+            <h3 data-i18n="modalRelated">Sản phẩm tương tự</h3>
+            <div class="related-grid" id="productModalRelated"></div>
           </div>
         </div>
       </div>
     </div>
+  </div>
 
-    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <!-- Toast Notification -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-    <nav class="mobile-nav" aria-label="Điều hướng mobile">
-      <a href="#home">⌂<span data-i18n="home">Trang chủ</span></a>
-      <a href="#products">☰<span data-i18n="products">Sản phẩm</span></a>
-      <button id="openCartMobile" type="button">🛒<span data-i18n="cart">Giỏ hàng</span></button>
-    </nav>
+  <!-- Mobile Bottom Navigation -->
+  <nav class="mobile-nav" aria-label="Điều hướng mobile">
+    <a href="#home" class="active">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round">
+        <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+      </svg>
+      <span data-i18n="home">Trang chủ</span>
+    </a>
+    <a href="#products">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="7" height="7"></rect>
+        <rect x="14" y="3" width="7" height="7"></rect>
+        <rect x="14" y="14" width="7" height="7"></rect>
+        <rect x="3" y="14" width="7" height="7"></rect>
+      </svg>
+      <span data-i18n="products">Sản phẩm</span>
+    </a>
+    <button id="openCartMobile" type="button">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <path d="M16 10a4 4 0 0 1-8 0"></path>
+      </svg>
+      <span data-i18n="cart">Giỏ hàng</span>
+    </button>
+  </nav>
 
-    <!-- Floating Contact Button -->
-    <button class="floating-contact-btn" id="floatingContactBtn" type="button" aria-label="Liên hệ với chúng tôi">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M20 2H4C2.9 2 2 2.9 2 4V22L6 18H20C21.1 18 22 17.1 22 16V4C22 2.9 21.1 2 20 2Z" fill="currentColor"/>
+  <!-- Floating Contact Button -->
+  <button class="floating-contact-btn" id="floatingContactBtn" type="button" aria-label="Liên hệ với chúng tôi">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+      stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+    </svg>
+  </button>
+
+  <!-- Contact Popup Modal -->
+  <div class="contact-popup-backdrop" id="contactPopupBackdrop" hidden></div>
+  <div class="contact-popup" id="contactPopup" hidden>
+    <div class="popup-header">
+      <h2 data-i18n="contactPopupTitle">Hỗ Trợ Trực Tuyến LUXAS</h2>
+    </div>
+
+    <div class="popup-content">
+      <div class="contact-section">
+        <h3 data-i18n="contactSectionBusiness">Kinh Doanh & Dự Án</h3>
+        <div class="contact-row">
+          <span class="contact-role" data-i18n="contactRoleBusiness">Phòng Kinh Doanh</span>
+          <button class="action-btn" type="button" onclick="window.open('https://zalo.me/0937511617','_blank')">
+            <span>Zalo</span>
+            <span data-i18n="contactMessage">Nhắn tin</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="contact-section">
+        <h3 data-i18n="contactSectionTech">Hỗ Trợ Kỹ Thuật & STEM</h3>
+        <div class="contact-row">
+          <span class="contact-role" data-i18n="contactRoleTech">Đội Ngũ Kỹ Sư IoT</span>
+          <button class="action-btn" type="button" onclick="window.open('https://zalo.me/0937511617','_blank')">
+            <span>Zalo</span>
+            <span data-i18n="contactMessage">Nhắn tin</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="contact-section">
+        <h3 data-i18n="contactSectionWarranty">Bảo Hành & Đổi Trả</h3>
+        <div class="contact-row">
+          <span class="contact-role" data-i18n="contactRoleWarranty">Bộ Phận Kỹ Thuật</span>
+          <button class="action-btn" type="button" onclick="window.open('https://zalo.me/0937511617','_blank')">
+            <span>Zalo</span>
+            <span data-i18n="contactMessage">Nhắn tin</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="popup-footer">
+        <p data-i18n="contactPopupFooter">KÊNH LIÊN HỆ TRỰC TIẾP:</p>
+        <div class="contact-methods">
+          <a href="https://zalo.me/0937511617" target="_blank" rel="noopener" class="contact-method zalo"
+            title="Zalo Chat">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+              <circle cx="16" cy="16" r="16" fill="#0068FF" />
+              <path d="M10 12.2H22V19.8H18.2L16 22L13.8 19.8H10V12.2Z" fill="white" />
+              <text x="16" y="17.7" text-anchor="middle" fill="#0068FF" font-size="5" font-weight="800">Zalo</text>
+            </svg>
+          </a>
+          <a href="tel:0937511617" class="contact-method phone" title="Gọi hotline">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+              <circle cx="16" cy="16" r="16" fill="#10B981" />
+              <path
+                d="M22 18.92v2a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 4h2a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L9.09 11.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 18.92z"
+                fill="white" />
+            </svg>
+          </a>
+          <a href="mailto:sales@luxas.com.vn" class="contact-method email" title="Gửi email">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+              <circle cx="16" cy="16" r="16" fill="#EF4444" />
+              <path
+                d="M8 11L16 16L24 11V9C24 8.4 23.6 8 23 8H9C8.4 8 8 8.4 8 9V11ZM8 13.5V23C8 23.6 8.4 24 9 24H23C23.6 24 24 23.6 24 23V13.5L16 19L8 13.5Z"
+                fill="white" />
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QR Code Modal -->
+  <div class="qr-modal-backdrop" id="qrModalBackdrop" hidden></div>
+  <div class="qr-modal" id="qrModal" hidden role="dialog" aria-modal="true" aria-labelledby="qrModalTitle">
+    <button class="qr-modal-close" id="qrModalClose" type="button" aria-label="Đóng">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
       </svg>
     </button>
-
-    <!-- Contact Popup Modal -->
-    <div class="contact-popup-backdrop" id="contactPopupBackdrop" hidden></div>
-    <div class="contact-popup" id="contactPopup" hidden>
-      <div class="popup-header">
-        <h2 data-i18n="contactPopupTitle">Liên hệ với Thegioiic</h2>
-      </div>
-      
-      <div class="popup-content">
-        <div class="contact-section">
-          <h3 data-i18n="contactSectionBusiness">Kinh Doanh</h3>
-          <div class="contact-row">
-            <span class="contact-logo">thegioiic</span>
-            <span class="contact-role" data-i18n="contactRoleBusiness">Kinh Doanh</span>
-            <button class="action-btn" type="button"><span>Zalo</span> <span data-i18n="contactMessage">Nhắn tin</span></button>
-          </div>
-        </div>
-        
-        <div class="contact-section">
-          <h3 data-i18n="contactSectionTech">Hỗ trợ Kỹ Thuật</h3>
-          <div class="contact-row">
-            <span class="contact-logo">thegioiic</span>
-            <span class="contact-role" data-i18n="contactRoleTech">Kỹ Thuật</span>
-            <button class="action-btn" type="button"><span>Zalo</span> <span data-i18n="contactMessage">Nhắn tin</span></button>
-          </div>
-        </div>
-        
-        <div class="contact-section">
-          <h3 data-i18n="contactSectionWarranty">Hỗ trợ Bảo hành</h3>
-          <div class="contact-row">
-            <span class="contact-logo">thegioiic</span>
-            <span class="contact-role" data-i18n="contactRoleWarranty">Bảo Hành</span>
-            <button class="action-btn" type="button"><span>Zalo</span> <span data-i18n="contactMessage">Nhắn tin</span></button>
-          </div>
-        </div>
-        
-        <div class="popup-footer">
-          <p data-i18n="contactPopupFooter">LIÊN HỆ VỚI CHÚNG TÔI TẠI:</p>
-          <div class="contact-methods">
-            <a href="#" class="contact-method zalo" title="Zalo">
-              <svg width="32" height="32" viewBox="0 0 32 32" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="16" cy="16" r="16" fill="#c8efff"/>
-                <circle cx="16" cy="16" r="12" fill="#0a8fd8"/>
-                <path d="M10 12.2H22V19.8H18.2L16 22L13.8 19.8H10V12.2Z" fill="white"/>
-                <text x="16" y="17.7" text-anchor="middle" fill="#0a8fd8" font-size="5" font-weight="800">Zalo</text>
-              </svg>
-            </a>
-            <a href="tel:0937511617" class="contact-method phone" title="Điện thoại">
-              <svg width="32" height="32" viewBox="0 0 32 32" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="16" cy="16" r="16" fill="#34A853"/>
-                <path d="M12.7 9.2C12.2 9.4 10.8 10.1 10.5 11.8C10 14.8 13.7 20.8 19.8 22C21.4 22.3 22.4 21.1 22.8 20.7C23.2 20.2 23.1 19.5 22.6 19.1L20.4 17.5C20 17.2 19.4 17.3 19.1 17.7L18.2 18.8C16.6 18 14.8 16.2 13.9 14.6L15 13.8C15.4 13.5 15.5 12.9 15.2 12.5L13.7 9.9C13.5 9.3 13.2 9.1 12.7 9.2Z" fill="white"/>
-                <path d="M20.6 9.5C22 10.3 23.1 11.4 23.7 12.9" stroke="white" stroke-width="1.6" stroke-linecap="round" fill="none"/>
-                <path d="M18.9 12C19.6 12.4 20.1 13 20.5 13.8" stroke="white" stroke-width="1.6" stroke-linecap="round" fill="none"/>
-              </svg>
-            </a>
-            <a href="mailto:sales@luxas.com.vn" class="contact-method email" title="Email">
-              <svg width="32" height="32" viewBox="0 0 32 32" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="16" cy="16" r="16" fill="#EA4335"/>
-                <path d="M8 11L16 16L24 11V9C24 8.4 23.6 8 23 8H9C8.4 8 8 8.4 8 9V11ZM8 13.5V23C8 23.6 8.4 24 9 24H23C23.6 24 24 23.6 24 23V13.5L16 19L8 13.5Z" fill="white"/>
-              </svg>
-            </a>
-          </div>
-        </div>
-      </div>
+    <h2 class="qr-modal-title" id="qrModalTitle">Quét mã QR</h2>
+    <div class="qr-modal-image-wrap">
+      <img id="qrModalImage" src="" alt="QR Code" />
     </div>
+    <p class="qr-modal-caption" id="qrModalCaption"></p>
+  </div>
 
-    <!-- QR Code Modal -->
-    <div class="qr-modal-backdrop" id="qrModalBackdrop" hidden></div>
-    <div class="qr-modal" id="qrModal" hidden role="dialog" aria-modal="true" aria-labelledby="qrModalTitle">
-      <button class="qr-modal-close" id="qrModalClose" type="button" aria-label="Đóng">×</button>
-      <h2 class="qr-modal-title" id="qrModalTitle">Quét mã QR</h2>
-      <div class="qr-modal-image-wrap">
-        <img id="qrModalImage" src="" alt="QR Code" />
-      </div>
-      <p class="qr-modal-caption" id="qrModalCaption"></p>
-    </div>
+  <!-- Floating Social Media Bar -->
+  <div class="social-bar" id="socialBar">
+    <button type="button" class="social-icon zalo" data-qr="zalo" title="Zalo" aria-label="Zalo">
+      <svg viewBox="0 0 24 24" width="26" height="26" fill="none">
+        <rect width="24" height="24" rx="12" fill="#0068FF" />
+        <path
+          d="M11.94 4.5C7.55 4.5 4 7.62 4 11.46c0 2.08 1.04 3.94 2.68 5.2-.1.26-.6 1.96-.68 2.24 0 0-.02.14.07.2.09.06.2.02.2.02.28-.04 2.2-1.44 2.54-1.68.66.16 1.38.24 2.13.24 4.39 0 7.94-3.12 7.94-6.96S16.33 4.5 11.94 4.5z"
+          fill="white" />
+        <path d="M16.48 14.42h-5.12c-.2 0-.37-.16-.37-.36s.16-.36.37-.36h5.12c.2 0 .37.16.37.36s-.16.36-.37.36z"
+          fill="white" />
+      </svg>
+      <span class="social-tooltip">Zalo Hỗ Trợ</span>
+    </button>
 
-    <!-- Floating Social Media Bar -->
-    <div class="social-bar" id="socialBar">
-      <button type="button" class="social-icon zalo" data-qr="zalo" title="Zalo" aria-label="Zalo">
-        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="24" height="24" rx="12" fill="#0068FF"/>
-          <path d="M11.94 4.5C7.55 4.5 4 7.62 4 11.46c0 2.08 1.04 3.94 2.68 5.2-.1.26-.6 1.96-.68 2.24 0 0-.02.14.07.2.09.06.2.02.2.02.28-.04 2.2-1.44 2.54-1.68.66.16 1.38.24 2.13.24 4.39 0 7.94-3.12 7.94-6.96S16.33 4.5 11.94 4.5z" fill="white"/>
-          <path d="M16.48 14.42h-5.12c-.2 0-.37-.16-.37-.36s.16-.36.37-.36h5.12c.2 0 .37.16.37.36s-.16.36-.37.36z" fill="white"/>
-          <path d="M12.48 8.14c0-.2.16-.36.36-.36s.36.16.36.36v3.82c0 .2-.16.36-.36.36s-.36-.16-.36-.36V8.14z" fill="white"/>
-          <circle cx="13.7" cy="10.6" r="1.3" fill="white"/>
-          <circle cx="10.5" cy="11.8" r="1.3" fill="white"/>
-        </svg>
-        <span class="social-tooltip">Zalo</span>
-      </button>
-      <button type="button" class="social-icon line" data-qr="line" title="Line" aria-label="Line">
-        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="24" height="24" rx="12" fill="#00B900"/>
-          <path d="M19.5 11.2c0-3.2-3.2-5.8-7.1-5.8s-7.1 2.6-7.1 5.8c0 2.9 2.5 5.3 5.9 5.7.2.04.5.1.5.2v1.4c0 .1.1.2.2.1.8-.3 3.7-1.8 5.2-3.6.9-.9 1.4-2.2 1.4-3.8z" fill="white"/>
-          <path d="M10.4 9.6h-.5c-.1 0-.2.1-.2.2v2.8c0 .1.1.2.2.2h.5c.1 0 .2-.1.2-.2v-2.8c0-.1-.1-.2-.2-.2z" fill="#00B900"/>
-          <path d="M12.6 9.6h-.5c-.1 0-.2.1-.2.2v2.8c0 .1.1.2.2.2h.5c.1 0 .2-.1.2-.2v-2.8c0-.1-.1-.2-.2-.2z" fill="#00B900"/>
-          <path d="M15.2 9.6h-1.8c-.1 0-.2.1-.2.2v.4c0 .1.1.2.2.2h.5v2.2c0 .1.1.2.2.2h.5c.1 0 .2-.1.2-.2V10.4h.5c.1 0 .2-.1.2-.2v-.4c0-.1-.1-.2-.2-.2z" fill="#00B900"/>
-        </svg>
-        <span class="social-tooltip">Line</span>
-      </button>
-      <button type="button" class="social-icon whatsapp" data-qr="whatsapp" title="WhatsApp" aria-label="WhatsApp">
-        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="24" height="24" rx="12" fill="#25D366"/>
-          <path d="M17.6 6.3A7.8 7.8 0 0 0 12 4a7.9 7.9 0 0 0-6.8 11.9L4 20l4.2-1.1A7.9 7.9 0 0 0 12 20a7.9 7.9 0 0 0 6.8-11.7zM12 18.5c-1 0-2-.3-2.9-.8l-.2-.1-2.5.7.7-2.4-.2-.2c-.5-.8-.8-1.7-.8-2.7 0-3.2 2.6-5.9 5.9-5.9 1.6 0 3.1.6 4.2 1.7s1.7 2.6 1.7 4.2c0 3.3-2.7 5.5-5.9 5.5z" fill="white"/>
-          <path d="M15.6 13.8c-.2-.1-1.2-.6-1.3-.6s-.3-.1-.4.1-.5.6-.6.7-.2.1-.4 0c-.2-.1-.8-.3-1.5-.9-.6-.5-1-1.2-1.1-1.4s0-.2.1-.3l.3-.3.2-.3v-.2l-.6-1.3c-.1-.3-.3-.3-.4-.3h-.4c-.1 0-.3 0-.5.2s-.7.7-.7 1.6.7 1.9.8 2 1.4 2.1 3.4 2.9c.5.2.8.3 1.1.3.4-.1 1.1-.5 1.3-.9.2-.5.2-.8.1-.9l-.2-.1z" fill="white"/>
-        </svg>
-        <span class="social-tooltip">WhatsApp</span>
-      </button>
-      <a href="https://youtube.com/@luxas" class="social-icon youtube" target="_blank" rel="noopener" title="YouTube" aria-label="YouTube">
-        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="24" height="24" rx="12" fill="#FF0000"/>
-          <path d="M18.2 8.4c-.2-.8-.8-1.4-1.6-1.6C15.2 6.5 12 6.5 12 6.5s-3.2 0-4.6.3c-.8.2-1.4.8-1.6 1.6C5.5 9.8 5.5 12 5.5 12s0 2.2.3 3.6c.2.8.8 1.4 1.6 1.6C8.8 17.5 12 17.5 12 17.5s3.2 0 4.6-.3c.8-.2 1.4-.8 1.6-1.6.3-1.4.3-3.6.3-3.6s0-2.2-.3-3.6z" fill="white"/>
-          <path d="M10.5 14.5v-5l4 2.5-4 2.5z" fill="#FF0000"/>
-        </svg>
-        <span class="social-tooltip">YouTube</span>
-      </a>
-      <a href="https://tiktok.com/@luxas" class="social-icon tiktok" target="_blank" rel="noopener" title="TikTok" aria-label="TikTok">
-        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="24" height="24" rx="12" fill="#000000"/>
-          <path d="M16.5 5.5c-.5 1.2-1.4 2-2.7 2.2v3.1c1.2.1 2.2.5 3.1 1.3.9.8 1.4 1.8 1.6 3 .2 1.2 0 2.4-.6 3.4-.6 1-1.5 1.7-2.6 2.1-1.1.4-2.3.4-3.4 0-1.1-.3-2-1-2.6-2-.6-1-.9-2-.8-3.2h3c0 .6.2 1.1.6 1.5.4.4.9.6 1.5.6.6 0 1.1-.2 1.5-.6.4-.4.6-.9.6-1.5s-.2-1.1-.6-1.5c-.4-.4-.9-.6-1.5-.6h-.5V5.5h3z" fill="white"/>
-          <path d="M16.5 5.5c.3.7.8 1.3 1.5 1.7.7.4 1.4.5 2.2.4v2.9c-1.3 0-2.5-.3-3.7-1V5.5z" fill="#FF0050"/>
-          <path d="M16.5 5.5c.3.7.8 1.3 1.5 1.7.7.4 1.4.5 2.2.4v2.9c-1.3 0-2.5-.3-3.7-1V5.5z" fill="#00F2EA" opacity="0.8" transform="translate(-0.5 -0.3)"/>
-        </svg>
-        <span class="social-tooltip">TikTok</span>
-      </a>
-      <a href="https://facebook.com/luxas" class="social-icon facebook" target="_blank" rel="noopener" title="Facebook" aria-label="Facebook">
-        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="24" height="24" rx="12" fill="#1877F2"/>
-          <path d="M15.5 12.5h-2.5v8h-3.2v-8H8.5V9.8h1.3V8c0-1.8 1-2.8 2.9-2.8.8 0 1.6.1 1.6.1v2.2h-.9c-.7 0-1 .4-1 1v1.3h1.9l-.3 2.7z" fill="white"/>
-        </svg>
-        <span class="social-tooltip">Facebook</span>
-      </a>
-      <a href="tel:+84937511617" class="social-icon phone-call" id="socialPhoneCall" title="Gọi điện 0937 511 617" aria-label="Gọi điện 0937 511 617">
-        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="24" height="24" rx="12" fill="#dc4c3f"/>
-          <path d="M6.6 10c1-1 2-1.8 3.2-2.4.3-.1.6 0 .8.2l1.2 1.8c.2.3.1.7-.2.9l-1 .6c.4.8 1 1.6 1.8 2.2l.6-1c.2-.3.6-.4.9-.2l1.8 1.2c.3.2.4.5.2.8-.6 1.2-1.4 2.2-2.4 3.2-.3.3-.7.3-1 .1-2.5-1.6-4.6-3.7-6.2-6.2-.2-.3-.2-.7.1-1z" fill="white"/>
-        </svg>
-        <span class="phone-label">0937 511 617</span>
-      </a>
-    </div>
+    <button type="button" class="social-icon line" data-qr="line" title="Line" aria-label="Line">
+      <svg viewBox="0 0 24 24" width="26" height="26" fill="none">
+        <rect width="24" height="24" rx="12" fill="#00B900" />
+        <path
+          d="M19.5 11.2c0-3.2-3.2-5.8-7.1-5.8s-7.1 2.6-7.1 5.8c0 2.9 2.5 5.3 5.9 5.7.2.04.5.1.5.2v1.4c0 .1.1.2.2.1.8-.3 3.7-1.8 5.2-3.6.9-.9 1.4-2.2 1.4-3.8z"
+          fill="white" />
+      </svg>
+      <span class="social-tooltip">Line</span>
+    </button>
 
-    <script src="app.js"></script>
-  </body>
+    <button type="button" class="social-icon whatsapp" data-qr="whatsapp" title="WhatsApp" aria-label="WhatsApp">
+      <svg viewBox="0 0 24 24" width="26" height="26" fill="none">
+        <rect width="24" height="24" rx="12" fill="#25D366" />
+        <path
+          d="M17.6 6.3A7.8 7.8 0 0 0 12 4a7.9 7.9 0 0 0-6.8 11.9L4 20l4.2-1.1A7.9 7.9 0 0 0 12 20a7.9 7.9 0 0 0 6.8-11.7z"
+          fill="white" />
+      </svg>
+      <span class="social-tooltip">WhatsApp</span>
+    </button>
+
+    <a href="tel:+84937511617" class="social-icon phone-call" id="socialPhoneCall" title="Gọi điện 0937 511 617"
+      aria-label="Gọi điện 0937 511 617">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round">
+        <path
+          d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z">
+        </path>
+      </svg>
+      <span class="phone-label">0937 511 617</span>
+    </a>
+  </div>
+
+  <!-- Scripts -->
+  <script src="store.js"></script>
+  <script src="app.js"></script>
+</body>
+
 </html>

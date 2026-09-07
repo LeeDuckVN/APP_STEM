@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sản phẩm - STEM IoT Admin</title>
+  <link rel="stylesheet" href="admin.css" />
+</head>
+
+<body>
+  <div id="app"></div>
+
+  <!-- MODAL: Thêm / Sửa sản phẩm -->
+  <div class="modal-backdrop" id="productFormModal">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h3 class="modal-title" id="productFormTitle">Thêm sản phẩm</h3>
+        <button class="modal-close" onclick="closeModal('productFormModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="productForm" onsubmit="return saveProduct(event)">
+          <input type="hidden" id="pfId" />
+          <div class="form-row">
+            <div class="form-group">
+              <label for="pfName">Tên sản phẩm (tiếng Việt) *</label>
+              <input type="text" class="form-control" id="pfName" required
+                placeholder="VD: Arduino Proto Shield Rev3" />
+            </div>
+            <div class="form-group">
+              <label for="pfSku">Mã SKU *</label>
+              <input type="text" class="form-control" id="pfSku" required placeholder="VD: ST-BOARD-001" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="pfCategory">Danh mục *</label>
+              <select class="form-control" id="pfCategory" required></select>
+            </div>
+            <div class="form-group">
+              <label for="pfSub">Nhóm con</label>
+              <select class="form-control" id="pfSub"></select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="pfPrice">Giá bán (đ) *</label>
+              <input type="number" class="form-control" id="pfPrice" required min="0" step="1000"
+                placeholder="150000" />
+            </div>
+            <div class="form-group">
+              <label for="pfInventory">Tồn kho *</label>
+              <input type="number" class="form-control" id="pfInventory" required min="0" step="1" placeholder="20" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="pfImage">Ảnh (đường dẫn)</label>
+              <input type="text" class="form-control" id="pfImage" placeholder="../assets/ten-anh.png" />
+            </div>
+            <div class="form-group">
+              <label for="pfBadge">Nhãn (badge)</label>
+              <input type="text" class="form-control" id="pfBadge" placeholder="VD: Arduino / ESP32 / Mới" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="pfHidden">Hiển thị trên cửa hàng</label>
+              <select class="form-control" id="pfHidden">
+                <option value="false">Đang bán (hiện)</option>
+                <option value="true">Ẩn khỏi cửa hàng</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="pfIsNew">Sản phẩm mới</label>
+              <select class="form-control" id="pfIsNew">
+                <option value="false">Không</option>
+                <option value="true">Có — hiện ở mục "Hàng mới về"</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="pfDescription">Mô tả (tiếng Việt)</label>
+            <textarea class="form-control" id="pfDescription" placeholder="Mô tả ngắn về sản phẩm..."></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('productFormModal')">Hủy</button>
+        <button class="btn btn-primary" onclick="document.getElementById('productForm').requestSubmit()">💾 Lưu</button>
+      </div>
+    </div>
+  </div>
+  <!-- MODAL: Xem chi tiết sản phẩm -->
+  <div class="modal-backdrop" id="productModal">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h3 class="modal-title">Chi tiết sản phẩm</h3>
+        <button class="modal-close" onclick="closeModal('productModal')">✕</button>
+      </div>
+      <div class="modal-body" id="productContent"></div>
+      <div class="modal-footer" id="productFooter">
+        <button class="btn btn-secondary" onclick="closeModal('productModal')">Đóng</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../store.js"></script>
+  <script src="admin.js"></script>
+  <script>
+    let allProducts = [];
+    let categories = [];
+    let filterState = { search: '', category: '', sub: '', stock: '' };
+
+    // ===== Khởi tạo: render layout TRƯỚC, gắn sự kiện SAU =====
+    (function () {
+      const session = requireAuth();
+      if (!session) return;
+
+      categories = getData('categories', []);
+      renderLayout('products', 'Quản lý sản phẩm', buildPage(), `
+        <button class="btn btn-sm btn-primary" onclick="openAddProduct()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <span>Thêm sản phẩm</span>
+        </button>
+        <button class="btn btn-sm btn-secondary" onclick="resetData()" title="Reset về dữ liệu gốc">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+          <span>Khôi phục mẫu</span>
+        </button>
+      `);
+
+      document.getElementById('searchProduct').addEventListener('input', (e) => { filterState.search = e.target.value; renderTable(); });
+      document.getElementById('filterCategory').addEventListener('change', (e) => { filterState.category = e.target.value; filterState.sub = ''; renderSubOptions(); renderTable(); });
+      document.getElementById('filterSub').addEventListener('change', (e) => { filterState.sub = e.target.value; renderTable(); });
+      document.getElementById('filterStock').addEventListener('change', (e) => { filterState.stock = e.target.value; renderTable(); });
+
+      renderAllAdmin = function () {
+        allProducts = getData('products', []);
+        renderStats();
+        renderTable();
+      };
+      renderAllAdmin();
+    })();
+
+    function renderStats() {
+      const total = allProducts.length;
+      const visible = allProducts.filter(p => !p.hidden).length;
+      const outOfStock = allProducts.filter(p => Number(p.inventory) === 0).length;
+      const lowStock = allProducts.filter(p => p.inventory > 0 && p.inventory <= 20).length;
+      const totalValue = allProducts.reduce((s, p) => s + p.price * p.inventory, 0);
+
+      document.getElementById('statTotal').textContent = total;
+      document.getElementById('statVisible').textContent = visible;
+      document.getElementById('statOutOfStock').textContent = outOfStock;
+      document.getElementById('statLowStock').textContent = lowStock;
+      document.getElementById('statTotalValue').textContent = fmtVND(totalValue);
+    }
+
+    function renderSubOptions() {
+      const cat = categories.find(c => c.id === filterState.category);
+      const subs = cat ? cat.subs : [];
+      const sel = document.getElementById('filterSub');
+      sel.innerHTML = '<option value="">Tất cả nhóm con</option>' + subs.map(s => `<option value="${s.id}">${escapeHtml(s.label.vi)}</option>`).join('');
+      sel.value = filterState.sub || '';
+    }
+    function renderTable() {
+      const f = filterState;
+      const filtered = allProducts.filter(p => {
+        if (f.search && !prodName(p).toLowerCase().includes(f.search.toLowerCase()) && !String(p.sku).toLowerCase().includes(f.search.toLowerCase())) return false;
+        if (f.category && p.category !== f.category) return false;
+        if (f.sub && p.sub !== f.sub) return false;
+        if (f.stock === 'inStock' && !(p.inventory > 0)) return false;
+        if (f.stock === 'lowStock' && !(p.inventory > 0 && p.inventory <= 20)) return false;
+        if (f.stock === 'outOfStock' && !(Number(p.inventory) === 0)) return false;
+        return true;
+      }).sort((a, b) => (b.sold || 0) - (a.sold || 0));
+
+      const countEl = document.getElementById('productCount');
+      if (countEl) countEl.textContent = filtered.length;
+
+      const tbody = document.getElementById('productTbody');
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7">
+              <div class="empty-state">
+                <div class="icon">
+                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                </div>
+                <h3>Không có sản phẩm nào</h3>
+                <p>Thử thay đổi bộ lọc hoặc thêm sản phẩm mới</p>
+              </div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(p => {
+        const cat = categories.find(c => c.id === p.category);
+        const subLabel = cat && cat.subs.find(s => s.id === p.sub);
+        return `
+          <tr>
+            <td>
+              <div class="product-cell">
+                <img class="product-img" src="${getStoreImageUrl(p.image, true)}" alt="${escapeHtml(prodName(p))}" onerror="this.src='../assets/stem-iot-banner.png'" />
+                <div class="info">
+                  <h4>${escapeHtml(prodName(p))} ${p.hidden ? '<span class="badge badge-gray"><span class="badge-dot"></span>Ẩn</span>' : ''}</h4>
+                  <span>${escapeHtml(p.sku)}</span>
+                </div>
+              </div>
+            </td>
+            <td>${cat ? escapeHtml(cat.label.vi) : '—'}${subLabel ? '<br><small class="text-xs text-gray">' + escapeHtml(subLabel.label.vi) + '</small>' : ''}</td>
+            <td><strong class="${p.inventory === 0 ? 'text-danger' : (p.inventory <= 20 ? 'text-warning' : '')}">${p.inventory}</strong></td>
+            <td>${p.sold || 0}</td>
+            <td><strong>${fmtVND(p.price)}</strong></td>
+            <td>${p.hidden ? '<span class="badge badge-gray"><span class="badge-dot"></span>Đang ẩn</span>' : '<span class="badge badge-success"><span class="badge-dot"></span>Đang bán</span>'}</td>
+            <td>
+              <div class="action-buttons">
+                <button class="action-btn view" title="Xem chi tiết" onclick="viewProduct('${p.id}')">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+                <button class="action-btn edit" title="Sửa" onclick="openEditProduct('${p.id}')">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </button>
+                <button class="action-btn delete" title="Xóa" onclick="deleteProduct('${p.id}')">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+    // ===== THÊM / SỬA SẢN PHẨM =====
+    function openAddProduct() {
+      document.getElementById('productFormTitle').textContent = 'Thêm sản phẩm';
+      document.getElementById('productForm').reset();
+      document.getElementById('pfId').value = '';
+      fillCategoryOptions('', '');
+      openModal('productFormModal');
+    }
+
+    function openEditProduct(id) {
+      const p = allProducts.find(x => x.id === id);
+      if (!p) return;
+      document.getElementById('productFormTitle').textContent = 'Sửa sản phẩm';
+      fillCategoryOptions(p.category, p.sub || '');
+      document.getElementById('pfId').value = p.id;
+      document.getElementById('pfName').value = prodName(p);
+      document.getElementById('pfSku').value = p.sku;
+      document.getElementById('pfPrice').value = p.price;
+      document.getElementById('pfInventory').value = p.inventory;
+      document.getElementById('pfImage').value = p.image || '';
+      document.getElementById('pfBadge').value = typeof p.badge === 'string' ? p.badge : (p.badge ? p.badge.vi : '') || '';
+      document.getElementById('pfHidden').value = p.hidden ? 'true' : 'false';
+      document.getElementById('pfIsNew').value = p.isNew ? 'true' : 'false';
+      document.getElementById('pfDescription').value = prodDesc(p);
+      openModal('productFormModal');
+    }
+
+    function fillCategoryOptions(categoryId, subId) {
+      const catSel = document.getElementById('pfCategory');
+      catSel.innerHTML = categories.map(c => `<option value="${c.id}">${escapeHtml(c.icon)} ${escapeHtml(c.label.vi)}</option>`).join('');
+      catSel.value = categoryId || (categories[0] ? categories[0].id : '');
+      fillSubOptions(subId);
+      catSel.onchange = () => fillSubOptions('');
+    }
+
+    function fillSubOptions(subId) {
+      const cat = categories.find(c => c.id === document.getElementById('pfCategory').value);
+      const subSel = document.getElementById('pfSub');
+      const subs = cat ? cat.subs : [];
+      subSel.innerHTML = subs.map(s => `<option value="${s.id}">${escapeHtml(s.label.vi)}</option>`).join('');
+      subSel.value = subId || (subs[0] ? subs[0].id : '');
+    }
+
+    function saveProduct(e) {
+      e.preventDefault();
+      const id = document.getElementById('pfId').value;
+      const name = document.getElementById('pfName').value.trim();
+      const sku = document.getElementById('pfSku').value.trim();
+      const category = document.getElementById('pfCategory').value;
+      const sub = document.getElementById('pfSub').value;
+      const price = Number(document.getElementById('pfPrice').value);
+      const inventory = Number(document.getElementById('pfInventory').value);
+      const rawImage = document.getElementById('pfImage').value.trim();
+      const image = rawImage ? rawImage.replace(/^(\.\.\/|\.\/)+/, '') : 'assets/stem-iot-banner.png';
+      const badgeText = document.getElementById('pfBadge').value.trim();
+      const hidden = document.getElementById('pfHidden').value === 'true';
+      const isNew = document.getElementById('pfIsNew').value === 'true';
+      const description = document.getElementById('pfDescription').value.trim();
+
+      if (!name || !sku || !category || isNaN(price)) {
+        showToast('Vui lòng nhập đủ thông tin bắt buộc', 'error');
+        return false;
+      }
+      const dup = allProducts.find(p => String(p.sku).toLowerCase() === sku.toLowerCase() && p.id !== id);
+      if (dup) {
+        showToast('Mã SKU đã tồn tại: ' + prodName(dup), 'error');
+        return false;
+      }
+
+      // name/badge/description đa ngôn ngữ: người dùng nhập 1 lần, tự copy sang en/ja
+      const data = {
+        name: { vi: name, en: name, ja: name },
+        sku, category, sub, price, inventory, image, hidden, isNew,
+        badge: { vi: badgeText, en: badgeText, ja: badgeText },
+        description: { vi: description, en: description, ja: description }
+      };
+
+      if (id) {
+        const idx = allProducts.findIndex(p => p.id === id);
+        if (idx >= 0) allProducts[idx] = { ...allProducts[idx], ...data };
+        showToast('Đã cập nhật sản phẩm — cửa hàng tự cập nhật', 'success');
+      } else {
+        allProducts.push({ id: genStoreId('p'), ...data, imagePosition: '50% 50%', unit: { vi: 'Cái', en: 'pc', ja: '個' }, sold: 0 });
+        showToast('Đã thêm sản phẩm mới — cửa hàng tự cập nhật', 'success');
+      }
+
+      setData('products', allProducts);
+      closeModal('productFormModal');
+      renderAllAdmin();
+      return false;
+    }
+
+    // ===== XÓA =====
+    function deleteProduct(id) {
+      const p = allProducts.find(x => x.id === id);
+      if (!p) return;
+      if (!confirmAction(`Xóa sản phẩm "${prodName(p)}"? Khách sẽ không còn thấy sản phẩm này.`)) return;
+      allProducts = allProducts.filter(x => x.id !== id);
+      setData('products', allProducts);
+      showToast('Đã xóa sản phẩm', 'success');
+      renderAllAdmin();
+    }
+    // ===== XEM CHI TIẾT =====
+    function viewProduct(id) {
+      const p = allProducts.find(x => x.id === id);
+      if (!p) return;
+      const cat = categories.find(c => c.id === p.category);
+      document.getElementById('productContent').innerHTML = `
+        <div class="product-cell" style="margin-bottom: 16px;">
+          <img class="product-img" src="${getStoreImageUrl(p.image, true)}" alt="${escapeHtml(prodName(p))}" onerror="this.src='../assets/stem-iot-banner.png'" style="width: 80px; height: 80px;" />
+          <div class="info">
+            <h4 style="font-size: 16px;">${escapeHtml(prodName(p))}</h4>
+            <span>SKU: ${escapeHtml(p.sku)} · ${cat ? escapeHtml(cat.label.vi) : '—'}</span>
+          </div>
+        </div>
+        <div class="form-row">
+          <div><span class="text-xs text-gray">Giá bán</span><div class="font-bold text-success">${fmtVND(p.price)}</div></div>
+          <div><span class="text-xs text-gray">Tồn kho</span><div class="font-bold ${p.inventory === 0 ? 'text-danger' : ''}">${p.inventory}</div></div>
+        </div>
+        <div class="form-row" style="margin-top: 12px;">
+          <div><span class="text-xs text-gray">Đã bán</span><div class="font-bold">${p.sold || 0}</div></div>
+          <div><span class="text-xs text-gray">Trạng thái</span><div>${p.hidden ? '<span class="badge badge-gray">Đang ẩn</span>' : '<span class="badge badge-success">Đang bán</span>'}</div></div>
+        </div>
+        ${prodDesc(p) ? `<p style="margin-top: 16px;" class="text-sm">${escapeHtml(prodDesc(p))}</p>` : ''}
+      `;
+      document.getElementById('productFooter').innerHTML = `
+        <button class="btn btn-secondary" onclick="closeModal('productModal')">Đóng</button>
+        <button class="btn btn-primary" onclick="closeModal('productModal'); openEditProduct('${p.id}')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          <span>Sửa sản phẩm</span>
+        </button>
+      `;
+      openModal('productModal');
+    }
+
+    function buildPage() {
+      return `
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon blue">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+            </div>
+            <div class="stat-info">
+              <h3 id="statTotal">0</h3>
+              <p>Tổng sản phẩm</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon green">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="stat-info">
+              <h3 id="statVisible">0</h3>
+              <p>Đang hiển thị</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon red">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            </div>
+            <div class="stat-info">
+              <h3 id="statOutOfStock">0</h3>
+              <p>Hết hàng</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon orange">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
+            <div class="stat-info">
+              <h3 id="statLowStock">0</h3>
+              <p>Sắp hết (≤20)</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon purple">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </div>
+            <div class="stat-info">
+              <h3 id="statTotalValue">0đ</h3>
+              <p>Tổng giá trị tồn kho</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="filter-toolbar">
+          <div class="search-field">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="searchProduct" placeholder="Tìm tên sản phẩm hoặc SKU..." />
+          </div>
+          <select class="filter-select" id="filterCategory">
+            <option value="">Tất cả danh mục</option>
+            ${categories.map(cat => `<option value="${cat.id}">${escapeHtml(cat.label.vi)}</option>`).join('')}
+          </select>
+          <select class="filter-select" id="filterSub">
+            <option value="">Tất cả nhóm con</option>
+          </select>
+          <select class="filter-select" id="filterStock">
+            <option value="">Tất cả kho</option>
+            <option value="inStock">Còn hàng</option>
+            <option value="lowStock">Sắp hết hàng</option>
+            <option value="outOfStock">Hết hàng</option>
+          </select>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              Danh sách sản phẩm
+              <span class="badge badge-info" id="productCount" style="margin-left: 6px;">0</span>
+            </div>
+            <button class="btn btn-sm btn-primary" onclick="openAddProduct()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <span>Thêm sản phẩm</span>
+            </button>
+          </div>
+          <div class="card-body no-padding">
+            <div class="table-wrapper">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Sản phẩm</th>
+                    <th>Danh mục</th>
+                    <th>Tồn kho</th>
+                    <th>Đã bán</th>
+                    <th>Giá</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody id="productTbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Đơn hàng - STEM IoT Admin</title>
+  <link rel="stylesheet" href="admin.css" />
+</head>
+
+<body>
+  <div id="app"></div>
+
+  <!-- MODAL: Chi tiết đơn hàng -->
+  <div class="modal-backdrop" id="orderModal">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h3 class="modal-title">Chi tiết đơn hàng</h3>
+        <button class="modal-close" onclick="closeModal('orderModal')">✕</button>
+      </div>
+      <div class="modal-body" id="orderContent"></div>
+      <div class="modal-footer" id="orderFooter"></div>
+    </div>
+  </div>
+
+  <!-- MODAL: Tạo đơn hàng mới -->
+  <div class="modal-backdrop" id="createOrderModal">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h3 class="modal-title">Tạo đơn hàng mới</h3>
+        <button class="modal-close" onclick="closeModal('createOrderModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="createOrderForm" onsubmit="return handleAdminCreateOrder(event)">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="coCustomer">Họ tên khách hàng *</label>
+              <input type="text" class="form-control" id="coCustomer" required placeholder="VD: Nguyễn Văn B" />
+            </div>
+            <div class="form-group">
+              <label for="coPhone">Số điện thoại *</label>
+              <input type="tel" class="form-control" id="coPhone" required placeholder="0901234567" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="coEmail">Email (tùy chọn)</label>
+              <input type="email" class="form-control" id="coEmail" placeholder="khach@example.com" />
+            </div>
+            <div class="form-group">
+              <label for="coAddress">Địa chỉ nhận hàng</label>
+              <input type="text" class="form-control" id="coAddress" placeholder="Địa chỉ giao hàng..." />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="coProduct">Chọn sản phẩm *</label>
+              <select class="form-control" id="coProduct" required onchange="updateCreateOrderSubtotal()"></select>
+            </div>
+            <div class="form-group">
+              <label for="coQty">Số lượng *</label>
+              <input type="number" class="form-control" id="coQty" required min="1" value="1"
+                oninput="updateCreateOrderSubtotal()" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="coStatus">Trạng thái đơn</label>
+              <select class="form-control" id="coStatus">
+                <option value="pending">Chờ xử lý</option>
+                <option value="processing">Đang xử lý</option>
+                <option value="shipping">Đang giao</option>
+                <option value="completed">Hoàn thành</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="coPayment">Thanh toán</label>
+              <select class="form-control" id="coPayment">
+                <option value="unpaid">Chưa thanh toán</option>
+                <option value="paid">Đã thanh toán</option>
+              </select>
+            </div>
+          </div>
+          <div
+            style="background: var(--light); padding: 12px 16px; border-radius: 8px; margin-top: 12px; display: flex; justify-content: space-between; align-items: center;">
+            <span>Thành tiền dự kiến:</span>
+            <strong id="coSubtotal" style="font-size: 16px; color: var(--primary);">0đ</strong>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('createOrderModal')">Hủy</button>
+        <button class="btn btn-primary" onclick="document.getElementById('createOrderForm').requestSubmit()">💾 Xác nhận
+          tạo đơn</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../store.js"></script>
+  <script src="admin.js"></script>
+  <script>
+    let allOrders = [];
+    let filterState = { search: '', status: '', payment: '' };
+
+    // ===== Khởi tạo: render layout TRƯỚC, gắn sự kiện SAU =====
+    (function () {
+      const session = requireAuth();
+      if (!session) return;
+
+      renderLayout('orders', 'Quản lý đơn hàng', buildPage(), `
+        <button class="btn btn-sm btn-primary" onclick="openCreateOrderModal()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <span>Tạo đơn hàng</span>
+        </button>
+        <button class="btn btn-sm btn-secondary" onclick="resetData()" title="Reset về dữ liệu gốc">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+          <span>Khôi phục mẫu</span>
+        </button>
+      `);
+
+      document.getElementById('searchOrder').addEventListener('input', (e) => { filterState.search = e.target.value; renderTable(); });
+      document.getElementById('filterStatus').addEventListener('change', (e) => { filterState.status = e.target.value; renderTable(); });
+      document.getElementById('filterPayment').addEventListener('change', (e) => { filterState.payment = e.target.value; renderTable(); });
+
+      renderAllAdmin = function () {
+        allOrders = getData('orders', []);
+        renderStats();
+        renderTable();
+      };
+      renderAllAdmin();
+    })();
+
+    function renderStats() {
+      const total = allOrders.length;
+      const pending = allOrders.filter(o => o.status === 'pending').length;
+      const shipping = allOrders.filter(o => o.status === 'shipping').length;
+      const revenue = allOrders
+        .filter(o => o.payment === 'paid' && o.status !== 'cancelled')
+        .reduce((s, o) => s + o.total, 0);
+
+      document.getElementById('statTotal').textContent = total;
+      document.getElementById('statPending').textContent = pending;
+      document.getElementById('statShipping').textContent = shipping;
+      document.getElementById('statRevenue').textContent = fmtVND(revenue);
+    }
+
+    function renderTable() {
+      const f = filterState;
+      const filtered = allOrders.filter(o => {
+        if (f.search) {
+          const q = f.search.toLowerCase();
+          if (!o.id.toLowerCase().includes(q) && !String(o.customer || '').toLowerCase().includes(q) && !String(o.phone || '').toLowerCase().includes(q)) return false;
+        }
+        if (f.status && o.status !== f.status) return false;
+        if (f.payment && o.payment !== f.payment) return false;
+        return true;
+      }).sort((a, b) => b.createdAt - a.createdAt);
+
+      const countEl = document.getElementById('orderCount');
+      if (countEl) countEl.textContent = filtered.length;
+
+      const tbody = document.getElementById('orderTbody');
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8">
+              <div class="empty-state">
+                <div class="icon">
+                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                </div>
+                <h3>Chưa có đơn hàng nào</h3>
+                <p>Đơn hàng sẽ xuất hiện khi khách đặt trên cửa hàng</p>
+              </div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(o => {
+        const itemCount = o.items.reduce((s, i) => s + i.qty, 0);
+        return `
+          <tr>
+            <td><strong>${escapeHtml(o.id)}</strong></td>
+            <td>
+              <div style="font-weight: 600; color: var(--text-dark);">${escapeHtml(o.customer)}</div>
+              <div class="text-xs text-gray">${escapeHtml(o.phone)}</div>
+            </td>
+            <td>${itemCount} sản phẩm</td>
+            <td><strong>${fmtVND(o.total)}</strong></td>
+            <td>${badge(o.payment, 'payment')}</td>
+            <td>${badge(o.status, 'order')}</td>
+            <td class="text-xs">${fmtDateTime(o.createdAt)}</td>
+            <td>
+              <div class="action-buttons">
+                <button class="action-btn view" title="Xem chi tiết" onclick="viewOrder('${o.id}')">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+                <button class="action-btn delete" title="Xóa" onclick="deleteOrder('${o.id}')">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+    // ===== XEM CHI TIẾT + CẬP NHẬT =====
+    function viewOrder(id) {
+      const o = allOrders.find(x => x.id === id);
+      if (!o) return;
+      const itemCount = o.items.reduce((s, i) => s + i.qty, 0);
+      document.getElementById('orderContent').innerHTML = `
+        <div class="flex justify-between" style="margin-bottom: 16px;">
+          <div>
+            <div class="font-bold text-lg">${escapeHtml(o.id)}</div>
+            <div class="text-xs text-gray">${fmtDateTime(o.createdAt)}</div>
+          </div>
+          <div>${badge(o.status, 'order')}</div>
+        </div>
+        <div class="form-row">
+          <div>
+            <span class="text-xs text-gray">Khách hàng</span>
+            <div class="font-medium">${escapeHtml(o.customer)}</div>
+          </div>
+          <div>
+            <span class="text-xs text-gray">Điện thoại</span>
+            <div class="font-medium">${escapeHtml(o.phone)}</div>
+          </div>
+        </div>
+        <div class="form-row" style="margin-top: 12px;">
+          <div>
+            <span class="text-xs text-gray">Email</span>
+            <div class="font-medium">${escapeHtml(o.email || '—')}</div>
+          </div>
+          <div>
+            <span class="text-xs text-gray">Thanh toán</span>
+            <div>${badge(o.payment, 'payment')}</div>
+          </div>
+        </div>
+        <p class="text-sm" style="margin-top: 12px;">📍 ${escapeHtml(o.address || '—')}</p>
+
+        <div class="card" style="margin-top: 16px; box-shadow: none; border: 1px solid var(--border);">
+          <div class="card-header">
+            <div class="card-title" style="font-size: 14px;">Sản phẩm (${itemCount})</div>
+          </div>
+          <div class="card-body no-padding">
+            ${o.items.map(i => `
+              <div class="cart-item">
+                <img class="cart-item-img" src="${getStoreImageUrl(i.image, true)}" alt="${escapeHtml(typeof i.name === 'string' ? i.name : (i.name?.vi || i.productId))}" onerror="this.src='../assets/stem-iot-banner.png'" />
+                <div class="cart-item-info">
+                  <h4>${escapeHtml(typeof i.name === 'string' ? i.name : (i.name?.vi || i.productId))}</h4>
+                  <p>${fmtVND(i.price)} × ${i.qty}</p>
+                </div>
+                <div class="font-bold">${fmtVND(i.price * i.qty)}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+        <div class="flex justify-between font-bold" style="margin-top: 12px;">
+          <span>Tổng cộng</span>
+          <span class="text-success text-lg">${fmtVND(o.total)}</span>
+        </div>
+      `;
+
+      const isCancelled = o.status === 'cancelled';
+      document.getElementById('orderFooter').innerHTML = `
+        <button class="btn btn-secondary" onclick="closeModal('orderModal')">Đóng</button>
+        ${!isCancelled ? `
+          <select class="form-control" style="width: auto;" onchange="updateOrderStatus('${o.id}', this.value)" title="Đổi trạng thái">
+            <option value="">— Đổi trạng thái —</option>
+            <option value="pending" ${o.status === 'pending' ? 'selected' : ''}>Chờ xử lý</option>
+            <option value="processing" ${o.status === 'processing' ? 'selected' : ''}>Đang xử lý</option>
+            <option value="shipping" ${o.status === 'shipping' ? 'selected' : ''}>Đang giao</option>
+            <option value="completed" ${o.status === 'completed' ? 'selected' : ''}>Hoàn thành</option>
+          </select>
+          <button class="btn btn-info btn-sm" onclick="togglePayment('${o.id}')">${o.payment === 'paid' ? '↩️ Chưa thanh toán' : '✅ Đã thanh toán'}</button>
+          <button class="btn btn-danger btn-sm" onclick="cancelOrder('${o.id}')">✕ Hủy đơn</button>
+        ` : ''}
+      `;
+      openModal('orderModal');
+    }
+
+    function updateOrderStatus(id, status) {
+      if (!status) return;
+      const res = updateStoreOrderStatus(id, status);
+      if (res.ok) {
+        showToast('Đã đổi trạng thái: ' + (ORDER_STATUS[status]?.label || status), 'success');
+      }
+      renderAllAdmin();
+      viewOrder(id);
+    }
+
+    function togglePayment(id) {
+      const o = allOrders.find(x => x.id === id);
+      if (!o) return;
+      const newPayment = o.payment === 'paid' ? 'unpaid' : 'paid';
+      updateStoreOrderPayment(id, newPayment);
+      showToast('Đã cập nhật thanh toán', 'success');
+      renderAllAdmin();
+      viewOrder(id);
+    }
+
+    function cancelOrder(id) {
+      const o = allOrders.find(x => x.id === id);
+      if (!o) return;
+      if (!confirmAction(`Hủy đơn hàng ${o.id}? Tồn kho sẽ được hoàn trả về cửa hàng.`)) return;
+
+      const res = cancelStoreOrder(id);
+      if (res.ok) {
+        showToast('Đã hủy đơn ' + id + ' và hoàn trả tồn kho', 'success');
+      } else {
+        showToast(res.message || 'Lỗi khi hủy đơn', 'error');
+      }
+      closeModal('orderModal');
+      renderAllAdmin();
+    }
+
+    function deleteOrder(id) {
+      const o = allOrders.find(x => x.id === id);
+      if (!o) return;
+      if (!confirmAction(`Xóa vĩnh viễn đơn hàng ${o.id}?`)) return;
+      deleteStoreOrder(id);
+      showToast('Đã xóa đơn hàng', 'success');
+      renderAllAdmin();
+    }
+
+    // ===== TẠO ĐƠN HÀNG TỪ ADMIN =====
+    function openCreateOrderModal() {
+      const products = getData('products', []).filter(p => !p.hidden && p.inventory > 0);
+      const sel = document.getElementById('coProduct');
+      if (products.length === 0) {
+        showToast('Không có sản phẩm nào còn hàng trong kho', 'warning');
+        return;
+      }
+
+      sel.innerHTML = products.map(p => `
+        <option value="${p.id}" data-price="${p.price}" data-stock="${p.inventory}">
+          ${escapeHtml(prodName(p))} (SKU: ${escapeHtml(p.sku)} | Còn ${p.inventory} | ${fmtVND(p.price)})
+        </option>
+      `).join('');
+
+      document.getElementById('createOrderForm').reset();
+      document.getElementById('coQty').value = 1;
+      updateCreateOrderSubtotal();
+      openModal('createOrderModal');
+    }
+
+    function updateCreateOrderSubtotal() {
+      const sel = document.getElementById('coProduct');
+      const opt = sel.selectedOptions[0];
+      const qty = Math.max(1, parseInt(document.getElementById('coQty').value, 10) || 1);
+      const subtotalEl = document.getElementById('coSubtotal');
+
+      if (!opt) {
+        subtotalEl.textContent = '0đ';
+        return;
+      }
+
+      const price = Number(opt.dataset.price) || 0;
+      const stock = Number(opt.dataset.stock) || 0;
+
+      if (qty > stock) {
+        document.getElementById('coQty').value = stock;
+      }
+
+      const safeQty = Math.min(stock, qty);
+      const total = price * safeQty;
+      subtotalEl.textContent = fmtVND(total);
+    }
+
+    function handleAdminCreateOrder(e) {
+      e.preventDefault();
+      const customer = document.getElementById('coCustomer').value.trim();
+      const phone = document.getElementById('coPhone').value.trim();
+      const email = document.getElementById('coEmail').value.trim();
+      const address = document.getElementById('coAddress').value.trim();
+      const productId = document.getElementById('coProduct').value;
+      const qty = Math.max(1, parseInt(document.getElementById('coQty').value, 10) || 1);
+      const status = document.getElementById('coStatus').value;
+      const payment = document.getElementById('coPayment').value;
+
+      if (!customer || !phone || !productId) {
+        showToast('Vui lòng nhập đầy đủ họ tên, số điện thoại và sản phẩm', 'error');
+        return false;
+      }
+
+      const result = placeStoreOrder(
+        { customer, phone, email, address, status, payment },
+        [{ id: productId, qty }]
+      );
+
+      if (!result.ok) {
+        showToast(result.message || 'Lỗi khi tạo đơn', 'error');
+        return false;
+      }
+
+      closeModal('createOrderModal');
+      showToast('Đã tạo thành công đơn hàng ' + result.order.id, 'success');
+      renderAllAdmin();
+      return false;
+    }
+    function buildPage() {
+      return `
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon blue">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            </div>
+            <div class="stat-info">
+              <h3 id="statTotal">0</h3>
+              <p>Tổng đơn hàng</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon orange">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div class="stat-info">
+              <h3 id="statPending">0</h3>
+              <p>Chờ xử lý</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon purple">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+            </div>
+            <div class="stat-info">
+              <h3 id="statShipping">0</h3>
+              <p>Đang giao hàng</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon green">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </div>
+            <div class="stat-info">
+              <h3 id="statRevenue">0đ</h3>
+              <p>Doanh thu (đã thu)</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="filter-toolbar">
+          <div class="search-field">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="searchOrder" placeholder="Tìm theo mã đơn, tên khách hoặc SĐT..." />
+          </div>
+          <select class="filter-select" id="filterStatus">
+            <option value="">Tất cả trạng thái</option>
+            <option value="pending">Chờ xử lý</option>
+            <option value="processing">Đang xử lý</option>
+            <option value="shipping">Đang giao</option>
+            <option value="completed">Hoàn thành</option>
+            <option value="cancelled">Đã hủy</option>
+          </select>
+          <select class="filter-select" id="filterPayment">
+            <option value="">Tất cả thanh toán</option>
+            <option value="paid">Đã thanh toán</option>
+            <option value="unpaid">Chưa thanh toán</option>
+            <option value="refunded">Đã hoàn tiền</option>
+          </select>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              Danh sách đơn hàng
+              <span class="badge badge-info" id="orderCount" style="margin-left: 6px;">0</span>
+            </div>
+            <small class="text-xs text-gray">Đơn hàng đến từ đặt hàng thật trên cửa hàng</small>
+          </div>
+          <div class="card-body no-padding">
+            <div class="table-wrapper">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Mã ĐH</th>
+                    <th>Khách hàng</th>
+                    <th>SP</th>
+                    <th>Tổng tiền</th>
+                    <th>Thanh toán</th>
+                    <th>Trạng thái</th>
+                    <th>Ngày</th>
+                    <th>Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody id="orderTbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+  </script>
+</body>
+
+</html>

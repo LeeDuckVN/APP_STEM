@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Khách hàng - STEM IoT Admin</title>
+  <link rel="stylesheet" href="admin.css" />
+</head>
+
+<body>
+  <div id="app"></div>
+
+  <!-- MODAL: Thêm / Sửa khách hàng -->
+  <div class="modal-backdrop" id="userFormModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="userFormTitle">Thêm khách hàng</h3>
+        <button class="modal-close" onclick="closeModal('userFormModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="userForm" onsubmit="return saveUser(event)">
+          <input type="hidden" id="ufId" />
+          <div class="form-group">
+            <label for="ufName">Họ tên *</label>
+            <input type="text" class="form-control" id="ufName" required placeholder="VD: Nguyễn Văn A" />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="ufEmail">Email *</label>
+              <input type="email" class="form-control" id="ufEmail" required placeholder="khach@example.com" />
+            </div>
+            <div class="form-group">
+              <label for="ufPhone">Số điện thoại *</label>
+              <input type="tel" class="form-control" id="ufPhone" required placeholder="0901234567" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="ufRole">Vai trò</label>
+              <select class="form-control" id="ufRole">
+                <option value="customer">Khách hàng</option>
+                <option value="vip">VIP</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="ufStatus">Trạng thái</label>
+              <select class="form-control" id="ufStatus">
+                <option value="active">Hoạt động</option>
+                <option value="inactive">Không hoạt động</option>
+              </select>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('userFormModal')">Hủy</button>
+        <button class="btn btn-primary" onclick="document.getElementById('userForm').requestSubmit()">💾 Lưu</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Chi tiết khách hàng -->
+  <div class="modal-backdrop" id="userModal">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h3 class="modal-title">Chi tiết khách hàng</h3>
+        <button class="modal-close" onclick="closeModal('userModal')">✕</button>
+      </div>
+      <div class="modal-body" id="userContent"></div>
+      <div class="modal-footer" id="userFooter">
+        <button class="btn btn-secondary" onclick="closeModal('userModal')">Đóng</button>
+      </div>
+    </div>
+  </div>
+  <script src="../store.js"></script>
+  <script src="admin.js"></script>
+  <script>
+    let allUsers = [];
+
+    // ===== Khởi tạo: render layout TRƯỚC, gắn sự kiện SAU =====
+    (function () {
+      const session = requireAuth();
+      if (!session) return;
+
+      renderLayout('users', 'Quản lý khách hàng', buildPage(), `
+        <button class="btn btn-sm btn-primary" onclick="openAddUser()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <span>Thêm khách hàng</span>
+        </button>
+        <button class="btn btn-sm btn-secondary" onclick="resetData()" title="Reset dữ liệu mẫu">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+          <span>Khôi phục mẫu</span>
+        </button>
+      `);
+
+      document.getElementById('searchUser').addEventListener('input', renderTable);
+      document.getElementById('filterRole').addEventListener('change', renderTable);
+      document.getElementById('filterStatus').addEventListener('change', renderTable);
+
+      window.renderAllAdmin = loadAndRender;
+      loadAndRender();
+    })();
+
+    function loadAndRender() {
+      allUsers = getData('users', []);
+      renderStats();
+      renderTable();
+    }
+
+    function renderStats() {
+      const total = allUsers.length;
+      const active = allUsers.filter(u => u.status === 'active').length;
+      const vip = allUsers.filter(u => u.role === 'vip').length;
+      /* Chi tiêu thật: tính từ các đơn chưa hủy khớp SĐT/email */
+      const orders = getData('orders', []).filter(o => o.status !== 'cancelled');
+      const totalSpent = orders.reduce((s, o) => s + o.total, 0);
+
+      document.getElementById('statTotal').textContent = total;
+      document.getElementById('statActive').textContent = active;
+      document.getElementById('statVip').textContent = vip;
+      document.getElementById('statTotalSpent').textContent = fmtVND(totalSpent);
+    }
+
+    function renderTable() {
+      const search = document.getElementById('searchUser').value.toLowerCase();
+      const roleFilter = document.getElementById('filterRole').value;
+      const statusFilter = document.getElementById('filterStatus').value;
+
+      const filtered = allUsers.filter(u => {
+        if (search && !u.name.toLowerCase().includes(search) && !String(u.email).toLowerCase().includes(search) && !String(u.phone || '').toLowerCase().includes(search)) return false;
+        if (roleFilter && u.role !== roleFilter) return false;
+        if (statusFilter && u.status !== statusFilter) return false;
+        return true;
+      }).sort((a, b) => b.createdAt - a.createdAt);
+
+      const countEl = document.getElementById('userCount');
+      if (countEl) countEl.textContent = filtered.length;
+
+      const tbody = document.getElementById('userTbody');
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6">
+              <div class="empty-state">
+                <div class="icon">
+                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+                <h3>Không có khách hàng nào</h3>
+                <p>Thử thay đổi bộ lọc hoặc thêm khách hàng mới</p>
+              </div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(u => {
+        return `
+          <tr>
+            <td>
+              <div class="product-cell">
+                <div class="user-avatar" style="width: 40px; height: 40px; font-size: 13px;">${escapeHtml(u.name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase())}</div>
+                <div class="info">
+                  <h4>${escapeHtml(u.name)}</h4>
+                  <span>${escapeHtml(u.email)}</span>
+                </div>
+              </div>
+            </td>
+            <td>${escapeHtml(u.phone || '—')}</td>
+            <td>${badge(u.role, 'role')}</td>
+            <td>${badge(u.status, 'user')}</td>
+            <td class="text-xs">${fmtDate(u.createdAt)}</td>
+            <td>
+              <div class="action-buttons">
+                <button class="action-btn view" title="Xem chi tiết" onclick="viewUser('${u.id}')">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+                <button class="action-btn edit" title="Sửa" onclick="openEditUser('${u.id}')">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </button>
+                <button class="action-btn delete" title="Xóa" onclick="deleteUser('${u.id}')">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+    // ===== THÊM / SỬA KHÁCH HÀNG =====
+    function openAddUser() {
+      document.getElementById('userFormTitle').textContent = 'Thêm khách hàng';
+      document.getElementById('userForm').reset();
+      document.getElementById('ufId').value = '';
+      document.getElementById('ufRole').value = 'customer';
+      document.getElementById('ufStatus').value = 'active';
+      openModal('userFormModal');
+    }
+
+    function openEditUser(id) {
+      const u = allUsers.find(x => x.id === id);
+      if (!u) return;
+      document.getElementById('userFormTitle').textContent = 'Sửa khách hàng';
+      document.getElementById('ufId').value = u.id;
+      document.getElementById('ufName').value = u.name;
+      document.getElementById('ufEmail').value = u.email;
+      document.getElementById('ufPhone').value = u.phone || '';
+      document.getElementById('ufRole').value = u.role;
+      document.getElementById('ufStatus').value = u.status;
+      openModal('userFormModal');
+    }
+
+    function saveUser(e) {
+      e.preventDefault();
+      const id = document.getElementById('ufId').value;
+      const name = document.getElementById('ufName').value.trim();
+      const email = document.getElementById('ufEmail').value.trim();
+      const phone = document.getElementById('ufPhone').value.trim();
+      const role = document.getElementById('ufRole').value;
+      const status = document.getElementById('ufStatus').value;
+
+      if (!name || !email || !phone) {
+        showToast('Vui lòng nhập đủ thông tin bắt buộc', 'error');
+        return false;
+      }
+      const dup = allUsers.find(u => u.email.toLowerCase() === email.toLowerCase() && u.id !== id);
+      if (dup) {
+        showToast('Email đã tồn tại: ' + dup.name, 'error');
+        return false;
+      }
+
+      const data = { name, email, phone, role, status };
+      if (id) {
+        const idx = allUsers.findIndex(u => u.id === id);
+        if (idx >= 0) allUsers[idx] = { ...allUsers[idx], ...data };
+        showToast('Đã cập nhật khách hàng', 'success');
+      } else {
+        allUsers.push({ id: genStoreId('u'), ...data, createdAt: Date.now() });
+        showToast('Đã thêm khách hàng mới', 'success');
+      }
+
+      setData('users', allUsers);
+      closeModal('userFormModal');
+      loadAndRender();
+      return false;
+    }
+
+    // ===== XÓA =====
+    function deleteUser(id) {
+      const u = allUsers.find(x => x.id === id);
+      if (!u) return;
+      if (!confirmAction(`Xóa khách hàng "${u.name}"?`)) return;
+      allUsers = allUsers.filter(x => x.id !== id);
+      setData('users', allUsers);
+      showToast('Đã xóa khách hàng', 'success');
+      loadAndRender();
+    }
+
+    // ===== XEM CHI TIẾT =====
+    function viewUser(id) {
+      const u = allUsers.find(x => x.id === id);
+      if (!u) return;
+      /* Ghép đơn theo SĐT/email thật (chính xác hơn tên) — chỉ tính đơn chưa hủy */
+      const allOrders = getData('orders', []);
+      const orders = allOrders.filter(o =>
+        o.status !== 'cancelled' &&
+        (o.phone === u.phone || (u.email && o.email && o.email.toLowerCase() === u.email.toLowerCase()))
+      );
+      const orderTotal = orders.reduce((s, o) => s + o.total, 0);
+      document.getElementById('userContent').innerHTML = `
+        <div class="product-cell" style="margin-bottom: 16px;">
+          <div class="user-avatar" style="width: 56px; height: 56px; font-size: 18px;">${escapeHtml(u.name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase())}</div>
+          <div class="info">
+            <h4 style="font-size: 16px;">${escapeHtml(u.name)} ${badge(u.role, 'role')}</h4>
+            <span>${escapeHtml(u.email)} · ${escapeHtml(u.phone || '')}</span>
+          </div>
+        </div>
+        <div class="form-row">
+          <div><span class="text-xs text-gray">Trạng thái</span><div>${badge(u.status, 'user')}</div></div>
+          <div><span class="text-xs text-gray">Ngày tham gia</span><div class="font-medium">${fmtDate(u.createdAt)}</div></div>
+        </div>
+        <div class="form-row" style="margin-top: 12px;">
+          <div><span class="text-xs text-gray">Tổng chi tiêu (từ đơn thật)</span><div class="font-bold text-success">${fmtVND(orderTotal)}</div></div>
+          <div><span class="text-xs text-gray">Số đơn hàng</span><div class="font-bold">${orders.length}</div></div>
+        </div>
+        ${orders.length > 0 ? `
+          <div class="card" style="margin-top: 16px; box-shadow: none; border: 1px solid var(--border);">
+            <div class="card-header">
+              <div class="card-title" style="font-size: 14px;">Lịch sử đơn hàng (${fmtVND(orderTotal)})</div>
+            </div>
+            <div class="card-body no-padding">
+              ${orders.map(o => `
+                <div class="cart-item">
+                  <div class="cart-item-info">
+                    <h4>${escapeHtml(o.id)}</h4>
+                    <p>${fmtDate(o.createdAt)} · ${o.items.reduce((s, i) => s + i.qty, 0)} sản phẩm</p>
+                  </div>
+                  <div class="font-bold">${fmtVND(o.total)}</div>
+                  <div>${badge(o.status, 'order')}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
+      `;
+      document.getElementById('userFooter').innerHTML = `
+        <button class="btn btn-secondary" onclick="closeModal('userModal')">Đóng</button>
+        <button class="btn btn-primary" onclick="closeModal('userModal'); openEditUser('${u.id}')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          <span>Sửa khách hàng</span>
+        </button>
+      `;
+      openModal('userModal');
+    }
+    function buildPage() {
+      return `
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon blue">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div class="stat-info">
+              <h3 id="statTotal">0</h3>
+              <p>Tổng khách hàng</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon green">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <div class="stat-info">
+              <h3 id="statActive">0</h3>
+              <p>Khách hàng hoạt động</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon purple">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </div>
+            <div class="stat-info">
+              <h3 id="statVip">0</h3>
+              <p>Khách hàng VIP</p>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon orange">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </div>
+            <div class="stat-info">
+              <h3 id="statTotalSpent">0đ</h3>
+              <p>Tổng chi tiêu tích lũy</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="filter-toolbar">
+          <div class="search-field">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="searchUser" placeholder="Tìm theo tên khách, email hoặc SĐT..." />
+          </div>
+          <select class="filter-select" id="filterRole">
+            <option value="">Tất cả vai trò</option>
+            <option value="customer">Khách hàng</option>
+            <option value="vip">VIP</option>
+            <option value="admin">Quản trị viên</option>
+          </select>
+          <select class="filter-select" id="filterStatus">
+            <option value="">Tất cả trạng thái</option>
+            <option value="active">Hoạt động</option>
+            <option value="inactive">Tạm khóa</option>
+          </select>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              Danh sách khách hàng
+              <span class="badge badge-info" id="userCount" style="margin-left: 6px;">0</span>
+            </div>
+            <button class="btn btn-sm btn-primary" onclick="openAddUser()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <span>Thêm khách hàng</span>
+            </button>
+          </div>
+          <div class="card-body no-padding">
+            <div class="table-wrapper">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Khách hàng</th>
+                    <th>Điện thoại</th>
+                    <th>Vai trò</th>
+                    <th>Trạng thái</th>
+                    <th>Tham gia</th>
+                    <th>Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody id="userTbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+  </script>
+</body>
+
+</html>
