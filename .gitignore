@@ -1,1 +1,3 @@
-.DS_Store`nThumbs.db`n.vscode/`nnode_modules/`n.env`n
+node_modules/
+.env
+npm-debug.log*.DS_Store`nThumbs.db`n.vscode/`nnode_modules/`n.env`n

@@ -1,0 +1,17 @@
+{
+  "name": "stem-iot-shop",
+  "version": "1.0.0",
+  "private": true,
+  "description": "STEM IoT Shop with MongoDB customer accounts",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "dotenv": "^16.4.7",
+    "express": "^5.1.0",
+    "mongodb": "^6.21.0"
+  }
+}

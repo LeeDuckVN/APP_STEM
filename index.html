@@ -48,6 +48,24 @@
       </div>
 
       <div class="topbar-actions topbar-right">
+        <div class="customer-account" id="customerAccount">
+          <button class="customer-account-toggle" id="customerAccountToggle" type="button" aria-expanded="false"
+            aria-controls="customerAccountMenu">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21a8 8 0 0 0-16 0"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            <span id="customerAccountLabel">Khách hàng</span>
+          </button>
+          <div class="customer-account-menu" id="customerAccountMenu" hidden>
+            <button type="button" data-account-action="register">Đăng ký</button>
+            <button type="button" data-account-action="login">Đăng nhập</button>
+            <button type="button" data-account-action="orders">Mua hàng</button>
+            <button type="button" data-account-action="history">Xem lịch sử đơn hàng</button>
+            <button type="button" data-account-action="logout" hidden>Đăng xuất</button>
+          </div>
+        </div>
         <a href="admin/dashboard.html" class="admin-quick-link admin-portal-link" title="Trang quản trị STEM IoT Admin">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round">
@@ -829,6 +847,38 @@
       <img id="qrModalImage" src="" alt="QR Code" />
     </div>
     <p class="qr-modal-caption" id="qrModalCaption"></p>
+  </div>
+
+  <!-- Customer Account Modal -->
+  <div class="account-modal-backdrop" id="accountModalBackdrop" hidden></div>
+  <div class="account-modal" id="accountModal" hidden role="dialog" aria-modal="true" aria-labelledby="accountModalTitle">
+    <button class="account-modal-close" id="accountModalClose" type="button" aria-label="Đóng">&times;</button>
+    <h2 id="accountModalTitle">Đăng nhập</h2>
+    <p class="account-modal-subtitle" id="accountModalSubtitle">Đăng nhập để theo dõi đơn hàng của bạn.</p>
+    <div class="account-tabs" role="tablist" aria-label="Tài khoản khách hàng">
+      <button type="button" class="is-active" data-account-tab="login">Đăng nhập</button>
+      <button type="button" data-account-tab="register">Tạo tài khoản</button>
+    </div>
+    <form id="customerLoginForm" class="account-form">
+      <label for="customerLoginEmail">Email</label>
+      <input id="customerLoginEmail" type="email" autocomplete="email" required placeholder="you@example.com" />
+      <label for="customerLoginPassword">Mật khẩu</label>
+      <input id="customerLoginPassword" type="password" autocomplete="current-password" required minlength="6" placeholder="Tối thiểu 6 ký tự" />
+      <p class="account-form-message" id="customerLoginMessage" role="alert"></p>
+      <button class="account-submit" type="submit">Đăng nhập</button>
+    </form>
+    <form id="customerRegisterForm" class="account-form" hidden>
+      <label for="customerRegisterName">Họ và tên</label>
+      <input id="customerRegisterName" type="text" autocomplete="name" required placeholder="Nguyễn Văn A" />
+      <label for="customerRegisterPhone">Số điện thoại</label>
+      <input id="customerRegisterPhone" type="tel" autocomplete="tel" required placeholder="0937 511 617" />
+      <label for="customerRegisterEmail">Email</label>
+      <input id="customerRegisterEmail" type="email" autocomplete="email" required placeholder="you@example.com" />
+      <label for="customerRegisterPassword">Mật khẩu</label>
+      <input id="customerRegisterPassword" type="password" autocomplete="new-password" required minlength="6" placeholder="Tối thiểu 6 ký tự" />
+      <p class="account-form-message" id="customerRegisterMessage" role="alert"></p>
+      <button class="account-submit" type="submit">Tạo tài khoản</button>
+    </form>
   </div>
 
   <!-- Floating Social Media Bar -->

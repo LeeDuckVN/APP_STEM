@@ -372,6 +372,139 @@ let activeSub = "all";
 let cart = JSON.parse(localStorage.getItem("stemCart") || "[]");
 
 const $ = (selector) => document.querySelector(selector);
+
+// ===================== Customer Account =====================
+const customerAccount = $("#customerAccount");
+const customerAccountToggle = $("#customerAccountToggle");
+const customerAccountMenu = $("#customerAccountMenu");
+const customerAccountLabel = $("#customerAccountLabel");
+const accountModal = $("#accountModal");
+const accountModalBackdrop = $("#accountModalBackdrop");
+const accountModalClose = $("#accountModalClose");
+const customerLoginForm = $("#customerLoginForm");
+const customerRegisterForm = $("#customerRegisterForm");
+const accountTabs = Array.from(document.querySelectorAll("[data-account-tab]"));
+const accountActions = Array.from(document.querySelectorAll("[data-account-action]"));
+const customerSessionKey = "stem_customer_session";
+const customerApiBase = "/api/customers";
+
+function getCustomerSession() {
+  return readJSON(customerSessionKey, null);
+}
+
+function setCustomerSession(user) {
+  if (user) writeJSON(customerSessionKey, { id: user.id, name: user.name, email: user.email });
+  else localStorage.removeItem(customerSessionKey);
+}
+
+function setAccountMode(mode) {
+  const isLogin = mode === "login";
+  customerLoginForm.hidden = !isLogin;
+  customerRegisterForm.hidden = isLogin;
+  accountTabs.forEach((tab) => tab.classList.toggle("is-active", tab.dataset.accountTab === mode));
+  $("#accountModalTitle").textContent = isLogin ? "Đăng nhập" : "Tạo tài khoản";
+  $("#accountModalSubtitle").textContent = isLogin
+    ? "Đăng nhập để theo dõi đơn hàng của bạn."
+    : "Tạo tài khoản để lưu thông tin và xem lịch sử mua hàng.";
+  $("#customerLoginMessage").textContent = "";
+  $("#customerRegisterMessage").textContent = "";
+}
+
+function openAccountModal(mode = "login") {
+  setAccountMode(mode);
+  accountModal.hidden = false;
+  accountModalBackdrop.hidden = false;
+}
+
+function closeAccountModal() {
+  accountModal.hidden = true;
+  accountModalBackdrop.hidden = true;
+}
+
+function refreshCustomerAccount() {
+  const session = getCustomerSession();
+  customerAccountLabel.textContent = session?.name || "Khách hàng";
+  accountActions.find((action) => action.dataset.accountAction === "logout").hidden = !session;
+  accountActions.find((action) => action.dataset.accountAction === "login").hidden = Boolean(session);
+  accountActions.find((action) => action.dataset.accountAction === "register").hidden = Boolean(session);
+}
+
+if (customerAccountToggle) {
+  refreshCustomerAccount();
+  customerAccountToggle.addEventListener("click", () => {
+    const isOpen = !customerAccountMenu.hidden;
+    customerAccountMenu.hidden = isOpen;
+    customerAccountToggle.setAttribute("aria-expanded", String(!isOpen));
+  });
+  accountActions.forEach((action) => action.addEventListener("click", () => {
+    const type = action.dataset.accountAction;
+    customerAccountMenu.hidden = true;
+    customerAccountToggle.setAttribute("aria-expanded", "false");
+    if (type === "login" || type === "register") openAccountModal(type);
+    if (type === "logout") {
+      setCustomerSession(null);
+      refreshCustomerAccount();
+    }
+    if (type === "orders" || type === "history") {
+      document.querySelector("#checkout")?.scrollIntoView({ behavior: "smooth" });
+    }
+  }));
+  accountTabs.forEach((tab) => tab.addEventListener("click", () => setAccountMode(tab.dataset.accountTab)));
+  accountModalClose?.addEventListener("click", closeAccountModal);
+  accountModalBackdrop?.addEventListener("click", closeAccountModal);
+
+  customerRegisterForm?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const name = $("#customerRegisterName").value.trim();
+    const phone = $("#customerRegisterPhone").value.trim();
+    const email = $("#customerRegisterEmail").value.trim().toLowerCase();
+    const password = $("#customerRegisterPassword").value;
+    const message = $("#customerRegisterMessage");
+    message.textContent = "";
+    try {
+      const response = await fetch(`${customerApiBase}/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, phone, email, password })
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        message.textContent = result.message || "Không thể tạo tài khoản.";
+        return;
+      }
+      setCustomerSession(result.customer);
+      refreshCustomerAccount();
+      closeAccountModal();
+    } catch (error) {
+      message.textContent = "Không kết nối được máy chủ. Hãy chạy website bằng npm start.";
+    }
+  });
+
+  customerLoginForm?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const email = $("#customerLoginEmail").value.trim().toLowerCase();
+    const password = $("#customerLoginPassword").value;
+    const message = $("#customerLoginMessage");
+    message.textContent = "";
+    try {
+      const response = await fetch(`${customerApiBase}/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        message.textContent = result.message || "Email hoặc mật khẩu không chính xác.";
+        return;
+      }
+      setCustomerSession(result.customer);
+      refreshCustomerAccount();
+      closeAccountModal();
+    } catch (error) {
+      message.textContent = "Không kết nối được máy chủ. Hãy chạy website bằng npm start.";
+    }
+  });
+}
 const localeMap = { vi: "vi-VN", en: "en-US", ja: "ja-JP" };
 
 const megaMenu = $("#megaMenu");

@@ -131,6 +131,176 @@ img {
   margin: 0 auto;
 }
 
+/* Customer account */
+.customer-account {
+  position: relative;
+}
+
+.customer-account-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  color: #e2e8f0;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.customer-account-toggle:hover,
+.customer-account-toggle[aria-expanded="true"] {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.customer-account-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 120;
+  min-width: 190px;
+  padding: 6px;
+  background: #1f1f21;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0 0 18px 18px;
+  box-shadow: var(--shadow-lg);
+}
+
+.customer-account-menu button {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  color: #ffffff;
+  text-align: left;
+  font-size: 12px;
+}
+
+.customer-account-menu button:hover {
+  color: #67e8f9;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.account-modal-backdrop,
+.account-modal-backdrop[hidden] {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(9, 13, 22, 0.65);
+}
+
+.account-modal-backdrop[hidden] {
+  display: none;
+}
+
+.account-modal,
+.account-modal[hidden] {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: 201;
+  width: min(420px, calc(100% - 32px));
+  padding: 28px;
+  transform: translate(-50%, -50%);
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+}
+
+.account-modal[hidden] {
+  display: none;
+}
+
+.account-modal h2 {
+  margin-bottom: 4px;
+  color: var(--text-primary);
+  font-size: 24px;
+}
+
+.account-modal-subtitle {
+  margin-bottom: 18px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.account-modal-close {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  color: var(--text-muted);
+  font-size: 26px;
+}
+
+.account-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  margin-bottom: 18px;
+  padding: 4px;
+  background: var(--bg-surface-alt);
+  border-radius: var(--radius-sm);
+}
+
+.account-tabs button {
+  padding: 8px;
+  border-radius: 6px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.account-tabs button.is-active {
+  background: #ffffff;
+  color: var(--primary);
+  box-shadow: var(--shadow-xs);
+}
+
+.account-form {
+  display: grid;
+  gap: 8px;
+}
+
+.account-form[hidden] {
+  display: none;
+}
+
+.account-form label {
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.account-form input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  outline: none;
+}
+
+.account-form input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-glow);
+}
+
+.account-form-message {
+  min-height: 18px;
+  color: var(--danger);
+  font-size: 12px;
+}
+
+.account-submit {
+  padding: 11px 14px;
+  background: var(--primary);
+  border-radius: var(--radius-sm);
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.account-submit:hover {
+  background: var(--primary-hover);
+}
+
 /* ==========================================================================
    TOPBAR
    ========================================================================== */
