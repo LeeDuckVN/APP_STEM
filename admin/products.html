@@ -19,7 +19,7 @@
         <button class="modal-close" onclick="closeModal('productFormModal')">✕</button>
       </div>
       <div class="modal-body">
-        <form id="productForm" onsubmit="return saveProduct(event)">
+        <form id="productForm" onsubmit="saveProduct(event); return false">
           <input type="hidden" id="pfId" />
           <div class="form-row">
             <div class="form-group">
@@ -55,8 +55,11 @@
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label for="pfImage">Ảnh (đường dẫn)</label>
-              <input type="text" class="form-control" id="pfImage" placeholder="../assets/ten-anh.png" />
+              <label for="pfImageFile">Ảnh sản phẩm</label>
+              <input type="file" class="form-control" id="pfImageFile" accept="image/png,image/jpeg,image/webp,image/gif" />
+              <small class="text-xs text-gray">Ảnh sẽ được lưu trực tiếp trong MongoDB.</small>
+              <img id="pfImagePreview" alt="Xem trước ảnh sản phẩm" hidden style="display:block; width:96px; height:72px; object-fit:contain; margin-top:8px; border-radius:8px; border:1px solid #dbe3ef;" />
+              <input type="hidden" id="pfImage" />
             </div>
             <div class="form-group">
               <label for="pfBadge">Nhãn (badge)</label>
@@ -127,7 +130,12 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
           <span>Khôi phục mẫu</span>
         </button>
+        <button class="btn btn-sm btn-secondary" onclick="syncAllStoreToMongo()" title="Lưu toàn bộ dữ liệu hiện có vào MongoDB">
+          <span>Đồng bộ MongoDB</span>
+        </button>
       `);
+
+      document.getElementById('pfImageFile').addEventListener('change', handleImageFile);
 
       document.getElementById('searchProduct').addEventListener('input', (e) => { filterState.search = e.target.value; renderTable(); });
       document.getElementById('filterCategory').addEventListener('change', (e) => { filterState.category = e.target.value; filterState.sub = ''; renderSubOptions(); renderTable(); });
@@ -140,7 +148,37 @@
         renderTable();
       };
       renderAllAdmin();
+      loadStoreFromMongo().then(() => renderAllAdmin()).catch(() => {
+        showToast('Chưa tải được MongoDB, đang dùng dữ liệu trên trình duyệt', 'warning');
+      });
     })();
+
+    function handleImageFile(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      if (file.size > 8 * 1024 * 1024) {
+        event.target.value = '';
+        showToast('Ảnh tối đa 8MB', 'error');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        document.getElementById('pfImage').value = reader.result;
+        const preview = document.getElementById('pfImagePreview');
+        preview.src = reader.result;
+        preview.hidden = false;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function syncAllStoreToMongo() {
+      try {
+        await saveStoreToMongo();
+        showToast('Đã lưu sản phẩm, đơn hàng, khách hàng và giỏ hàng vào MongoDB', 'success');
+      } catch (error) {
+        showToast('Không thể đồng bộ MongoDB. Kiểm tra kết nối Atlas.', 'error');
+      }
+    }
 
     function renderStats() {
       const total = allProducts.length;
@@ -203,7 +241,7 @@
           <tr>
             <td>
               <div class="product-cell">
-                <img class="product-img" src="${getStoreImageUrl(p.image, true)}" alt="${escapeHtml(prodName(p))}" onerror="this.src='../assets/stem-iot-banner.png'" />
+                <img class="product-img" src="${getProductImageUrl(p, true)}" alt="${escapeHtml(prodName(p))}" onerror="this.src='../assets/stem-iot-banner.png'" />
                 <div class="info">
                   <h4>${escapeHtml(prodName(p))} ${p.hidden ? '<span class="badge badge-gray"><span class="badge-dot"></span>Ẩn</span>' : ''}</h4>
                   <span>${escapeHtml(p.sku)}</span>
@@ -237,6 +275,8 @@
       document.getElementById('productFormTitle').textContent = 'Thêm sản phẩm';
       document.getElementById('productForm').reset();
       document.getElementById('pfId').value = '';
+      document.getElementById('pfImage').value = '';
+      document.getElementById('pfImagePreview').hidden = true;
       fillCategoryOptions('', '');
       openModal('productFormModal');
     }
@@ -251,7 +291,14 @@
       document.getElementById('pfSku').value = p.sku;
       document.getElementById('pfPrice').value = p.price;
       document.getElementById('pfInventory').value = p.inventory;
-      document.getElementById('pfImage').value = p.image || '';
+      document.getElementById('pfImage').value = p.imageData || p.image || '';
+      const preview = document.getElementById('pfImagePreview');
+      if (p.imageData) {
+        preview.src = p.imageData;
+        preview.hidden = false;
+      } else {
+        preview.hidden = true;
+      }
       document.getElementById('pfBadge').value = typeof p.badge === 'string' ? p.badge : (p.badge ? p.badge.vi : '') || '';
       document.getElementById('pfHidden').value = p.hidden ? 'true' : 'false';
       document.getElementById('pfIsNew').value = p.isNew ? 'true' : 'false';
@@ -275,7 +322,7 @@
       subSel.value = subId || (subs[0] ? subs[0].id : '');
     }
 
-    function saveProduct(e) {
+    async function saveProduct(e) {
       e.preventDefault();
       const id = document.getElementById('pfId').value;
       const name = document.getElementById('pfName').value.trim();
@@ -285,7 +332,8 @@
       const price = Number(document.getElementById('pfPrice').value);
       const inventory = Number(document.getElementById('pfInventory').value);
       const rawImage = document.getElementById('pfImage').value.trim();
-      const image = rawImage ? rawImage.replace(/^(\.\.\/|\.\/)+/, '') : 'assets/stem-iot-banner.png';
+      const imageData = rawImage.startsWith('data:image/') ? rawImage : '';
+      const image = imageData ? 'assets/stem-iot-banner.png' : (rawImage ? rawImage.replace(/^(\.\.\/|\.\/)+/, '') : 'assets/stem-iot-banner.png');
       const badgeText = document.getElementById('pfBadge').value.trim();
       const hidden = document.getElementById('pfHidden').value === 'true';
       const isNew = document.getElementById('pfIsNew').value === 'true';
@@ -304,7 +352,7 @@
       // name/badge/description đa ngôn ngữ: người dùng nhập 1 lần, tự copy sang en/ja
       const data = {
         name: { vi: name, en: name, ja: name },
-        sku, category, sub, price, inventory, image, hidden, isNew,
+        sku, category, sub, price, inventory, image, imageData, hidden, isNew,
         badge: { vi: badgeText, en: badgeText, ja: badgeText },
         description: { vi: description, en: description, ja: description }
       };
@@ -319,6 +367,12 @@
       }
 
       setData('products', allProducts);
+      try {
+        await saveStoreToMongo();
+      } catch (error) {
+        showToast('Đã lưu trên trình duyệt nhưng chưa lưu được MongoDB', 'warning');
+        return false;
+      }
       closeModal('productFormModal');
       renderAllAdmin();
       return false;
@@ -341,7 +395,7 @@
       const cat = categories.find(c => c.id === p.category);
       document.getElementById('productContent').innerHTML = `
         <div class="product-cell" style="margin-bottom: 16px;">
-          <img class="product-img" src="${getStoreImageUrl(p.image, true)}" alt="${escapeHtml(prodName(p))}" onerror="this.src='../assets/stem-iot-banner.png'" style="width: 80px; height: 80px;" />
+          <img class="product-img" src="${getProductImageUrl(p, true)}" alt="${escapeHtml(prodName(p))}" onerror="this.src='../assets/stem-iot-banner.png'" style="width: 80px; height: 80px;" />
           <div class="info">
             <h4 style="font-size: 16px;">${escapeHtml(prodName(p))}</h4>
             <span>SKU: ${escapeHtml(p.sku)} · ${cat ? escapeHtml(cat.label.vi) : '—'}</span>

@@ -601,6 +601,7 @@ function normalizeSeedProduct(p) {
     unit: normI18n(p.unit, 'Cái'),
     inventory: Math.max(0, p.inventory != null ? Number(p.inventory) : (p.stock != null ? Number(p.stock) : 0)),
     image: p.image || 'assets/stem-iot-banner.png',
+    imageData: p.imageData || '',
     imagePosition: p.imagePosition || '50% 50%',
     badge: normI18n(p.badge, 'Mới'),
     description: normI18n(p.description, ''),
@@ -616,6 +617,10 @@ function getStoreImageUrl(path, isAdmin = false) {
   if (/^(https?:|\/\/|data:)/i.test(path)) return path;
   const clean = String(path).replace(/^(\.\.\/|\.\/)+/, '');
   return isAdmin ? ('../' + clean) : clean;
+}
+
+function getProductImageUrl(product, isAdmin = false) {
+  return getStoreImageUrl(product && product.imageData ? product.imageData : product && product.image, isAdmin);
 }
 
 // ============== BROADCAST CHANNEL ĐỒNG BỘ ĐA TAB ==============
@@ -644,6 +649,9 @@ function notifyStoreChanged(detail = 'store-updated') {
       });
     }
   } catch (e) { /* noop */ }
+  if (detail !== 'mongo-loaded' && typeof saveStoreToMongo === 'function') {
+    saveStoreToMongo().catch(() => { /* API health is reported by the admin sync button */ });
+  }
 }
 
 // ============== API DÙNG CHUNG ==============
@@ -692,6 +700,38 @@ function getStoreUsers() {
 function saveStoreUsers(list, shouldNotify = true) {
   writeJSON(STORE_KEYS.users, Array.isArray(list) ? list : []);
   if (shouldNotify) notifyStoreChanged('users-saved');
+}
+
+async function loadStoreFromMongo() {
+  const response = await fetch('/api/store');
+  if (!response.ok) throw new Error('MongoDB store unavailable');
+  const payload = await response.json();
+  const data = payload.data || {};
+  const hasRemoteData = [data.products, data.orders, data.users, data.cart]
+    .some((items) => Array.isArray(items) && items.length > 0);
+  if (!hasRemoteData) return data;
+  if (Array.isArray(data.products)) saveStoreProducts(data.products, false);
+  if (Array.isArray(data.orders)) saveStoreOrders(data.orders, false);
+  if (Array.isArray(data.users)) saveStoreUsers(data.users, false);
+  if (Array.isArray(data.cart)) saveStoreCart(data.cart, false);
+  localStorage.setItem(STORE_KEYS.seeded, '1');
+  notifyStoreChanged('mongo-loaded');
+  return data;
+}
+
+async function saveStoreToMongo() {
+  const response = await fetch('/api/store', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      products: getStoreProducts(),
+      orders: getStoreOrders(),
+      users: getStoreUsers(),
+      cart: getStoreCart()
+    })
+  });
+  if (!response.ok) throw new Error('MongoDB store unavailable');
+  return response.json();
 }
 
 // ============== ĐỒNG BỘ KHÁCH HÀNG THEO TỔNG ĐƠN HÀNG THẬT ==============

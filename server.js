@@ -9,11 +9,12 @@ const app = express();
 const port = Number(process.env.PORT) || 3000;
 const mongoUri = process.env.MONGODB_URI;
 const databaseName = process.env.MONGODB_DB || 'stem_iot';
-const mongoClient = mongoUri ? new MongoClient(mongoUri) : null;
+let mongoClient;
 let customers;
+let storeData;
 let databaseReady;
 
-app.use(express.json());
+app.use(express.json({ limit: '25mb' }));
 app.use(express.static(path.join(__dirname)));
 
 function publicCustomer(customer) {
@@ -30,14 +31,74 @@ function publicCustomer(customer) {
 async function connectDatabase() {
   if (databaseReady) return databaseReady;
   databaseReady = (async () => {
-    if (!mongoClient) throw new Error('MONGODB_URI is missing.');
+    if (!mongoUri) throw new Error('MONGODB_URI is missing.');
+    mongoClient = new MongoClient(mongoUri, { serverSelectionTimeoutMS: 10000 });
     await mongoClient.connect();
     const database = mongoClient.db(databaseName);
     customers = database.collection('customers');
+    storeData = database.collection('store_data');
     await customers.createIndex({ email: 1 }, { unique: true });
-  })();
+    await storeData.createIndex({ key: 1 }, { unique: true });
+  })().catch((error) => {
+    databaseReady = null;
+    throw error;
+  });
   return databaseReady;
 }
+
+const STORE_COLLECTIONS = ['products', 'orders', 'users', 'cart'];
+
+async function readStoreData() {
+  await connectDatabase();
+  const records = await storeData.find({ key: { $in: STORE_COLLECTIONS } }).toArray();
+  const result = Object.fromEntries(STORE_COLLECTIONS.map((key) => [key, []]));
+  records.forEach((record) => { result[record.key] = record.value || []; });
+  return result;
+}
+
+async function writeStoreData(data) {
+  await connectDatabase();
+  const operations = STORE_COLLECTIONS.map((key) => ({
+    updateOne: { filter: { key }, update: { $set: { key, value: Array.isArray(data[key]) ? data[key] : [] } }, upsert: true }
+  }));
+  await storeData.bulkWrite(operations);
+  return readStoreData();
+}
+
+app.get('/api/store', async (req, res) => {
+  try {
+    res.json({ ok: true, data: await readStoreData() });
+  } catch (error) {
+    console.error('Store read error:', error.message);
+    res.status(503).json({ ok: false, message: 'Không đọc được dữ liệu MongoDB.' });
+  }
+});
+
+app.put('/api/store', async (req, res) => {
+  try {
+    res.json({ ok: true, data: await writeStoreData(req.body || {}) });
+  } catch (error) {
+    console.error('Store write error:', error.message);
+    res.status(503).json({ ok: false, message: 'Không lưu được dữ liệu vào MongoDB.' });
+  }
+});
+
+app.get('/api/store/audit', async (req, res) => {
+  try {
+    const data = await readStoreData();
+    const images = data.products.filter((product) => product.imageData || product.image).length;
+    res.json({
+      ok: true,
+      collections: {
+        ...Object.fromEntries(STORE_COLLECTIONS.map((key) => [key, data[key].length])),
+        customers: await customers.countDocuments()
+      },
+      productsWithImages: images
+    });
+  } catch (error) {
+    res.status(503).json({ ok: false, message: 'Không kiểm tra được dữ liệu MongoDB.' });
+  }
+});
 
 app.get('/api/health', async (req, res) => {
   try {
@@ -103,8 +164,12 @@ app.post('/api/customers/login', async (req, res) => {
 });
 
 async function start() {
-  await connectDatabase();
-  app.listen(port, () => console.log(`STEM IoT Shop: http://localhost:${port}`));
+  app.listen(port, () => {
+    console.log(`STEM IoT Shop: http://localhost:${port}`);
+    connectDatabase().catch((error) => {
+      console.error('MongoDB connection warning:', error.message);
+    });
+  });
 }
 
 if (require.main === module) {

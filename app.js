@@ -747,7 +747,7 @@ function renderRelatedProducts(product) {
     .map(
       (item) => `
         <button class="related-item" type="button" data-related-id="${item.id}">
-          <img src="${getStoreImageUrl(item.image, false)}" alt="${label(item.name)}" />
+          <img src="${getProductImageUrl(item, false)}" alt="${label(item.name)}" />
           <strong>${label(item.name)}</strong>
           <span>${formatMoney(item.price)}</span>
         </button>
@@ -764,7 +764,7 @@ function openProductModal(productId) {
   const product = products.find((item) => item.id === productId);
   if (!product) return;
 
-  const modalImg = getStoreImageUrl(product.image, false);
+  const modalImg = getProductImageUrl(product, false);
   productModalTitle.textContent = label(product.name);
   productModalMeta.textContent = `${t("modalMetaBrand")}: ${label(product.badge)} · ${product.sku}`;
   productModalPrice.textContent = formatMoney(product.price);
@@ -820,7 +820,7 @@ function renderProducts() {
       return `
         <article class="product-card">
           <div class="product-image-wrap product-image" style="--image-position: ${product.imagePosition}">
-            <img src="${getStoreImageUrl(product.image, false)}" alt="${productName}" loading="lazy" />
+            <img src="${getProductImageUrl(product, false)}" alt="${productName}" loading="lazy" />
             <span class="product-badge-pill badge">${label(product.badge)}</span>
             <div class="product-stock-dot-wrap">
               <span class="stock-dot ${inStock ? (isLowStock ? "low-stock" : "in-stock") : "out-stock"}"></span>
@@ -884,7 +884,7 @@ function renderNewProducts() {
       (product) => `
         <article class="mini-card">
           <div class="product-image" style="--image-position: ${product.imagePosition}">
-            <img src="${getStoreImageUrl(product.image, false)}" alt="${label(product.name)}" loading="lazy" />
+            <img src="${getProductImageUrl(product, false)}" alt="${label(product.name)}" loading="lazy" />
           </div>
           <div>
             <h3>${label(product.name)}</h3>
@@ -999,7 +999,7 @@ function renderCart() {
       .map(
         (item) => `
             <div class="cart-line">
-              <img src="${getStoreImageUrl(item.image, false)}" alt="${label(item.name)}" />
+              <img src="${getProductImageUrl(item, false)}" alt="${label(item.name)}" />
               <div class="cart-line-info">
                 <h4>${label(item.name)}</h4>
                 <small>${formatMoney(item.price)} × ${item.qty} ${label(item.unit)}</small>
@@ -1457,6 +1457,10 @@ window.addEventListener("storage", (event) => {
 // Lắng nghe tín hiệu đồng bộ từ store.js (BroadcastChannel và CustomEvent)
 window.addEventListener("store-changed", () => {
   reloadStorefrontFromStore();
+});
+
+loadStoreFromMongo().then(reloadStorefrontFromStore).catch(() => {
+  console.warn("MongoDB store unavailable; using browser cache.");
 });
 
 // Tự động kiểm tra và cập nhật khi người dùng chuyển tab quay lại trang chủ
