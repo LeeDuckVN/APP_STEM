@@ -11,6 +11,7 @@ var STORE_KEYS = {
   products: 'stem_products',
   orders: 'stem_orders',
   users: 'stem_users',
+  quotes: 'stem_quotes',
   cart: 'stemCart',
   seeded: 'stem_store_seeded'
 };
@@ -29,6 +30,88 @@ function readJSON(key, fallback) {
 function writeJSON(key, value) {
   localStorage.setItem(key, JSON.stringify(value));
 }
+
+function escapeHtml(v) {
+  return String(v == null ? '' : v)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function getApiBaseUrl() {
+  if (typeof window !== 'undefined') {
+    // Khi mở file HTML trực tiếp qua file:///
+    if (window.location.protocol === 'file:') {
+      return 'http://localhost:3000';
+    }
+    // Khi mở qua Live Server (:5500, :5501...) hoặc port bất kỳ khác 3000
+    if (window.location.port && String(window.location.port) !== '3000') {
+      const hostname = window.location.hostname || 'localhost';
+      return `${window.location.protocol}//${hostname}:3000`;
+    }
+  }
+  return '';
+}
+if (typeof window !== 'undefined') {
+  window.getApiBaseUrl = getApiBaseUrl;
+}
+
+async function googleTranslateClient(text, targetLang = 'en', sourceLang = 'vi') {
+  if (!text || !String(text).trim()) return '';
+  try {
+    const query = encodeURIComponent(String(text).trim());
+    const url = `https://clients5.google.com/translate_a/t?client=dict-chrome-ex&sl=${sourceLang}&tl=${targetLang}&q=${query}`;
+    const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' } });
+    if (!res.ok) throw new Error('Status: ' + res.status);
+    const data = await res.json();
+    if (Array.isArray(data) && typeof data[0] === 'string') return data[0];
+    if (Array.isArray(data) && Array.isArray(data[0])) return data[0].map((x) => x[0]).join('');
+    return String(data);
+  } catch (e) {
+    return text;
+  }
+}
+
+async function autoTranslateProductFields(fields, sourceLang = 'vi', targetLangs = ['en', 'ja']) {
+  // 1. Thử gọi qua endpoint máy chủ backend nếu server đang chạy
+  try {
+    const res = await fetch(`${getApiBaseUrl()}/api/translate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fields, sourceLang, targetLangs })
+    });
+    if (res.ok) {
+      const json = await res.json();
+      if (json.ok && json.data) return json.data;
+    }
+  } catch (e) {
+    // Không có server hoặc lỗi kết nối -> chuyển sang fallback trực tiếp từ client
+  }
+
+  // 2. Fallback trực tiếp qua Google Translate từ trình duyệt
+  const result = {};
+  for (const [key, val] of Object.entries(fields || {})) {
+    const str = typeof val === 'string' ? val : (val?.vi || val?.en || '');
+    if (!str || !str.trim()) {
+      result[key] = { vi: '', en: '', ja: '' };
+      continue;
+    }
+    result[key] = { vi: str };
+    await Promise.all(
+      targetLangs.map(async (tl) => {
+        try {
+          result[key][tl] = await googleTranslateClient(str, tl, sourceLang);
+        } catch (e) {
+          result[key][tl] = str;
+        }
+      })
+    );
+  }
+  return result;
+}
+
 var STORE_CATEGORIES = [
   {
     id: "ics",
@@ -649,7 +732,7 @@ function notifyStoreChanged(detail = 'store-updated') {
       });
     }
   } catch (e) { /* noop */ }
-  if (detail !== 'mongo-loaded' && typeof saveStoreToMongo === 'function') {
+  if (detail !== 'mongo-loaded' && detail !== 'cart-saved' && typeof saveStoreToMongo === 'function') {
     saveStoreToMongo().catch(() => { /* API health is reported by the admin sync button */ });
   }
 }
@@ -658,33 +741,22 @@ function notifyStoreChanged(detail = 'store-updated') {
 function getStoreProducts() {
   const seeded = localStorage.getItem(STORE_KEYS.seeded);
   const stored = readJSON(STORE_KEYS.products, null);
-  if (!seeded || !Array.isArray(stored)) {
-    const seed = SEED_PRODUCTS.map(normalizeSeedProduct);
-    writeJSON(STORE_KEYS.products, seed);
-    localStorage.setItem(STORE_KEYS.seeded, '1');
-    return seed;
+  if (seeded && Array.isArray(stored)) {
+    return stored;
   }
-  return stored.map(normalizeSeedProduct);
+  const initial = SEED_PRODUCTS.map(normalizeSeedProduct);
+  saveStoreProducts(initial, false);
+  localStorage.setItem(STORE_KEYS.seeded, '1');
+  return initial;
 }
 
 function saveStoreProducts(list, shouldNotify = true) {
-  writeJSON(STORE_KEYS.products, list.map(normalizeSeedProduct));
+  writeJSON(STORE_KEYS.products, Array.isArray(list) ? list : []);
   if (shouldNotify) notifyStoreChanged('products-saved');
 }
 
-function getStoreCart() {
-  const c = readJSON(STORE_KEYS.cart, []);
-  return Array.isArray(c) ? c : [];
-}
-
-function saveStoreCart(cart, shouldNotify = true) {
-  writeJSON(STORE_KEYS.cart, Array.isArray(cart) ? cart : []);
-  if (shouldNotify) notifyStoreChanged('cart-saved');
-}
-
 function getStoreOrders() {
-  const list = readJSON(STORE_KEYS.orders, []);
-  return Array.isArray(list) ? list : [];
+  return readJSON(STORE_KEYS.orders, []);
 }
 
 function saveStoreOrders(list, shouldNotify = true) {
@@ -692,9 +764,17 @@ function saveStoreOrders(list, shouldNotify = true) {
   if (shouldNotify) notifyStoreChanged('orders-saved');
 }
 
+function getStoreCart() {
+  return readJSON(STORE_KEYS.cart, []);
+}
+
+function saveStoreCart(list, shouldNotify = true) {
+  writeJSON(STORE_KEYS.cart, Array.isArray(list) ? list : []);
+  if (shouldNotify) notifyStoreChanged('cart-saved');
+}
+
 function getStoreUsers() {
-  const list = readJSON(STORE_KEYS.users, []);
-  return Array.isArray(list) ? list : [];
+  return readJSON(STORE_KEYS.users, []);
 }
 
 function saveStoreUsers(list, shouldNotify = true) {
@@ -702,32 +782,93 @@ function saveStoreUsers(list, shouldNotify = true) {
   if (shouldNotify) notifyStoreChanged('users-saved');
 }
 
+function getStoreQuotes() {
+  const list = readJSON(STORE_KEYS.quotes, []);
+  // Tự động dọn dẹp triệt để nếu còn lưu cache dữ liệu mẫu cũ trong LocalStorage trình duyệt
+  if (Array.isArray(list) && list.some(q => q.customer && (q.customer.includes('Nguyễn Văn Nam') || q.customer.includes('Luxas') || q.id === 'RFQ-0001' || q.id === 'RFQ-0002'))) {
+    const cleaned = list.filter(q => !(q.customer && (q.customer.includes('Nguyễn Văn Nam') || q.customer.includes('Luxas') || q.id === 'RFQ-0001' || q.id === 'RFQ-0002')));
+    writeJSON(STORE_KEYS.quotes, cleaned);
+    return cleaned;
+  }
+  return list;
+}
+
+function saveStoreQuotes(list, shouldNotify = true) {
+  writeJSON(STORE_KEYS.quotes, Array.isArray(list) ? list : []);
+  if (shouldNotify) notifyStoreChanged('quotes-saved');
+}
+
+function addStoreQuote(data) {
+  const quotes = getStoreQuotes();
+  const id = nextStoreQuoteId(quotes);
+  const record = {
+    id,
+    customer: String(data.customer || '').trim(),
+    phone: String(data.phone || '').trim(),
+    email: String(data.email || '').trim(),
+    content: String(data.content || data.details || '').trim(),
+    status: data.status || 'pending',
+    notes: data.notes || '',
+    createdAt: Date.now(),
+    updatedAt: Date.now()
+  };
+  quotes.unshift(record);
+  saveStoreQuotes(quotes);
+  return record;
+}
+
+function updateStoreQuote(id, patch) {
+  const quotes = getStoreQuotes();
+  const idx = quotes.findIndex((q) => q.id === id);
+  if (idx < 0) return null;
+  quotes[idx] = { ...quotes[idx], ...patch, updatedAt: Date.now() };
+  saveStoreQuotes(quotes);
+  return quotes[idx];
+}
+
+function deleteStoreQuote(id) {
+  let quotes = getStoreQuotes();
+  quotes = quotes.filter((q) => q.id !== id);
+  saveStoreQuotes(quotes);
+  return true;
+}
+
+function nextStoreQuoteId(quotes) {
+  const maxNum = (quotes || []).reduce((m, q) => {
+    const n = parseInt(String(q.id).split('-').pop(), 10);
+    return Number.isFinite(n) ? Math.max(m, n) : m;
+  }, 0);
+  return 'RFQ-' + String(maxNum + 1).padStart(4, '0');
+}
+
 async function loadStoreFromMongo() {
-  const response = await fetch('/api/store');
+  const url = `${getApiBaseUrl()}/api/store`;
+  const response = await fetch(url);
   if (!response.ok) throw new Error('MongoDB store unavailable');
   const payload = await response.json();
   const data = payload.data || {};
-  const hasRemoteData = [data.products, data.orders, data.users, data.cart]
+  const hasRemoteData = [data.products, data.orders, data.users, data.quotes]
     .some((items) => Array.isArray(items) && items.length > 0);
   if (!hasRemoteData) return data;
   if (Array.isArray(data.products)) saveStoreProducts(data.products, false);
   if (Array.isArray(data.orders)) saveStoreOrders(data.orders, false);
   if (Array.isArray(data.users)) saveStoreUsers(data.users, false);
-  if (Array.isArray(data.cart)) saveStoreCart(data.cart, false);
+  if (Array.isArray(data.quotes)) saveStoreQuotes(data.quotes, false);
   localStorage.setItem(STORE_KEYS.seeded, '1');
   notifyStoreChanged('mongo-loaded');
   return data;
 }
 
 async function saveStoreToMongo() {
-  const response = await fetch('/api/store', {
+  const url = `${getApiBaseUrl()}/api/store`;
+  const response = await fetch(url, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       products: getStoreProducts(),
       orders: getStoreOrders(),
       users: getStoreUsers(),
-      cart: getStoreCart()
+      quotes: getStoreQuotes()
     })
   });
   if (!response.ok) throw new Error('MongoDB store unavailable');
@@ -808,6 +949,7 @@ function placeStoreOrder(customerInfo, items) {
     phone,
     email,
     address,
+    customerId: customerInfo.customerId || null,
     items: orderItems,
     subtotal,
     shipping,
@@ -966,12 +1108,13 @@ function genStoreId(prefix = 'id') {
 // ============== RESET TOÀN BỘ DỮ LIỆU ==============
 // Trả về seed ban đầu (dùng bởi nút Reset của admin)
 function resetStore() {
-  [STORE_KEYS.products, STORE_KEYS.orders, STORE_KEYS.users, STORE_KEYS.cart, STORE_KEYS.seeded].forEach((k) =>
+  [STORE_KEYS.products, STORE_KEYS.orders, STORE_KEYS.users, STORE_KEYS.quotes, STORE_KEYS.cart, STORE_KEYS.seeded].forEach((k) =>
     localStorage.removeItem(k)
   );
   getStoreProducts(); // re-seed
   saveStoreOrders([], false);
   saveStoreUsers([], false);
+  saveStoreQuotes([], false);
   saveStoreCart([], false);
   notifyStoreChanged('reset');
 }

@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Phiếu Bảo Hành - STEM IoT Admin</title>
+  <link rel="stylesheet" href="admin.css" />
+</head>
+
+<body>
+  <div id="app"></div>
+
+  <!-- MODAL: Chi tiết & xử lý phiếu bảo hành -->
+  <div class="modal-backdrop" id="warrantyDetailModal">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h3 class="modal-title">Xử lý phiếu bảo hành</h3>
+        <button class="modal-close" onclick="closeModal('warrantyDetailModal')">✕</button>
+      </div>
+      <div class="modal-body" id="warrantyDetailContent"></div>
+      <div class="modal-footer" id="warrantyDetailFooter"></div>
+    </div>
+  </div>
+
+  <script src="../store.js"></script>
+  <script src="admin.js"></script>
+  <script>
+    const API_BASE = 'http://localhost:3000';
+    let allClaims = [];
+
+    const REASON_LABELS = {
+      no_power: 'Không lên nguồn / mất đèn LED',
+      com_port: 'Không nhận cổng COM',
+      sensor_fail: 'Cảm biến sai số / lỗi giao tiếp',
+      physical: 'Lỗi ngoại quan khi mở hộp',
+      other: 'Hiện tượng kỹ thuật khác'
+    };
+
+    // ====== LOAD DATA ======
+    async function loadWarrantyClaims() {
+      try {
+        const res = await fetch(`${API_BASE}/api/warranty-claims`);
+        const data = await res.json();
+        if (!data.ok) throw new Error(data.message);
+        allClaims = data.data || [];
+      } catch (err) {
+        console.warn('Load warranty claims error:', err.message);
+        allClaims = [];
+      }
+    }
+
+    // ====== RENDER ======
+    renderAllAdmin = async function () {
+      await loadWarrantyClaims();
+
+      const pending = allClaims.filter(c => c.status === 'pending').length;
+      const processing = allClaims.filter(c => c.status === 'processing').length;
+      const resolved = allClaims.filter(c => c.status === 'resolved').length;
+      const total = allClaims.length;
+
+      const filterVal = document.getElementById('warrantyFilter')?.value || '';
+      const searchVal = (document.getElementById('warrantySearch')?.value || '').toLowerCase();
+
+      let filtered = allClaims;
+      if (filterVal) filtered = filtered.filter(c => c.status === filterVal);
+      if (searchVal) filtered = filtered.filter(c =>
+        (c.orderCode || '').toLowerCase().includes(searchVal) ||
+        (c.phone || '').includes(searchVal) ||
+        (c.product || '').toLowerCase().includes(searchVal)
+      );
+
+      const rows = filtered.length === 0
+        ? `<tr><td colspan="7" style="text-align:center;color:#94a3b8;padding:40px;">Chưa có phiếu bảo hành nào</td></tr>`
+        : filtered.map(c => `
+          <tr>
+            <td><code style="font-size:12px;background:#f1f5f9;padding:2px 6px;border-radius:4px;">${escapeHtml(c.id)}</code></td>
+            <td><strong>${escapeHtml(c.orderCode)}</strong></td>
+            <td>${escapeHtml(c.phone)}</td>
+            <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${escapeHtml(c.product)}">${escapeHtml(c.product)}</td>
+            <td><span style="font-size:12px;color:#64748b;">${REASON_LABELS[c.reason] || c.reason}</span></td>
+            <td>${badge(c.status, 'warranty')}</td>
+            <td>${fmtDateTime(c.createdAt)}</td>
+            <td>
+              <div style="display:flex;gap:6px;">
+                <button class="btn btn-sm btn-primary" onclick="openWarrantyDetail('${c.id}')">Xử lý</button>
+                <button class="btn btn-sm btn-danger" onclick="deleteWarrantyClaim('${c.id}')">Xóa</button>
+              </div>
+            </td>
+          </tr>`).join('');
+
+      const content = `
+        <div class="stats-grid" style="margin-bottom:24px;">
+          <div class="stat-card">
+            <div class="stat-label">Tổng phiếu</div>
+            <div class="stat-value">${total}</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Mới nhận</div>
+            <div class="stat-value" style="color:#f59e0b;">${pending}</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Đang xử lý</div>
+            <div class="stat-value" style="color:#0284c7;">${processing}</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Đã giải quyết</div>
+            <div class="stat-value" style="color:#10b981;">${resolved}</div>
+          </div>
+        </div>
+
+        <div class="table-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <input type="text" id="warrantySearch" class="form-control" placeholder="🔍 Tìm mã đơn, SĐT, sản phẩm..." style="width:260px;" oninput="renderAllAdmin()" value="${escapeHtml(searchVal)}" />
+            <select id="warrantyFilter" class="form-control" style="width:160px;" onchange="renderAllAdmin()">
+              <option value="">Tất cả trạng thái</option>
+              <option value="pending" ${filterVal === 'pending' ? 'selected' : ''}>Mới nhận</option>
+              <option value="processing" ${filterVal === 'processing' ? 'selected' : ''}>Đang xử lý</option>
+              <option value="resolved" ${filterVal === 'resolved' ? 'selected' : ''}>Đã giải quyết</option>
+              <option value="rejected" ${filterVal === 'rejected' ? 'selected' : ''}>Không bảo hành</option>
+            </select>
+          </div>
+          <span style="font-size:13px;color:#94a3b8;">Hiển thị ${filtered.length} / ${total} phiếu</span>
+        </div>
+
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Mã phiếu</th>
+                <th>Mã đơn hàng</th>
+                <th>SĐT</th>
+                <th>Sản phẩm</th>
+                <th>Loại sự cố</th>
+                <th>Trạng thái</th>
+                <th>Ngày gửi</th>
+                <th>Hành động</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>`;
+
+      renderLayout('warranty', 'Phiếu Bảo Hành', content,
+        `<button class="btn btn-primary" onclick="window.syncAdminWithMongo(false)">🔄 Làm mới</button>`
+      );
+    };
+
+    // ====== DETAIL MODAL ======
+    function openWarrantyDetail(id) {
+      const c = allClaims.find(x => x.id === id);
+      if (!c) return;
+
+      document.getElementById('warrantyDetailContent').innerHTML = `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+          <div>
+            <label style="font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.5px;">Mã phiếu</label>
+            <p style="font-family:monospace;font-size:15px;font-weight:700;color:#0284c7;margin:4px 0 0;">${escapeHtml(c.id)}</p>
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.5px;">Mã đơn hàng</label>
+            <p style="font-size:15px;font-weight:600;margin:4px 0 0;">${escapeHtml(c.orderCode)}</p>
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.5px;">Số điện thoại</label>
+            <p style="font-size:15px;margin:4px 0 0;"><a href="tel:${escapeHtml(c.phone)}" style="color:#0284c7;">${escapeHtml(c.phone)}</a></p>
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.5px;">Ngày gửi</label>
+            <p style="font-size:15px;margin:4px 0 0;">${fmtDateTime(c.createdAt)}</p>
+          </div>
+          <div style="grid-column:span 2;">
+            <label style="font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.5px;">Sản phẩm cần bảo hành</label>
+            <p style="font-size:15px;font-weight:600;margin:4px 0 0;">${escapeHtml(c.product)}</p>
+          </div>
+          <div style="grid-column:span 2;">
+            <label style="font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.5px;">Loại sự cố</label>
+            <p style="font-size:15px;margin:4px 0 0;">${REASON_LABELS[c.reason] || c.reason}</p>
+          </div>
+          <div style="grid-column:span 2;">
+            <label style="font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.5px;">Mô tả hiện tượng lỗi</label>
+            <p style="font-size:14px;color:#334155;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px;margin:4px 0 0;line-height:1.6;">${escapeHtml(c.notes)}</p>
+          </div>
+        </div>
+
+        <hr style="border:none;border-top:1px solid #e2e8f0;margin:20px 0;" />
+        <h4 style="font-size:14px;font-weight:700;margin-bottom:12px;">Cập nhật xử lý</h4>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Trạng thái xử lý</label>
+            <select class="form-control" id="wStatusSel">
+              <option value="pending" ${c.status === 'pending' ? 'selected' : ''}>Mới nhận</option>
+              <option value="processing" ${c.status === 'processing' ? 'selected' : ''}>Đang xử lý</option>
+              <option value="resolved" ${c.status === 'resolved' ? 'selected' : ''}>Đã giải quyết</option>
+              <option value="rejected" ${c.status === 'rejected' ? 'selected' : ''}>Không bảo hành</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Ghi chú nội bộ (kỹ thuật viên)</label>
+          <textarea class="form-control" id="wAdminNotes" rows="3" placeholder="Nhập kết quả chẩn đoán, hướng xử lý hoặc hẹn ngày trả hàng...">${escapeHtml(c.adminNotes || '')}</textarea>
+        </div>`;
+
+      document.getElementById('warrantyDetailFooter').innerHTML = `
+        <button class="btn btn-secondary" onclick="closeModal('warrantyDetailModal')">Đóng</button>
+        <button class="btn btn-primary" onclick="saveWarrantyClaim('${c.id}')">💾 Lưu cập nhật</button>`;
+
+      openModal('warrantyDetailModal');
+    }
+
+    async function saveWarrantyClaim(id) {
+      const status = document.getElementById('wStatusSel').value;
+      const adminNotes = document.getElementById('wAdminNotes').value.trim();
+      try {
+        const res = await fetch(`${API_BASE}/api/warranty-claims/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status, adminNotes })
+        });
+        const data = await res.json();
+        if (!data.ok) throw new Error(data.message);
+        closeModal('warrantyDetailModal');
+        showToast('Đã cập nhật phiếu bảo hành thành công', 'success');
+        renderAllAdmin();
+      } catch (err) {
+        showToast('Lỗi cập nhật: ' + err.message, 'error');
+      }
+    }
+
+    async function deleteWarrantyClaim(id) {
+      if (!confirmAction(`Xóa phiếu bảo hành ${id}? Hành động này không thể hoàn tác.`)) return;
+      try {
+        const res = await fetch(`${API_BASE}/api/warranty-claims/${id}`, { method: 'DELETE' });
+        const data = await res.json();
+        if (!data.ok) throw new Error(data.message);
+        showToast('Đã xóa phiếu bảo hành', 'success');
+        renderAllAdmin();
+      } catch (err) {
+        showToast('Lỗi xóa phiếu: ' + err.message, 'error');
+      }
+    }
+
+    // Khởi chạy
+    requireAuth();
+    renderAllAdmin();
+  </script>
+</body>
+
+</html>

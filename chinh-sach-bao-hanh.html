@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chính Sách Bảo Hành & Đổi Trả - STEM IoT LUXAS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    :root {
+      --docs-bg: #f8fafc;
+      --docs-card-bg: #ffffff;
+      --docs-border: #e2e8f0;
+      --docs-primary: #0284c7;
+      --docs-primary-dark: #0369a1;
+      --docs-cyan: #06b6d4;
+      --docs-emerald: #10b981;
+      --docs-amber: #f59e0b;
+      --docs-rose: #f43f5e;
+      --docs-text: #0f172a;
+      --docs-muted: #64748b;
+      --code-bg: #090d16;
+    }
+
+    body {
+      background-color: var(--docs-bg);
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      color: var(--docs-text);
+      line-height: 1.65;
+    }
+
+    /* Top Sticky Header */
+    .warranty-header {
+      background: linear-gradient(135deg, #090d16 0%, #0f172a 100%);
+      color: #ffffff;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(12px);
+    }
+
+    .warranty-header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 68px;
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .warranty-logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: #ffffff;
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .warranty-badge-sub {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: #34d399;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 9999px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .warranty-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-nav-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: var(--radius-full);
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn-back-home {
+      background: rgba(255, 255, 255, 0.08);
+      color: #cbd5e1;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .btn-back-home:hover {
+      background: rgba(255, 255, 255, 0.16);
+      color: #ffffff;
+    }
+
+    .btn-switch-page {
+      background: linear-gradient(135deg, #0284c7, #06b6d4);
+      color: #ffffff;
+      border: none;
+      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.3);
+    }
+
+    .btn-switch-page:hover {
+      opacity: 0.95;
+      transform: translateY(-1px);
+    }
+
+    /* Hero Banner */
+    .warranty-hero {
+      background: radial-gradient(circle at 15% 50%, rgba(2, 132, 199, 0.12), transparent 45%),
+        radial-gradient(circle at 85% 30%, rgba(16, 185, 129, 0.10), transparent 50%),
+        #0c1220;
+      color: #ffffff;
+      padding: 56px 24px 64px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .warranty-hero-inner {
+      max-width: 1320px;
+      margin: 0 auto;
+    }
+
+    .hero-pill-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #6ee7b7;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 20px;
+    }
+
+    .warranty-hero h1 {
+      font-size: clamp(28px, 4vw, 42px);
+      font-weight: 800;
+      line-height: 1.25;
+      margin-bottom: 16px;
+      letter-spacing: -0.02em;
+    }
+
+    .warranty-hero h1 span {
+      background: linear-gradient(135deg, #38bdf8 0%, #34d399 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .warranty-hero p {
+      font-size: 16px;
+      color: #94a3b8;
+      max-width: 780px;
+      line-height: 1.7;
+      margin-bottom: 28px;
+    }
+
+    .hero-stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      max-width: 900px;
+    }
+
+    .hero-stat-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .hero-stat-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .hero-stat-icon.emerald {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+    }
+
+    .hero-stat-icon.blue {
+      background: rgba(2, 132, 199, 0.15);
+      color: #38bdf8;
+    }
+
+    .hero-stat-icon.amber {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+    }
+
+    .hero-stat-info h4 {
+      font-size: 17px;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin: 0 0 2px 0;
+    }
+
+    .hero-stat-info p {
+      font-size: 12px;
+      color: #94a3b8;
+      margin: 0;
+    }
+
+    /* Main Container with Sticky Sidebar */
+    .warranty-container {
+      max-width: 1320px;
+      margin: 40px auto;
+      padding: 0 24px;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 40px;
+      align-items: start;
+    }
+
+    /* Sticky Sidebar */
+    .warranty-sidebar {
+      position: sticky;
+      top: 96px;
+      background: #ffffff;
+      border: 1px solid var(--docs-border);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04);
+    }
+
+    .sidebar-title {
+      font-size: 13px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--docs-muted);
+      margin-bottom: 16px;
+    }
+
+    .sidebar-menu {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .sidebar-menu a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      color: #334155;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .sidebar-menu a:hover {
+      background: #f1f5f9;
+      color: var(--docs-primary);
+    }
+
+    .sidebar-menu a.active {
+      background: #e0f2fe;
+      color: var(--docs-primary-dark);
+      font-weight: 700;
+    }
+
+    .sidebar-hotline-card {
+      margin-top: 24px;
+      padding: 16px;
+      background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      text-align: center;
+    }
+
+    .sidebar-hotline-card h5 {
+      font-size: 13px;
+      color: #166534;
+      font-weight: 700;
+      margin: 0 0 6px 0;
+    }
+
+    .sidebar-hotline-card a {
+      display: block;
+      font-size: 17px;
+      font-weight: 800;
+      color: #15803d;
+      text-decoration: none;
+      letter-spacing: 0.02em;
+    }
+
+    .sidebar-hotline-card p {
+      font-size: 11px;
+      color: #4ade80;
+      color: #15803d;
+      margin: 4px 0 0 0;
+    }
+
+    /* Content Sections */
+    .content-block {
+      background: #ffffff;
+      border: 1px solid var(--docs-border);
+      border-radius: 16px;
+      padding: 36px;
+      margin-bottom: 32px;
+      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.03);
+      scroll-margin-top: 96px;
+    }
+
+    .content-block h2 {
+      font-size: 24px;
+      font-weight: 800;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .section-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: #0284c7;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .content-block p {
+      color: #475569;
+      font-size: 15px;
+      line-height: 1.7;
+      margin-bottom: 20px;
+    }
+
+    /* Warranty Duration Table */
+    .warranty-table-wrap {
+      overflow-x: auto;
+      margin: 24px 0;
+      border: 1px solid var(--docs-border);
+      border-radius: 12px;
+    }
+
+    .warranty-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      text-align: left;
+    }
+
+    .warranty-table th {
+      background: #f8fafc;
+      color: #1e293b;
+      font-weight: 700;
+      padding: 14px 18px;
+      border-bottom: 2px solid var(--docs-border);
+      white-space: nowrap;
+    }
+
+    .warranty-table td {
+      padding: 14px 18px;
+      border-bottom: 1px solid #f1f5f9;
+      color: #334155;
+      vertical-align: middle;
+    }
+
+    .warranty-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .warranty-table tr:hover td {
+      background: #fcfcfc;
+    }
+
+    .badge-term {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-weight: 700;
+      font-size: 12px;
+    }
+
+    .badge-term.green {
+      background: #dcfce7;
+      color: #15803d;
+      border: 1px solid #bbf7d0;
+    }
+
+    .badge-term.blue {
+      background: #e0f2fe;
+      color: #0369a1;
+      border: 1px solid #bae6fd;
+    }
+
+    .badge-term.orange {
+      background: #ffedd5;
+      color: #c2410c;
+      border: 1px solid #fed7aa;
+    }
+
+    /* Comparison Grid: Được BH vs Từ Chối */
+    .condition-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin: 24px 0;
+    }
+
+    .condition-card {
+      border-radius: 14px;
+      padding: 24px;
+      border: 1px solid;
+    }
+
+    .condition-card.approved {
+      background: #f0fdf4;
+      border-color: #bbf7d0;
+    }
+
+    .condition-card.rejected {
+      background: #fff1f2;
+      border-color: #fecdd3;
+    }
+
+    .condition-card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 16px;
+      font-weight: 800;
+      margin-bottom: 16px;
+    }
+
+    .condition-card.approved .condition-card-header {
+      color: #166534;
+    }
+
+    .condition-card.rejected .condition-card-header {
+      color: #9f1239;
+    }
+
+    .condition-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .condition-list li {
+      position: relative;
+      padding-left: 24px;
+    }
+
+    .condition-card.approved .condition-list li::before {
+      content: '✓';
+      position: absolute;
+      left: 0;
+      color: #16a34a;
+      font-weight: 800;
+    }
+
+    .condition-card.rejected .condition-list li::before {
+      content: '✕';
+      position: absolute;
+      left: 0;
+      color: #e11d48;
+      font-weight: 800;
+    }
+
+    /* Process Steps */
+    .steps-timeline {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      margin: 28px 0;
+      position: relative;
+    }
+
+    .step-card {
+      background: #f8fafc;
+      border: 1px solid var(--docs-border);
+      border-radius: 14px;
+      padding: 22px;
+      position: relative;
+      transition: all 0.2s ease;
+    }
+
+    .step-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+      border-color: #cbd5e1;
+    }
+
+    .step-number {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #0284c7;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      font-weight: 800;
+      margin-bottom: 14px;
+    }
+
+    .step-card h4 {
+      font-size: 15px;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 0 0 8px 0;
+    }
+
+    .step-card p {
+      font-size: 13px;
+      color: #64748b;
+      margin: 0;
+      line-height: 1.55;
+    }
+
+    /* Interactive Warranty Claim Form */
+    .claim-form-box {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 14px;
+      padding: 28px;
+      margin-top: 24px;
+    }
+
+    .claim-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .claim-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .claim-field.full-width {
+      grid-column: span 2;
+    }
+
+    .claim-field label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #334155;
+    }
+
+    .claim-field input,
+    .claim-field select,
+    .claim-field textarea {
+      padding: 10px 14px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 14px;
+      background: #ffffff;
+      transition: border-color 0.2s;
+    }
+
+    .claim-field input:focus,
+    .claim-field select:focus,
+    .claim-field textarea:focus {
+      outline: none;
+      border-color: #0284c7;
+      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+    }
+
+    .btn-submit-claim {
+      background: linear-gradient(135deg, #0284c7, #0369a1);
+      color: #ffffff;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .btn-submit-claim:hover {
+      opacity: 0.95;
+      transform: translateY(-1px);
+    }
+
+    /* Locations Grid */
+    .locations-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .location-card {
+      background: #f8fafc;
+      border: 1px solid var(--docs-border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .location-card h4 {
+      font-size: 15px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 10px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .location-card p {
+      font-size: 14px;
+      color: #475569;
+      margin: 0 0 6px 0;
+      line-height: 1.5;
+    }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+      .warranty-container {
+        grid-template-columns: 1fr;
+      }
+
+      .warranty-sidebar {
+        display: none;
+      }
+
+      .condition-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .claim-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .claim-field.full-width {
+        grid-column: span 1;
+      }
+
+      .locations-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Header Bar -->
+  <header class="warranty-header">
+    <div class="warranty-header-inner">
+      <a href="index.html" class="warranty-logo">
+        <span
+          style="display:inline-flex;width:34px;height:34px;background:linear-gradient(135deg,#0284c7,#06b6d4);border-radius:8px;align-items:center;justify-content:center;color:#fff;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+        </span>
+        <span>STEM<span style="color:#38bdf8;">IoT</span></span>
+        <span class="warranty-badge-sub">Chính Sách Bảo Hành</span>
+      </a>
+      <div class="warranty-header-actions">
+        <a href="huong-dan-mua-hang.html" class="btn-nav-action btn-back-home">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+          <span>Hướng dẫn mua hàng</span>
+        </a>
+        <a href="index.html" class="btn-nav-action btn-switch-page">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+          <span>Về Cửa Hàng</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="warranty-hero">
+    <div class="warranty-hero-inner">
+      <div class="hero-pill-badge">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+        </svg>
+        Cam Kết Chất Lượng Công Nghiệp & Giáo Dục STEM
+      </div>
+      <h1>Chính Sách <span>Bảo Hành & Đổi Trả</span> Minh Bạch</h1>
+      <p>
+        LUXAS cam kết 100% linh kiện chính hãng, tiêu chuẩn công nghiệp và phục vụ đào tạo STEM Maker. Mọi sản phẩm vi
+        điều khiển, cảm biến và module mở rộng đều được bảo hành kỹ thuật, hỗ trợ kiểm tra nạp code và đổi mới nếu phát
+        sinh lỗi từ nhà sản xuất.
+      </p>
+
+      <div class="hero-stats-row">
+        <div class="hero-stat-card">
+          <div class="hero-stat-icon emerald">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </div>
+          <div class="hero-stat-info">
+            <h4>1 Đổi 1 Trong 7 Ngày</h4>
+            <p>Đổi mới 100% nếu phát hiện lỗi NSX</p>
+          </div>
+        </div>
+
+        <div class="hero-stat-card">
+          <div class="hero-stat-icon blue">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          </div>
+          <div class="hero-stat-info">
+            <h4>6 - 12 Tháng</h4>
+            <p>Bảo hành phần cứng tiêu chuẩn</p>
+          </div>
+        </div>
+
+        <div class="hero-stat-card">
+          <div class="hero-stat-icon amber">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path
+                d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z">
+              </path>
+            </svg>
+          </div>
+          <div class="hero-stat-info">
+            <h4>Hỗ Trợ Kỹ Thuật 24/7</h4>
+            <p>Kỹ sư test lỗi & tư vấn sửa mạch</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content Layout -->
+  <div class="warranty-container">
+    <!-- Sticky Navigation Sidebar -->
+    <aside class="warranty-sidebar">
+      <div class="sidebar-title">Mục lục chính sách</div>
+      <ul class="sidebar-menu">
+        <li><a href="#commitment" class="active">1. Nguyên tắc cam kết</a></li>
+        <li><a href="#durations">2. Thời hạn từng nhóm hàng</a></li>
+        <li><a href="#conditions">3. Điều kiện tiếp nhận</a></li>
+        <li><a href="#process">4. Quy trình 4 bước đổi trả</a></li>
+        <li><a href="#repair">5. Sửa chữa sau bảo hành</a></li>
+        <li><a href="#claim-form">6. Gửi yêu cầu trực tuyến</a></li>
+        <li><a href="#locations">7. Địa chỉ & Hotline</a></li>
+      </ul>
+
+      <div class="sidebar-hotline-card">
+        <h5>HOTLINE KỸ THUẬT</h5>
+        <a href="tel:0937511617">0937 511 617</a>
+        <p>Hỗ trợ Zalo chẩn đoán lỗi mạch 24/7</p>
+      </div>
+    </aside>
+
+    <!-- Main Content Articles -->
+    <main class="warranty-content">
+      <!-- Section 1 -->
+      <section class="content-block" id="commitment">
+        <h2><span class="section-num">1</span> Nguyên Tắc & Cam Kết Chất Lượng</h2>
+        <p>
+          Tại <strong>STEM IoT LUXAS</strong>, chúng tôi hiểu rằng độ ổn định của linh kiện điện tử là yếu tố quyết định
+          thành công của các dự án Maker, đồ án tốt nghiệp, cũng như hệ thống giám sát môi trường công nghiệp. Tất cả
+          linh kiện được phân phối đều trải qua quy trình kiểm tra chất lượng (QC) và được bảo hành chính hãng.
+        </p>
+        <p>
+          <strong>Cam kết cốt lõi:</strong>
+        </p>
+        <ul style="color:#475569;font-size:15px;line-height:1.8;padding-left:20px;">
+          <li><strong>Linh kiện chính hãng 100%:</strong> Nhập khẩu trực tiếp từ các đối tác Adafruit, Seeed Studio,
+            DFRobot, STMicroelectronics, Espressif, Texas Instruments.</li>
+          <li><strong>Minh bạch điện tử:</strong> Mọi đơn hàng đều lưu trữ mã đơn hàng (ORD-xxxx) trên hệ thống đám mây
+            MongoDB Atlas, không lo mất hóa đơn giấy.</li>
+          <li><strong>Hỗ trợ kỹ thuật thực chiến:</strong> Kỹ sư điện tử LUXAS hỗ trợ tư vấn sơ đồ chân pinout, cấp
+            nguồn đúng dải điện áp và nạp code mẫu test mạch từ xa.</li>
+        </ul>
+      </section>
+
+      <!-- Section 2 -->
+      <section class="content-block" id="durations">
+        <h2><span class="section-num">2</span> Thời Hạn Bảo Hành Chi Tiết</h2>
+        <p>Thời hạn bảo hành được tính từ ngày khách hàng nhận được kiện hàng từ bưu tá (ghi nhận theo mã vận đơn chuyển
+          phát).</p>
+
+        <div class="warranty-table-wrap">
+          <table class="warranty-table">
+            <thead>
+              <tr>
+                <th>Nhóm sản phẩm</th>
+                <th>Sản phẩm tiêu biểu</th>
+                <th>Thời hạn BH</th>
+                <th>Chính sách đổi mới</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Bo mạch vi điều khiển</strong></td>
+                <td>ESP32 NodeMCU, Arduino Uno R4 WiFi, RP2040, STM32</td>
+                <td><span class="badge-term green">12 Tháng</span></td>
+                <td>1 đổi 1 trong 7 ngày đầu nếu lỗi chip/bootloader</td>
+              </tr>
+              <tr>
+                <td><strong>Module Cảm biến môi trường</strong></td>
+                <td>BME280, SHT31, DHT22, Loadcell + HX711, Siêu âm</td>
+                <td><span class="badge-term blue">06 Tháng</span></td>
+                <td>Đổi mới nếu không giao tiếp được bus I2C/SPI</td>
+              </tr>
+              <tr>
+                <td><strong>Shield & Module mở rộng</strong></td>
+                <td>Relay Shield, CAN Bus, LoRa SX1276, RS-485 Modbus, GPS</td>
+                <td><span class="badge-term blue">06 Tháng</span></td>
+                <td>Đổi mới trong 7 ngày nếu lỗi cách ly/truyền thông</td>
+              </tr>
+              <tr>
+                <td><strong>Màn hình hiển thị</strong></td>
+                <td>OLED 0.96", E-Ink 2.7", TFT Touch Shield 2.8", LCD 1602</td>
+                <td><span class="badge-term blue">06 Tháng</span></td>
+                <td>Bảo hành điểm chết và controller hiển thị</td>
+              </tr>
+              <tr>
+                <td><strong>Động cơ & Mạch công suất</strong></td>
+                <td>Servo MG996R, SG90, Động cơ bước Nema 17, Driver A4988</td>
+                <td><span class="badge-term orange">03 - 06 Tháng</span></td>
+                <td>Kiểm tra quay tải và mạch lái driver</td>
+              </tr>
+              <tr>
+                <td><strong>Vật tư phụ kiện & Linh kiện rời</strong></td>
+                <td>Breadboard, Dây cắm Jumper, Header pin, IC rời</td>
+                <td><span class="badge-term green">07 Ngày</span></td>
+                <td>1 đổi 1 ngay khi kiểm tra nhận hàng</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Section 3 -->
+      <section class="content-block" id="conditions">
+        <h2><span class="section-num">3</span> Điều Kiện Tiếp Nhận & Từ Chối</h2>
+        <p>Để đảm bảo quyền lợi công bằng cho khách hàng và phân định rõ trách nhiệm kỹ thuật, LUXAS áp dụng quy chuẩn
+          kiểm tra sau:</p>
+
+        <div class="condition-grid">
+          <div class="condition-card approved">
+            <div class="condition-card-header">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              TRƯỜNG HỢP ĐƯỢC BẢO HÀNH
+            </div>
+            <ul class="condition-list">
+              <li>Sản phẩm còn trong thời hạn bảo hành căn cứ theo mã đơn hàng điện tử (ORD-xxxx) hoặc số điện thoại mua
+                hàng.</li>
+              <li>Tem bảo hành / mã SKU / mã vạch trên bo mạch còn nguyên vẹn, không bị tẩy xóa hoặc chắp vá.</li>
+              <li>Lỗi kỹ thuật xuất phát từ linh kiện hoặc nhà sản xuất: Vi điều khiển không nhận nạp code dù cổng COM
+                hoạt động; Cảm biến sai số vượt ngưỡng datasheet khi cấp đúng điện áp chuẩn.</li>
+              <li>Module không kết nối được giao tiếp phần cứng (I2C NACK, SPI không phản hồi) khi đấu nối đúng sơ đồ
+                khuyến nghị.</li>
+            </ul>
+          </div>
+
+          <div class="condition-card rejected">
+            <div class="condition-card-header">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+              TRƯỜNG HỢP NGOÀI PHẠM VI BẢO HÀNH
+            </div>
+            <ul class="condition-list">
+              <li><strong>Cấp nguồn quá áp:</strong> Cấp nguồn 5V/12V vào đường 3.3V Logic của chip gây nứt vỏ IC, cháy
+                chip LDO hoặc chết vi điều khiển.</li>
+              <li><strong>Đấu ngược cực:</strong> Cắm ngược chân VCC và GND dẫn đến bốc khói hoặc phù tụ hóa.</li>
+              <li><strong>Hàn lem & Chập chân:</strong> Mối hàn tay bị cầu thiếc giữa các chân vi sai hoặc rách pad đồng
+                do nhổ linh kiện sai nhiệt độ.</li>
+              <li><strong>Hư hại ngoại lực & Môi trường:</strong> Mạch rơi vỡ, nứt góc PCB, ngấm nước, ẩm mốc, sét đánh
+                hoặc đấu nhầm điện lưới 220V vào chân GPIO.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 4 -->
+      <section class="content-block" id="process">
+        <h2><span class="section-num">4</span> Quy Trình 4 Bước Đổi Trả Nhanh Chóng</h2>
+        <p>Quy trình tinh gọn giúp bạn tiết kiệm tối đa thời gian chờ đợi:</p>
+
+        <div class="steps-timeline">
+          <div class="step-card">
+            <div class="step-number">1</div>
+            <h4>Liên Hệ Báo Lỗi</h4>
+            <p>Nhắn tin Zalo <strong>0937 511 617</strong> hoặc gọi Hotline, cung cấp Mã đơn hàng và video/hình ảnh ngắn
+              mô tả hiện tượng mạch.</p>
+          </div>
+
+          <div class="step-card">
+            <div class="step-number">2</div>
+            <h4>Kỹ Sư Test Từ Xa</h4>
+            <p>Đội ngũ kỹ thuật hỗ trợ kiểm tra sơ đồ dây, thư viện code Arduino/ESP-IDF để loại trừ lỗi phần mềm.</p>
+          </div>
+
+          <div class="step-card">
+            <div class="step-number">3</div>
+            <h4>Gửi Hàng Về Lab</h4>
+            <p>Nếu xác định lỗi phần cứng, bạn đóng gói gửi về Trung tâm bảo hành LUXAS tại TP.HCM hoặc Bình Dương.</p>
+          </div>
+
+          <div class="step-card">
+            <div class="step-number">4</div>
+            <h4>Đổi Mới & Trả Hàng</h4>
+            <p>Lab kiểm định trong 24-48 giờ: Đổi mới 100% hoặc sửa chữa hoàn chỉnh và bưu tá gửi trả tận nhà miễn phí.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 5 -->
+      <section class="content-block" id="repair">
+        <h2><span class="section-num">5</span> Dịch Vụ Sửa Chữa Lab Sau Bảo Hành</h2>
+        <p>
+          Đối với các trường hợp sản phẩm đã hết hạn bảo hành hoặc gặp sự cố chập cháy do thao tác nhầm lẫn trong quá
+          trình học tập thực hành, <strong>Xưởng gia công PCBA LUXAS</strong> hỗ trợ sửa chữa với tinh thần đồng hành
+          cùng Maker & Sinh viên:
+        </p>
+        <ul style="color:#475569;font-size:15px;line-height:1.8;padding-left:20px;">
+          <li>Thay thế chip nạp USB-UART (CH340G, CP2102, FT232RL) bằng máy hàn khò SMT chuyên dụng.</li>
+          <li>Thay IC ổn áp LDO (AMS1117-3.3V, ME6211), tụ lọc nguồn Decoupling và diode bảo vệ nguồn ngược cực.</li>
+          <li>Chi phí sửa chữa chỉ tính giá gốc của linh kiện thay thế (từ 15.000đ - 45.000đ), miễn phí công hàn cho học
+            sinh, sinh viên.</li>
+        </ul>
+      </section>
+
+      <!-- Section 6 -->
+      <section class="content-block" id="claim-form">
+        <h2><span class="section-num">6</span> Gửi Yêu Cầu Bảo Hành Trực Tuyến</h2>
+        <p>Nếu bạn phát hiện linh kiện gặp trục trặc, vui lòng điền thông tin vào phiếu tiếp nhận dưới đây để kỹ sư liên
+          hệ hỗ trợ trong vòng 30 phút:</p>
+
+        <div class="claim-form-box">
+          <form id="warrantyClaimForm" onsubmit="handleClaimSubmit(event)">
+            <div class="claim-grid">
+              <div class="claim-field">
+                <label for="claimOrderCode">Mã đơn hàng *</label>
+                <input type="text" id="claimOrderCode" placeholder="VD: ORD-0001" required />
+              </div>
+              <div class="claim-field">
+                <label for="claimPhone">Số điện thoại đặt hàng *</label>
+                <input type="tel" id="claimPhone" placeholder="VD: 0937511617" required />
+              </div>
+              <div class="claim-field">
+                <label for="claimProduct">Tên sản phẩm cần bảo hành *</label>
+                <input type="text" id="claimProduct" placeholder="VD: ESP32 WiFi BLE Module" required />
+              </div>
+              <div class="claim-field">
+                <label for="claimReason">Loại sự cố</label>
+                <select id="claimReason">
+                  <option value="no_power">Không lên nguồn / mất đèn LED báo</option>
+                  <option value="com_port">Không nhận cổng COM khi cắm máy tính</option>
+                  <option value="sensor_fail">Cảm biến sai số / không giao tiếp I2C, SPI</option>
+                  <option value="physical">Lỗi ngoại quan khi mở hộp kiện hàng</option>
+                  <option value="other">Hiện tượng kỹ thuật khác</option>
+                </select>
+              </div>
+              <div class="claim-field full-width">
+                <label for="claimNotes">Mô tả chi tiết hiện tượng lỗi & cách đấu nối *</label>
+                <textarea id="claimNotes" rows="3"
+                  placeholder="Mô tả mức điện áp cấp, sơ đồ chân đã cắm và các đèn báo hiển thị..." required></textarea>
+              </div>
+            </div>
+
+            <button type="submit" class="btn-submit-claim">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span>Gửi Phiếu Tiếp Nhận Kỹ Thuật</span>
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <!-- Section 7 -->
+      <section class="content-block" id="locations">
+        <h2><span class="section-num">7</span> Địa Điểm & Kênh Tiếp Nhận Chính Thức</h2>
+        <p>Quý khách có thể gửi bưu phẩm chuyển phát hoặc mang trực tiếp linh kiện đến các địa điểm tiếp nhận của LUXAS:
+        </p>
+
+        <div class="locations-grid">
+          <div class="location-card">
+            <h4>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2.5">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+              </svg>
+              Trung Tâm Kỹ Thuật TP.HCM
+            </h4>
+            <p><strong>Địa chỉ:</strong> 38/5 Vạn Kiếp, Phường 1, Quận Bình Thạnh, TP. Hồ Chí Minh.</p>
+            <p><strong>Giờ làm việc:</strong> 08:00 - 17:30 (Thứ 2 - Thứ 7)</p>
+            <p><strong>Hotline:</strong> 0937 511 617</p>
+          </div>
+
+          <div class="location-card">
+            <h4>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+              </svg>
+              Xưởng PCBA & Lab Bình Dương
+            </h4>
+            <p><strong>Địa chỉ:</strong> 284C/3 Khu phố Thạnh Lợi, P. An Thạnh, TP. Thuận An, Bình Dương.</p>
+            <p><strong>Giờ làm việc:</strong> 08:00 - 17:00 (Thứ 2 - Thứ 7)</p>
+            <p><strong>Email kỹ thuật:</strong> sales@luxas.com.vn</p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:3000';
+
+    async function handleClaimSubmit(e) {
+      e.preventDefault();
+      const btn = document.querySelector('.btn-submit-claim');
+      const orderCode = document.getElementById('claimOrderCode').value.trim();
+      const phone = document.getElementById('claimPhone').value.trim();
+      const product = document.getElementById('claimProduct').value.trim();
+      const reason = document.getElementById('claimReason').value;
+      const notes = document.getElementById('claimNotes').value.trim();
+
+      btn.disabled = true;
+      btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation:spin 1s linear infinite"><circle cx="12" cy="12" r="10" stroke-opacity=".25"/><path d="M12 2a10 10 0 0 1 10 10" stroke-opacity="1"/></svg><span>Đang gửi...</span>`;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/warranty-claims`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ orderCode, phone, product, reason, notes })
+        });
+        const data = await res.json();
+
+        if (!res.ok || !data.ok) throw new Error(data.message || 'Lỗi máy chủ');
+
+        // Hiển thị thông báo thành công
+        const formBox = document.querySelector('.claim-form-box');
+        formBox.innerHTML = `
+          <div style="text-align:center;padding:40px 20px;">
+            <div style="width:64px;height:64px;background:linear-gradient(135deg,#10b981,#059669);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:28px;">✓</div>
+            <h3 style="font-size:20px;font-weight:700;color:#0f172a;margin-bottom:8px;">Phiếu đã được ghi nhận!</h3>
+            <p style="color:#475569;font-size:15px;line-height:1.7;margin-bottom:6px;">Mã phiếu: <strong style="color:#0284c7;font-family:monospace;">${data.claim.id}</strong></p>
+            <p style="color:#475569;font-size:14px;line-height:1.7;">Kỹ sư IoT LUXAS sẽ liên hệ lại qua số <strong>${phone}</strong> trong vòng <strong>30 phút</strong>.</p>
+          </div>`;
+      } catch (err) {
+        alert('⚠️ Không gửi được phiếu: ' + err.message + '\n\nVui lòng liên hệ trực tiếp Zalo 0937 511 617.');
+        btn.disabled = false;
+        btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg><span>Gửi Phiếu Tiếp Nhận Kỹ Thuật</span>`;
+      }
+    }
+  </script>
+  <style>
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</body>
+
+</html>

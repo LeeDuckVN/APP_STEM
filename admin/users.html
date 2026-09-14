@@ -23,16 +23,16 @@
           <input type="hidden" id="ufId" />
           <div class="form-group">
             <label for="ufName">Họ tên *</label>
-            <input type="text" class="form-control" id="ufName" required placeholder="VD: Nguyễn Văn A" />
+            <input type="text" class="form-control" id="ufName" required placeholder="Nhập họ và tên khách hàng..." />
           </div>
           <div class="form-row">
             <div class="form-group">
               <label for="ufEmail">Email *</label>
-              <input type="email" class="form-control" id="ufEmail" required placeholder="khach@example.com" />
+              <input type="email" class="form-control" id="ufEmail" required placeholder="Nhập địa chỉ email..." />
             </div>
             <div class="form-group">
               <label for="ufPhone">Số điện thoại *</label>
-              <input type="tel" class="form-control" id="ufPhone" required placeholder="0901234567" />
+              <input type="tel" class="form-control" id="ufPhone" required placeholder="Nhập số điện thoại..." />
             </div>
           </div>
           <div class="form-row">
@@ -88,10 +88,6 @@
         <button class="btn btn-sm btn-primary" onclick="openAddUser()">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           <span>Thêm khách hàng</span>
-        </button>
-        <button class="btn btn-sm btn-secondary" onclick="resetData()" title="Reset dữ liệu mẫu">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
-          <span>Khôi phục mẫu</span>
         </button>
       `);
 
@@ -282,7 +278,7 @@
           <div><span class="text-xs text-gray">Ngày tham gia</span><div class="font-medium">${fmtDate(u.createdAt)}</div></div>
         </div>
         <div class="form-row" style="margin-top: 12px;">
-          <div><span class="text-xs text-gray">Tổng chi tiêu (từ đơn thật)</span><div class="font-bold text-success">${fmtVND(orderTotal)}</div></div>
+          <div><span class="text-xs text-gray">Tổng chi tiêu</span><div class="font-bold text-success">${fmtVND(orderTotal)}</div></div>
           <div><span class="text-xs text-gray">Số đơn hàng</span><div class="font-bold">${orders.length}</div></div>
         </div>
         ${orders.length > 0 ? `

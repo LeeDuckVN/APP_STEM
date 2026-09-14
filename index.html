@@ -13,6 +13,14 @@
     href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
     rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
+  <script>
+    // Tự động chuyển hướng ngay sang trang mới nếu URL vẫn còn hash cũ #support hoặc #checkout
+    if (window.location.hash === '#support') {
+      window.location.replace('chinh-sach-bao-hanh.html');
+    } else if (window.location.hash === '#checkout') {
+      window.location.replace('huong-dan-mua-hang.html');
+    }
+  </script>
 </head>
 
 <body>
@@ -120,7 +128,7 @@
 
       <form class="search-box" id="searchForm" role="search">
         <select id="searchScope" class="search-scope-select" aria-label="Phạm vi tìm kiếm">
-          <option value="all" data-i18n="all">Tất cả danh mục</option>
+          <option value="all" selected data-i18n="all">Tất cả danh mục</option>
           <option value="board" data-i18n="catBoard">Board IoT</option>
           <option value="sensors" data-i18n="catSensors">Cảm biến</option>
           <option value="robot" data-i18n="catRobot">Robot kit</option>
@@ -195,14 +203,30 @@
           </svg>
           <span data-i18n="products">Sản phẩm</span>
         </a>
-        <a href="#support" class="nav-link">
+        <a href="tai-lieu-san-pham.html" class="nav-link">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="16 18 22 12 16 6"></polyline>
+            <polyline points="8 6 2 12 8 18"></polyline>
+          </svg>
+          <span>Tài liệu kỹ thuật</span>
+        </a>
+        <a href="huong-dan-thuc-hanh.html" class="nav-link">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 20h20"></path>
+            <path d="M5 20V8l5 4V8l5 4V4h5v16"></path>
+          </svg>
+          <span>Thực hành PCBA</span>
+        </a>
+        <a href="chinh-sach-bao-hanh.html" class="nav-link">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
           </svg>
           <span data-i18n="warranty">Bảo hành</span>
         </a>
-        <a href="#checkout" class="nav-link">
+        <a href="huong-dan-mua-hang.html" class="nav-link">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"></circle>
@@ -246,9 +270,8 @@
       <section class="hero-panel hero-carousel" id="heroCarousel" aria-label="Banner quảng cáo">
         <div class="carousel-track" id="carouselTrack">
           <div class="carousel-slide active">
-            <img
-              src="assets/banner/stem-iot-banner.jpg"
-              alt="Banner STEM IoT - linh kiện và robot kit" loading="eager" />
+            <img src="assets/banner/stem-iot-banner.jpg" alt="Banner STEM IoT - linh kiện và robot kit"
+              loading="eager" />
             <div class="hero-overlay">
               <div class="hero-copy">
                 <span class="hero-kicker hero-tag" data-i18n="heroKicker">Hàng sẵn kho cho lớp học và lab</span>
@@ -300,28 +323,62 @@
       </section>
 
       <aside class="right-promos" aria-label="Ưu đãi nổi bật">
-        <div class="promo-card">
-          <div class="promo-badge">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-              stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-            </svg>
-            <span>Hỏa tốc</span>
+        <div class="promo-card blue-panel">
+          <div class="promo-content">
+            <span class="promo-tag tech">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="16 18 22 12 16 6" />
+                <polyline points="8 6 2 12 8 18" />
+              </svg>
+              <span>TECH RESOURCES</span>
+            </span>
+            <strong data-i18n="promoDocsTitle">Tài Liệu Hỗ Trợ Kỹ Thuật & Lập Trình</strong>
+            <p data-i18n="promoDocsText">Trọn bộ code mẫu chuẩn, thư viện C/C++/Python, sơ đồ chân pinout và hướng dẫn
+              tích hợp IoT.</p>
           </div>
-          <strong data-i18n="promoFastTitle">Giao nhanh nội thành</strong>
-          <p data-i18n="promoFastText">Soạn hàng trong ngày cho sản phẩm có sẵn kho.</p>
+          <div class="promo-links">
+            <a href="tai-lieu-san-pham.html#programming">
+              <span data-i18n="promoDocsLink1">💻 Code mẫu & Thư viện Arduino/ESP32</span>
+              <span class="promo-arrow">→</span>
+            </a>
+            <a href="tai-lieu-san-pham.html#pinouts">
+              <span data-i18n="promoDocsLink2">📖 Sơ đồ chân & Tài liệu kỹ thuật</span>
+              <span class="promo-arrow">→</span>
+            </a>
+            <a href="tai-lieu-san-pham.html#video">
+              <span data-i18n="promoDocsLink3">🎥 Video thực hành & Hướng dẫn Maker</span>
+              <span class="promo-arrow">→</span>
+            </a>
+          </div>
         </div>
-        <div class="promo-card">
-          <div class="promo-badge stem-badge">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
-              stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"></circle>
-              <circle cx="12" cy="12" r="4"></circle>
-            </svg>
-            <span>Giáo dục</span>
+
+        <div class="promo-card blue-panel">
+          <div class="promo-content">
+            <span class="promo-tag factory">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M2 20h20" />
+                <path d="M5 20V8l5 4V8l5 4V4h5v16" />
+              </svg>
+              <span>LAB & SMT FACTORY</span>
+            </span>
+            <strong data-i18n="promoPracticeTitle">Thực Hành Mạch Điện Tử & Gia Công PCBA</strong>
+            <p data-i18n="promoPracticeText">Cẩm nang phân tích mạch căn bản, kỹ thuật hàn dán linh kiện bề mặt SMT &
+              xuyên lỗ THM tại Nhà máy Luxas.</p>
           </div>
-          <strong data-i18n="promoStemTitle">Hỗ trợ dự án STEM</strong>
-          <p data-i18n="promoStemText">Gợi ý combo theo giáo án, robot, IoT, smart farm.</p>
+          <div class="promo-links">
+            <a href="huong-dan-thuc-hanh.html#circuits">
+              <span data-i18n="promoPracticeLink1">⚡ Nguyên lý & Mạch điện tử căn bản</span>
+              <span class="promo-arrow">→</span>
+            </a>
+            <a href="huong-dan-thuc-hanh.html#soldering">
+              <span data-i18n="promoPracticeLink2">🛠️ Cắm Breadboard & Kỹ thuật hàn mạch</span>
+              <span class="promo-arrow">→</span>
+            </a>
+            <a href="huong-dan-thuc-hanh.html#pcba-luxas">
+              <span data-i18n="promoPracticeLink3">🏭 Dây chuyền dán SMT & THM (PCBA)</span>
+              <span class="promo-arrow">→</span>
+            </a>
+          </div>
         </div>
       </aside>
     </section>
@@ -344,7 +401,8 @@
         </div>
       </div>
 
-      <div class="service-card">
+      <a href="huong-dan-mua-hang.html#vat-invoice" class="service-card"
+        style="text-decoration: none; color: inherit; cursor: pointer;">
         <div class="service-icon-wrap cyan">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round">
@@ -359,9 +417,10 @@
           <strong data-i18n="serviceInvoiceTitle">Hóa đơn VAT điện tử</strong>
           <span data-i18n="serviceInvoiceText">Hỗ trợ trường học, viện và doanh nghiệp</span>
         </div>
-      </div>
+      </a>
 
-      <div class="service-card">
+      <a href="chinh-sach-bao-hanh.html" class="service-card"
+        style="text-decoration: none; color: inherit; cursor: pointer;">
         <div class="service-icon-wrap emerald">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round">
@@ -373,7 +432,7 @@
           <strong data-i18n="serviceWarrantyTitle">Bảo hành kỹ thuật</strong>
           <span data-i18n="serviceWarrantyText">Đổi mới linh kiện lỗi, hỗ trợ kỹ thuật tận tâm</span>
         </div>
-      </div>
+      </a>
 
       <div class="service-card">
         <div class="service-icon-wrap amber">
@@ -427,7 +486,7 @@
         <div class="filter-group">
           <label for="stockFilter" data-i18n="stock">Kho hàng</label>
           <select id="stockFilter" class="filter-select">
-            <option value="all" data-i18n="all">Tất cả</option>
+            <option value="all" selected data-i18n="all">Tất cả</option>
             <option value="inStock" data-i18n="inStock">Còn hàng</option>
             <option value="lowStock" data-i18n="lowStock">Sắp hết hàng</option>
           </select>
@@ -435,7 +494,7 @@
         <div class="filter-group">
           <label for="priceFilter" data-i18n="priceRange">Mức giá</label>
           <select id="priceFilter" class="filter-select">
-            <option value="all" data-i18n="all">Tất cả mức giá</option>
+            <option value="all" selected data-i18n="all">Tất cả mức giá</option>
             <option value="0-100000" data-i18n="priceUnder100">Dưới 100.000đ</option>
             <option value="100000-300000" data-i18n="price100to300">100.000đ - 300.000đ</option>
             <option value="300000-99999999" data-i18n="priceOver300">Trên 300.000đ</option>
@@ -453,7 +512,7 @@
           <div class="view-tools">
             <span class="result-count-badge count-badge" id="resultCount">0 sản phẩm</span>
             <select id="sortSelect" class="sort-select" aria-label="Sắp xếp">
-              <option value="featured" data-i18n="sortFeatured">Nổi bật</option>
+              <option value="featured" selected data-i18n="sortFeatured">Nổi bật</option>
               <option value="priceAsc" data-i18n="sortPriceAsc">Giá tăng dần</option>
               <option value="priceDesc" data-i18n="sortPriceDesc">Giá giảm dần</option>
               <option value="stockDesc" data-i18n="sortStockDesc">Tồn kho nhiều</option>
@@ -492,11 +551,13 @@
             <h2 data-i18n="quoteTitle">Gửi yêu cầu mua linh kiện</h2>
           </div>
         </div>
-        <input type="text" placeholder="Tên khách hàng hoặc tên trường/đơn vị" data-i18n-placeholder="customerName"
-          required />
-        <input type="tel" placeholder="Số điện thoại Zalo liên hệ" data-i18n-placeholder="phoneNumber" required />
-        <textarea placeholder="Danh sách linh kiện, số lượng, yêu cầu xuất hóa đơn và thời gian giao..."
-          data-i18n-placeholder="quoteDetails" rows="4"></textarea>
+        <input type="text" id="quoteCustomer" name="customer" placeholder="Tên khách hàng hoặc tên trường/đơn vị"
+          data-i18n-placeholder="customerName" required />
+        <input type="tel" id="quotePhone" name="phone" placeholder="Số điện thoại Zalo liên hệ"
+          data-i18n-placeholder="phoneNumber" required />
+        <textarea id="quoteContent" name="content"
+          placeholder="Danh sách linh kiện, số lượng, yêu cầu xuất hóa đơn và thời gian giao..."
+          data-i18n-placeholder="quoteDetails" rows="4" required></textarea>
         <button class="primary-button" type="submit">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round">
@@ -505,12 +566,32 @@
           </svg>
           <span data-i18n="sendRequest">Gửi yêu cầu báo giá</span>
         </button>
+        <div class="quote-benefits">
+          <div class="quote-benefit-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+            <span>Phản hồi & báo giá nhanh trong <strong>15 - 30 phút</strong></span>
+          </div>
+          <div class="quote-benefit-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+            <span>Hỗ trợ xuất hóa đơn VAT cho Trường học, Viện nghiên cứu</span>
+          </div>
+          <div class="quote-benefit-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+            <span>Chiết khấu đơn dự án số lượng lớn & tư vấn linh kiện thay thế</span>
+          </div>
+        </div>
       </form>
     </section>
   </main>
 
   <!-- Corporate Dark High-Tech Footer -->
-  <footer class="site-footer" id="support">
+  <footer class="site-footer">
     <div class="container footer-columns">
       <div class="footer-column">
         <div class="footer-panel-header">LUXAS STEM IoT</div>
@@ -570,6 +651,22 @@
               </svg>
               <a href="admin/dashboard.html" style="color: var(--cyan); text-decoration: none; font-weight: 600;">Đăng
                 nhập Cổng Quản trị</a>
+            </li>
+            <li>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+              </svg>
+              <a href="chinh-sach-bao-hanh.html" style="color: #94a3b8; text-decoration: none;">Chính sách bảo hành &
+                đổi trả</a>
+            </li>
+            <li>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+              <a href="huong-dan-mua-hang.html" style="color: #94a3b8; text-decoration: none;">Hướng dẫn mua hàng &
+                thanh toán</a>
             </li>
           </ul>
         </div>
@@ -639,10 +736,22 @@
     </div>
 
     <form class="checkout-form" id="checkoutForm">
-      <div class="checkout-form-title">Thông tin giao nhận hàng</div>
-      <input type="text" placeholder="Họ và tên người nhận" data-i18n-placeholder="fullName" required />
-      <input type="tel" placeholder="Số điện thoại nhận hàng" data-i18n-placeholder="phoneNumber" required />
-      <input type="text" placeholder="Địa chỉ chi tiết (Số nhà, đường, phường, quận...)"
+      <div class="checkout-form-title" data-i18n="checkoutTitle">Thông tin giao nhận hàng</div>
+      <div id="checkoutCustomerNotice" class="checkout-customer-notice" hidden>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+          <circle cx="12" cy="7" r="4" />
+        </svg>
+        <span>Tài khoản: <strong id="checkoutCustomerName"></strong></span>
+      </div>
+      <input type="text" id="checkoutName" placeholder="Họ và tên người nhận" data-i18n-placeholder="fullName"
+        required />
+      <input type="tel" id="checkoutPhone" placeholder="Số điện thoại nhận hàng" data-i18n-placeholder="phoneNumber"
+        required />
+      <input type="email" id="checkoutEmail" placeholder="Email nhận hóa đơn / theo dõi đơn"
+        data-i18n-placeholder="emailPlaceholder" />
+      <input type="text" id="checkoutAddress" placeholder="Địa chỉ chi tiết (Số nhà, đường, phường, quận...)"
         data-i18n-placeholder="deliveryAddress" required />
       <button class="primary-button checkout-submit-btn btn-place-order" type="submit">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -657,8 +766,8 @@
   <!-- Interactive Product Detail Modal -->
   <div class="modal hidden" id="productModal">
     <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="productModalTitle">
-      <button class="close-button" id="closeProductModal" type="button" aria-label="Đóng">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+      <button class="close-button" id="closeProductModal" type="button" aria-label="Đóng" onclick="closeProductModal()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
           stroke-linecap="round" stroke-linejoin="round">
           <line x1="18" y1="6" x2="6" y2="18"></line>
           <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -851,7 +960,8 @@
 
   <!-- Customer Account Modal -->
   <div class="account-modal-backdrop" id="accountModalBackdrop" hidden></div>
-  <div class="account-modal" id="accountModal" hidden role="dialog" aria-modal="true" aria-labelledby="accountModalTitle">
+  <div class="account-modal" id="accountModal" hidden role="dialog" aria-modal="true"
+    aria-labelledby="accountModalTitle">
     <button class="account-modal-close" id="accountModalClose" type="button" aria-label="Đóng">&times;</button>
     <h2 id="accountModalTitle">Đăng nhập</h2>
     <p class="account-modal-subtitle" id="accountModalSubtitle">Đăng nhập để theo dõi đơn hàng của bạn.</p>
@@ -863,7 +973,8 @@
       <label for="customerLoginEmail">Email</label>
       <input id="customerLoginEmail" type="email" autocomplete="email" required placeholder="you@example.com" />
       <label for="customerLoginPassword">Mật khẩu</label>
-      <input id="customerLoginPassword" type="password" autocomplete="current-password" required minlength="6" placeholder="Tối thiểu 6 ký tự" />
+      <input id="customerLoginPassword" type="password" autocomplete="current-password" required minlength="6"
+        placeholder="Tối thiểu 6 ký tự" />
       <p class="account-form-message" id="customerLoginMessage" role="alert"></p>
       <button class="account-submit" type="submit">Đăng nhập</button>
     </form>
@@ -875,10 +986,24 @@
       <label for="customerRegisterEmail">Email</label>
       <input id="customerRegisterEmail" type="email" autocomplete="email" required placeholder="you@example.com" />
       <label for="customerRegisterPassword">Mật khẩu</label>
-      <input id="customerRegisterPassword" type="password" autocomplete="new-password" required minlength="6" placeholder="Tối thiểu 6 ký tự" />
+      <input id="customerRegisterPassword" type="password" autocomplete="new-password" required minlength="6"
+        placeholder="Tối thiểu 6 ký tự" />
       <p class="account-form-message" id="customerRegisterMessage" role="alert"></p>
       <button class="account-submit" type="submit">Tạo tài khoản</button>
     </form>
+  </div>
+
+  <!-- Customer Order History Modal -->
+  <div class="account-modal-backdrop" id="customerOrdersBackdrop" hidden></div>
+  <div class="account-modal customer-orders-modal" id="customerOrdersModal" hidden role="dialog" aria-modal="true"
+    aria-labelledby="customerOrdersTitle">
+    <button class="account-modal-close" id="customerOrdersClose" type="button" aria-label="Đóng">&times;</button>
+    <h2 id="customerOrdersTitle" data-i18n="myOrdersTitle">Đơn hàng của bạn</h2>
+    <p class="account-modal-subtitle" id="customerOrdersSubtitle" data-i18n="myOrdersSubtitle">Lịch sử các đơn hàng đã
+      đặt của bạn.</p>
+    <div id="customerOrdersList" class="customer-orders-list">
+      <!-- Generated dynamically in app.js -->
+    </div>
   </div>
 
   <!-- Floating Social Media Bar -->

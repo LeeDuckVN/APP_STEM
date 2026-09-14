@@ -55,10 +55,11 @@
       </form>
 
       <div class="login-hint">
-        <p style="margin-bottom: 6px;">Tài khoản mẫu: <code>admin</code> · Mật khẩu: <code>admin123</code></p>
+        <p style="margin-bottom: 6px;">Tài khoản quản trị mặc định: <code>admin</code> · Mật khẩu: <code>admin123</code>
+        </p>
         <button type="button" class="btn btn-sm btn-secondary" onclick="fillDemoAccount()"
           style="font-size: 11.5px; padding: 4px 10px; background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.15); color: #e2e8f0;">
-          Tự động điền tài khoản mẫu
+          Điền thông tin quản trị
         </button>
       </div>
 
@@ -84,7 +85,7 @@
     function fillDemoAccount() {
       document.getElementById('username').value = 'admin';
       document.getElementById('password').value = 'admin123';
-      showToast('Đã điền tài khoản mẫu', 'info');
+      showToast('Đã điền tài khoản quản trị', 'info');
     }
 
     function handleLogin(e) {

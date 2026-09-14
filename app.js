@@ -20,10 +20,16 @@ const i18n = {
     heroTitle: "Board, cảm biến, robot kit và thiết bị tự động hóa",
     viewProducts: "Xem sản phẩm",
     requestQuote: "Gửi yêu cầu báo giá",
-    promoFastTitle: "Giao nhanh nội thành",
-    promoFastText: "Soạn hàng trong ngày cho sản phẩm có tồn kho.",
-    promoStemTitle: "Hỗ trợ dự án STEM",
-    promoStemText: "Gợi ý combo theo giáo án, robot, IoT, nhà máy mini.",
+    promoDocsTitle: "Tài Liệu Hỗ Trợ Kỹ Thuật & Lập Trình",
+    promoDocsText: "Trọn bộ code mẫu chuẩn, thư viện C/C++/Python, sơ đồ chân pinout và hướng dẫn tích hợp IoT.",
+    promoDocsLink1: "💻 Code mẫu & Thư viện Arduino/ESP32",
+    promoDocsLink2: "📖 Sơ đồ chân & Tài liệu kỹ thuật",
+    promoDocsLink3: "🎥 Video thực hành & Hướng dẫn Maker",
+    promoPracticeTitle: "Thực Hành Mạch Điện Tử & Gia Công PCBA",
+    promoPracticeText: "Cẩm nang phân tích mạch căn bản, kỹ thuật hàn dán linh kiện bề mặt SMT & xuyên lỗ THM tại Nhà máy Luxas.",
+    promoPracticeLink1: "⚡ Nguyên lý & Mạch điện tử căn bản",
+    promoPracticeLink2: "🛠️ Cắm Breadboard & Kỹ thuật hàn mạch",
+    promoPracticeLink3: "🏭 Dây chuyền dán SMT & THM (PCBA)",
     serviceShippingTitle: "🚚 Giao hàng",
     serviceShippingText: "COD, chuyển khoản, lấy tại cửa hàng",
     serviceInvoiceTitle: "🧾 Xuất hóa đơn",
@@ -71,9 +77,15 @@ const i18n = {
     subtotal: "Tạm tính",
     shippingFee: "Phí giao hàng",
     total: "Tổng cộng",
-    fullName: "Họ tên",
-    deliveryAddress: "Địa chỉ nhận hàng",
-    placeOrder: "Đặt hàng",
+    fullName: "Họ và tên người nhận",
+    phoneNumber: "Số điện thoại nhận hàng",
+    emailPlaceholder: "Email nhận hóa đơn / theo dõi đơn",
+    deliveryAddress: "Địa chỉ chi tiết (Số nhà, đường, phường, quận...)",
+    checkoutTitle: "Thông tin giao nhận hàng",
+    myOrdersTitle: "Đơn hàng của bạn",
+    myOrdersSubtitle: "Lịch sử các đơn hàng đã đặt của bạn.",
+    noOrders: "Bạn chưa có đơn hàng nào.",
+    placeOrder: "Xác nhận đặt hàng (COD)",
     home: "Trang chủ",
     allCategories: "Tất cả danh mục",
     allSubcategories: "Tất cả nhóm con",
@@ -138,10 +150,16 @@ const i18n = {
     heroTitle: "Boards, sensors, robot kits, and automation devices",
     viewProducts: "View products",
     requestQuote: "Request a quote",
-    promoFastTitle: "Fast local delivery",
-    promoFastText: "Same-day picking for in-stock products.",
-    promoStemTitle: "STEM project support",
-    promoStemText: "Suggested kits for lessons, robots, IoT, and mini factories.",
+    promoDocsTitle: "Technical Documentation & Code Libraries",
+    promoDocsText: "Standard sample code, C/C++/Python libraries, pinouts, and step-by-step IoT integration guides.",
+    promoDocsLink1: "💻 Arduino & ESP32 Code Libraries",
+    promoDocsLink2: "📖 Pinout Schematics & Tech Specs",
+    promoDocsLink3: "🎥 Hands-on Video & Maker Guides",
+    promoPracticeTitle: "Electronics Practice & PCBA Manufacturing",
+    promoPracticeText: "Basic circuit analysis guide, SMT surface mount & THM through-hole assembly at Luxas Factory.",
+    promoPracticeLink1: "⚡ Basic Circuit Principles",
+    promoPracticeLink2: "🛠️ Breadboard & Soldering Guide",
+    promoPracticeLink3: "🏭 Luxas SMT & THM PCBA Assembly Line",
     serviceShippingTitle: "🚚 Delivery",
     serviceShippingText: "COD, bank transfer, or store pickup",
     serviceInvoiceTitle: "🧾 Invoices",
@@ -190,8 +208,14 @@ const i18n = {
     shippingFee: "Shipping fee",
     total: "Total",
     fullName: "Full name",
-    deliveryAddress: "Delivery address",
-    placeOrder: "Place order",
+    phoneNumber: "Phone number",
+    emailPlaceholder: "Email for order updates / tracking",
+    deliveryAddress: "Delivery address (Street, ward, district...)",
+    checkoutTitle: "Shipping & Contact Information",
+    myOrdersTitle: "Your Orders",
+    myOrdersSubtitle: "Order history for your account.",
+    noOrders: "No orders placed yet.",
+    placeOrder: "Confirm Order (COD)",
     home: "Home",
     allCategories: "All categories",
     allSubcategories: "All subcategories",
@@ -256,10 +280,16 @@ const i18n = {
     heroTitle: "ボード、センサー、ロボットキット、自動化機器",
     viewProducts: "商品を見る",
     requestQuote: "見積依頼",
-    promoFastTitle: "市内スピード配送",
-    promoFastText: "在庫品は当日ピッキング対応。",
-    promoStemTitle: "STEMプロジェクト支援",
-    promoStemText: "授業、ロボット、IoT、ミニ工場向けキットを提案します。",
+    promoDocsTitle: "技術サポート資料・サンプルコード",
+    promoDocsText: "標準サンプルコード、C/C++/Pythonライブラリ、ピン配置図、IoT統合ガイド。",
+    promoDocsLink1: "💻 Arduino/ESP32 コードとライブラリ",
+    promoDocsLink2: "📖 ピン配置図と技術仕様書",
+    promoDocsLink3: "🎥 実践動画とメイカー向けガイド",
+    promoPracticeTitle: "基礎電子回路 実践とPCBA実装",
+    promoPracticeText: "基礎回路解析、Luxas工場直結の表面実装（SMT）およびスルーホール（THM）組み立て手順。",
+    promoPracticeLink1: "⚡ 基礎電子回路と部品の原理",
+    promoPracticeLink2: "🛠️ ブレッドボードと半田付け手順",
+    promoPracticeLink3: "🏭 Luxas工場 SMT/THM 実装ライン",
     serviceShippingTitle: "🚚 配送",
     serviceShippingText: "代引き、銀行振込、店舗受取",
     serviceInvoiceTitle: "🧾 請求書",
@@ -308,8 +338,14 @@ const i18n = {
     shippingFee: "送料",
     total: "合計",
     fullName: "氏名",
-    deliveryAddress: "配送先住所",
-    placeOrder: "注文する",
+    phoneNumber: "電話番号",
+    emailPlaceholder: "メールアドレス",
+    deliveryAddress: "お届け先住所",
+    checkoutTitle: "配送先情報",
+    myOrdersTitle: "注文履歴",
+    myOrdersSubtitle: "あなたのアカウントの注文履歴。",
+    noOrders: "まだ注文はありません。",
+    placeOrder: "注文を確定する (COD)",
     home: "ホーム",
     allCategories: "すべてのカテゴリ",
     allSubcategories: "すべてのサブカテゴリ",
@@ -373,6 +409,15 @@ let cart = JSON.parse(localStorage.getItem("stemCart") || "[]");
 
 const $ = (selector) => document.querySelector(selector);
 
+function escapeHtml(v) {
+  return String(v == null ? "" : v)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 // ===================== Customer Account =====================
 const customerAccount = $("#customerAccount");
 const customerAccountToggle = $("#customerAccountToggle");
@@ -386,16 +431,143 @@ const customerRegisterForm = $("#customerRegisterForm");
 const accountTabs = Array.from(document.querySelectorAll("[data-account-tab]"));
 const accountActions = Array.from(document.querySelectorAll("[data-account-action]"));
 const customerSessionKey = "stem_customer_session";
-const customerApiBase = "/api/customers";
+const customerApiBase = `${typeof getApiBaseUrl === 'function' ? getApiBaseUrl() : ''}/api/customers`;
 
 function getCustomerSession() {
   return readJSON(customerSessionKey, null);
 }
 
 function setCustomerSession(user) {
-  if (user) writeJSON(customerSessionKey, { id: user.id, name: user.name, email: user.email });
-  else localStorage.removeItem(customerSessionKey);
+  if (user) {
+    writeJSON(customerSessionKey, {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone || ""
+    });
+  } else {
+    localStorage.removeItem(customerSessionKey);
+  }
 }
+
+function autoFillCheckoutCustomer() {
+  const session = getCustomerSession();
+  const noticeEl = $("#checkoutCustomerNotice");
+  const nameNotice = $("#checkoutCustomerName");
+  const nameInput = $("#checkoutName");
+  const phoneInput = $("#checkoutPhone");
+  const emailInput = $("#checkoutEmail");
+
+  if (session) {
+    if (noticeEl && nameNotice) {
+      nameNotice.textContent = session.name || session.email;
+      noticeEl.hidden = false;
+    }
+    if (nameInput && (!nameInput.value || nameInput.dataset.autofilled === "true")) {
+      nameInput.value = session.name || "";
+      nameInput.dataset.autofilled = "true";
+    }
+    if (phoneInput && (!phoneInput.value || phoneInput.dataset.autofilled === "true")) {
+      phoneInput.value = session.phone || "";
+      phoneInput.dataset.autofilled = "true";
+    }
+    if (emailInput && (!emailInput.value || emailInput.dataset.autofilled === "true")) {
+      emailInput.value = session.email || "";
+      emailInput.dataset.autofilled = "true";
+    }
+  } else {
+    if (noticeEl) noticeEl.hidden = true;
+    if (nameInput && nameInput.dataset.autofilled === "true") {
+      nameInput.value = "";
+      delete nameInput.dataset.autofilled;
+    }
+    if (phoneInput && phoneInput.dataset.autofilled === "true") {
+      phoneInput.value = "";
+      delete phoneInput.dataset.autofilled;
+    }
+    if (emailInput && emailInput.dataset.autofilled === "true") {
+      emailInput.value = "";
+      delete emailInput.dataset.autofilled;
+    }
+  }
+}
+
+// ===================== Customer Orders Modal =====================
+const customerOrdersModal = $("#customerOrdersModal");
+const customerOrdersBackdrop = $("#customerOrdersBackdrop");
+const customerOrdersClose = $("#customerOrdersClose");
+const customerOrdersList = $("#customerOrdersList");
+
+function openCustomerOrdersModal() {
+  const session = getCustomerSession();
+  if (!session) {
+    openAccountModal("login");
+    return;
+  }
+  renderCustomerOrders(session);
+  if (customerOrdersModal) customerOrdersModal.hidden = false;
+  if (customerOrdersBackdrop) customerOrdersBackdrop.hidden = false;
+}
+
+function closeCustomerOrdersModal() {
+  if (customerOrdersModal) customerOrdersModal.hidden = true;
+  if (customerOrdersBackdrop) customerOrdersBackdrop.hidden = true;
+}
+
+function renderCustomerOrders(session) {
+  if (!customerOrdersList) return;
+  const allOrders = getStoreOrders();
+  const sEmail = String(session.email || "").toLowerCase().trim();
+  const sPhone = String(session.phone || "").trim();
+  const sId = String(session.id || "").trim();
+
+  const userOrders = allOrders.filter((o) => {
+    if (sId && o.customerId && String(o.customerId) === sId) return true;
+    if (sEmail && o.email && String(o.email).toLowerCase().trim() === sEmail) return true;
+    if (sPhone && o.phone && String(o.phone).trim() === sPhone) return true;
+    return false;
+  }).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+  if (userOrders.length === 0) {
+    customerOrdersList.innerHTML = `<div class="customer-orders-empty">${t("noOrders") || "Bạn chưa có đơn hàng nào."}</div>`;
+    return;
+  }
+
+  const statusMap = {
+    pending: { label: "Chờ xử lý", class: "pending" },
+    processing: { label: "Đang xử lý", class: "processing" },
+    shipping: { label: "Đang giao", class: "shipped" },
+    shipped: { label: "Đang giao", class: "shipped" },
+    completed: { label: "Hoàn thành", class: "completed" },
+    cancelled: { label: "Đã hủy", class: "cancelled" }
+  };
+
+  customerOrdersList.innerHTML = userOrders.map((o) => {
+    const st = statusMap[o.status] || { label: o.status, class: "pending" };
+    const dateStr = o.createdAt ? new Date(o.createdAt).toLocaleString("vi-VN") : "—";
+    const itemsSummary = (o.items || []).map((it) => {
+      const name = typeof it.name === "string" ? it.name : (it.name?.[currentLang] || it.name?.vi || "Sản phẩm");
+      return `${it.qty}x ${name}`;
+    }).join(", ");
+
+    return `
+      <div class="customer-order-card">
+        <div class="customer-order-card-header">
+          <span class="customer-order-card-id">${escapeHtml(o.id)}</span>
+          <span class="customer-order-card-status ${st.class}">${st.label}</span>
+        </div>
+        <div class="customer-order-items">${escapeHtml(itemsSummary || "Chi tiết đơn")}</div>
+        <div class="customer-order-card-footer">
+          <span>${dateStr}</span>
+          <span class="customer-order-card-total">${formatCurrency(o.total)}</span>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+customerOrdersClose?.addEventListener("click", closeCustomerOrdersModal);
+customerOrdersBackdrop?.addEventListener("click", closeCustomerOrdersModal);
 
 function setAccountMode(mode) {
   const isLogin = mode === "login";
@@ -423,10 +595,15 @@ function closeAccountModal() {
 
 function refreshCustomerAccount() {
   const session = getCustomerSession();
-  customerAccountLabel.textContent = session?.name || "Khách hàng";
-  accountActions.find((action) => action.dataset.accountAction === "logout").hidden = !session;
-  accountActions.find((action) => action.dataset.accountAction === "login").hidden = Boolean(session);
-  accountActions.find((action) => action.dataset.accountAction === "register").hidden = Boolean(session);
+  if (customerAccountLabel) {
+    customerAccountLabel.textContent = session?.name || "Khách hàng";
+  }
+  accountActions.forEach((action) => {
+    const act = action.dataset?.accountAction;
+    if (act === "logout") action.hidden = !session;
+    if (act === "login" || act === "register") action.hidden = Boolean(session);
+  });
+  autoFillCheckoutCustomer();
 }
 
 if (customerAccountToggle) {
@@ -446,7 +623,7 @@ if (customerAccountToggle) {
       refreshCustomerAccount();
     }
     if (type === "orders" || type === "history") {
-      document.querySelector("#checkout")?.scrollIntoView({ behavior: "smooth" });
+      openCustomerOrdersModal();
     }
   }));
   accountTabs.forEach((tab) => tab.addEventListener("click", () => setAccountMode(tab.dataset.accountTab)));
@@ -562,11 +739,14 @@ function formatMoney(amount) {
 }
 
 function getCategory(categoryId) {
-  return categories.find((category) => category.id === categoryId);
+  const found = categories.find((category) => category.id === categoryId);
+  return found || { id: categoryId || "", label: { vi: categoryId || "", en: categoryId || "", ja: categoryId || "" }, subs: [] };
 }
 
 function getSub(categoryId, subId) {
-  return getCategory(categoryId)?.subs.find((sub) => sub.id === subId);
+  const cat = getCategory(categoryId);
+  const found = cat?.subs?.find((sub) => sub.id === subId);
+  return found || { id: subId || "", label: { vi: subId || "", en: subId || "", ja: subId || "" } };
 }
 
 function saveCart() {
@@ -684,55 +864,71 @@ function syncFilters() {
 }
 
 function matchesPrice(product) {
-  if (priceFilter.value === "all") return true;
-  const [min, max] = priceFilter.value.split("-").map(Number);
+  const val = priceFilter?.value || "all";
+  if (val === "all" || !val.includes("-")) return true;
+  const parts = val.split("-").map(Number);
+  const min = Number.isFinite(parts[0]) ? parts[0] : 0;
+  const max = Number.isFinite(parts[1]) ? parts[1] : Infinity;
   return product.price >= min && product.price <= max;
 }
 
 function productSearchText(product) {
+  if (!product) return "";
   const category = getCategory(product.category);
   const sub = getSub(product.category, product.sub);
+
+  const extractText = (val) => {
+    if (!val) return [];
+    if (typeof val === "string") return [val];
+    if (typeof val === "object") return Object.values(val).filter((x) => typeof x === "string");
+    return [String(val)];
+  };
+
   return [
-    product.sku,
-    ...Object.values(product.name),
-    ...Object.values(product.badge),
-    ...Object.values(category.label),
-    ...Object.values(sub.label)
+    product.sku || "",
+    ...extractText(product.name),
+    ...extractText(product.badge),
+    ...extractText(category?.label),
+    ...extractText(sub?.label)
   ]
     .join(" ")
     .toLowerCase();
 }
 
 function getVisibleProducts() {
-  const query = searchInput.value.trim().toLowerCase();
-  const scopedCategory = searchScope.value;
+  const query = (searchInput?.value || "").trim().toLowerCase();
+  const scopedCategory = searchScope?.value || "all";
+  const stockVal = stockFilter?.value || "all";
 
   let visible = products.filter((product) => {
-    const categoryOk = activeCategory === "all" || product.category === activeCategory;
-    const subOk = activeSub === "all" || product.sub === activeSub;
-    const scopeOk = scopedCategory === "all" || product.category === scopedCategory;
+    const categoryOk = !activeCategory || activeCategory === "all" || product.category === activeCategory;
+    const subOk = !activeSub || activeSub === "all" || product.sub === activeSub;
+    const scopeOk = !scopedCategory || scopedCategory === "all" || product.category === scopedCategory;
     const hiddenOk = !product.hidden; /* sản phẩm bị admin ẩn -> khách không thấy */
     const stockOk =
-      stockFilter.value === "all" ||
-      (stockFilter.value === "inStock" && product.inventory > 0) ||
-      (stockFilter.value === "lowStock" && product.inventory > 0 && product.inventory <= 20);
-    const searchOk = productSearchText(product).includes(query);
+      !stockVal ||
+      stockVal === "all" ||
+      (stockVal === "inStock" && product.inventory > 0) ||
+      (stockVal === "lowStock" && product.inventory > 0 && product.inventory <= 20);
+    const searchOk = !query || productSearchText(product).includes(query);
     return categoryOk && subOk && scopeOk && hiddenOk && stockOk && matchesPrice(product) && searchOk;
   });
 
-  if (sortSelect.value === "priceAsc") visible = visible.sort((a, b) => a.price - b.price);
-  if (sortSelect.value === "priceDesc") visible = visible.sort((a, b) => b.price - a.price);
-  if (sortSelect.value === "stockDesc") visible = visible.sort((a, b) => b.inventory - a.inventory);
+  const sortVal = sortSelect?.value || "featured";
+  if (sortVal === "priceAsc") visible = visible.sort((a, b) => a.price - b.price);
+  if (sortVal === "priceDesc") visible = visible.sort((a, b) => b.price - a.price);
+  if (sortVal === "stockDesc") visible = visible.sort((a, b) => b.inventory - a.inventory);
 
   return visible;
 }
 
 function getProductSpecs(product) {
-  const subName = label(getSub(product.category, product.sub).label);
+  const sub = getSub(product.category, product.sub);
+  const subName = sub ? label(sub.label) : "";
   return [
     `${t("specProductType")}: ${subName}`,
     `${t("specBrand")}: ${label(product.badge)}`,
-    `${t("specSku")}: ${product.sku}`,
+    `${t("specSku")}: ${product.sku || ""}`,
     `${t("specStatus")}: ${product.inventory > 0 ? t("inStockStatus") : t("outStockStatus")}`,
     `${t("specFit")}: ${label(product.description)}`
   ];
@@ -798,11 +994,18 @@ function openProductModal(productId) {
   productModalQty.value = 1;
   productModalAdd.dataset.productId = product.id;
   productModal.classList.remove("hidden");
+  productModal.style.display = "flex";
 }
 
 function closeProductModal() {
-  productModal.classList.add("hidden");
+  const modal = document.getElementById("productModal") || productModal;
+  if (modal) {
+    modal.classList.add("hidden");
+    modal.style.display = "none";
+  }
 }
+window.closeProductModal = closeProductModal;
+window.openProductModal = openProductModal;
 
 function renderProducts() {
   const visible = getVisibleProducts();
@@ -814,7 +1017,8 @@ function renderProducts() {
     .map((product) => {
       const productName = label(product.name);
       const productDescription = label(product.description);
-      const subName = label(getSub(product.category, product.sub).label);
+      const sub = getSub(product.category, product.sub);
+      const subName = sub ? label(sub.label) : "";
       const inStock = product.inventory > 0;
       const isLowStock = inStock && product.inventory <= 20;
       return `
@@ -878,22 +1082,28 @@ function renderProducts() {
 }
 
 function renderNewProducts() {
-  newProducts.innerHTML = products
-    .filter((product) => product.isNew && !product.hidden)
+  const newItems = products.filter((product) => product.isNew && !product.hidden);
+  newProducts.innerHTML = newItems
     .map(
       (product) => `
-        <article class="mini-card">
+        <article class="mini-card" data-new-product-id="${product.id}" title="Xem chi tiết ${escapeHtml(label(product.name))}">
           <div class="product-image" style="--image-position: ${product.imagePosition}">
-            <img src="${getProductImageUrl(product, false)}" alt="${label(product.name)}" loading="lazy" />
+            <img src="${getProductImageUrl(product, false)}" alt="${escapeHtml(label(product.name))}" loading="lazy" />
           </div>
           <div>
-            <h3>${label(product.name)}</h3>
+            <h3>${escapeHtml(label(product.name))}</h3>
             <strong>${formatMoney(product.price)}</strong>
           </div>
         </article>
       `
     )
     .join("");
+
+  newProducts.querySelectorAll("[data-new-product-id]").forEach((card) => {
+    card.addEventListener("click", () => {
+      openProductModal(card.dataset.newProductId);
+    });
+  });
 }
 
 function renderSuggestions() {
@@ -920,6 +1130,7 @@ function renderSuggestions() {
 
 function addToCart(productId, qty = 1) {
   const product = products.find((item) => item.id === productId);
+  if (!product) return;
   const quantity = Math.max(1, qty);
   const existing = cart.find((item) => item.id === productId);
 
@@ -936,6 +1147,7 @@ function addToCart(productId, qty = 1) {
 
 function changeCartQty(productId, step) {
   const product = products.find((item) => item.id === productId);
+  if (!product) return;
   cart = cart
     .map((item) => (item.id === productId ? { ...item, qty: Math.min(product.inventory, item.qty + step) } : item))
     .filter((item) => item.qty > 0);
@@ -1040,6 +1252,7 @@ function renderCart() {
 }
 
 function openCart() {
+  autoFillCheckoutCustomer();
   cartBackdrop.hidden = false;
   cartDrawer.classList.add("open");
   cartDrawer.setAttribute("aria-hidden", "false");
@@ -1190,10 +1403,33 @@ modalTabs.forEach((button) => {
   });
 });
 
-$("#quote").addEventListener("submit", (event) => {
+$("#quote")?.addEventListener("submit", (event) => {
   event.preventDefault();
-  event.currentTarget.reset();
-  showToast(t("quoteReceived"));
+  const form = event.currentTarget;
+  const customer = $("#quoteCustomer") ? $("#quoteCustomer").value.trim() : "";
+  const phone = $("#quotePhone") ? $("#quotePhone").value.trim() : "";
+  const content = $("#quoteContent") ? $("#quoteContent").value.trim() : "";
+
+  if (!customer || !phone || !content) {
+    showToast("Vui lòng điền đầy đủ tên, số điện thoại và danh sách linh kiện cần báo giá.", "warning");
+    return;
+  }
+
+  const session = typeof getCustomerSession === "function" ? getCustomerSession() : null;
+  const newQuote = typeof addStoreQuote === "function" ? addStoreQuote({
+    customer,
+    phone,
+    email: session?.email || "",
+    content
+  }) : null;
+
+  form.reset();
+  const msg = currentLang === "en"
+    ? `Quote request ${newQuote?.id || ""} received! We will contact you within 15-30 minutes.`
+    : currentLang === "ja"
+      ? `見積依頼 ${newQuote?.id || ""} を受け付けました。15〜30分以内にご連絡いたします。`
+      : `Đã gửi yêu cầu báo giá ${newQuote?.id ? `(#${newQuote.id})` : ""} thành công! Kỹ thuật viên sẽ liên hệ trong 15 - 30 phút.`;
+  showToast(msg, "success", 4500);
 });
 
 $("#checkoutForm").addEventListener("submit", (event) => {
@@ -1203,9 +1439,20 @@ $("#checkoutForm").addEventListener("submit", (event) => {
     return;
   }
   const form = event.currentTarget;
-  const inputs = form.querySelectorAll("input");
+  const session = getCustomerSession();
+  const customerName = $("#checkoutName") ? $("#checkoutName").value.trim() : "";
+  const customerPhone = $("#checkoutPhone") ? $("#checkoutPhone").value.trim() : "";
+  const customerEmail = $("#checkoutEmail") ? $("#checkoutEmail").value.trim() : (session?.email || "");
+  const customerAddress = $("#checkoutAddress") ? $("#checkoutAddress").value.trim() : "";
+
   const result = placeStoreOrder(
-    { customer: inputs[0].value.trim(), phone: inputs[1].value.trim(), address: inputs[2].value.trim() },
+    {
+      customer: customerName,
+      phone: customerPhone,
+      email: customerEmail,
+      address: customerAddress,
+      customerId: session?.id || null
+    },
     cart
   );
   if (!result.ok) {
@@ -1221,6 +1468,7 @@ $("#checkoutForm").addEventListener("submit", (event) => {
   renderAll();
   renderNewProducts();
   form.reset();
+  autoFillCheckoutCustomer();
   showToast(t("orderSuccess") + " - " + result.order.id);
 });
 
@@ -1301,25 +1549,27 @@ if (carouselTrack && carouselDots) {
   const AUTOPLAY_INTERVAL = 4500; // 4.5s giữa các ảnh
 
   function setActiveSlide(next) {
-    if (next === currentIndex || next < 0 || next >= slideCount) return;
-    slides[currentIndex].classList.remove("active");
-    slides[next].classList.add("active");
+    if (slideCount <= 1 || next === currentIndex || next < 0 || next >= slideCount) return;
+    if (slides[currentIndex]) slides[currentIndex].classList.remove("active");
+    if (slides[next]) slides[next].classList.add("active");
     dots[currentIndex]?.classList.remove("active");
     dots[next]?.classList.add("active");
     currentIndex = next;
   }
 
   function nextSlide() {
-    setActiveSlide((currentIndex + 1) % slideCount);
+    if (slideCount > 1) setActiveSlide((currentIndex + 1) % slideCount);
   }
 
   function prevSlide() {
-    setActiveSlide((currentIndex - 1 + slideCount) % slideCount);
+    if (slideCount > 1) setActiveSlide((currentIndex - 1 + slideCount) % slideCount);
   }
 
   function restartAutoplay() {
     if (autoplayTimer) clearInterval(autoplayTimer);
-    autoplayTimer = window.setInterval(nextSlide, AUTOPLAY_INTERVAL);
+    if (slideCount > 1) {
+      autoplayTimer = window.setInterval(nextSlide, AUTOPLAY_INTERVAL);
+    }
   }
 
   // Tạo các dot điều hướng
@@ -1348,7 +1598,9 @@ if (carouselTrack && carouselDots) {
   });
 
   // Xoay vòng tự động
-  restartAutoplay();
+  if (slideCount > 1) {
+    restartAutoplay();
+  }
 
   // Pause autoplay khi rê chuột vào carousel
   carouselEl?.addEventListener("mouseenter", () => {

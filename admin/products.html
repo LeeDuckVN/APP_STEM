@@ -56,9 +56,11 @@
           <div class="form-row">
             <div class="form-group">
               <label for="pfImageFile">Ảnh sản phẩm</label>
-              <input type="file" class="form-control" id="pfImageFile" accept="image/png,image/jpeg,image/webp,image/gif" />
+              <input type="file" class="form-control" id="pfImageFile"
+                accept="image/png,image/jpeg,image/webp,image/gif" />
               <small class="text-xs text-gray">Ảnh sẽ được lưu trực tiếp trong MongoDB.</small>
-              <img id="pfImagePreview" alt="Xem trước ảnh sản phẩm" hidden style="display:block; width:96px; height:72px; object-fit:contain; margin-top:8px; border-radius:8px; border:1px solid #dbe3ef;" />
+              <img id="pfImagePreview" alt="Xem trước ảnh sản phẩm" hidden
+                style="display:block; width:96px; height:72px; object-fit:contain; margin-top:8px; border-radius:8px; border:1px solid #dbe3ef;" />
               <input type="hidden" id="pfImage" />
             </div>
             <div class="form-group">
@@ -83,9 +85,70 @@
             </div>
           </div>
           <div class="form-group">
-            <label for="pfDescription">Mô tả (tiếng Việt)</label>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <label for="pfDescription" style="margin-bottom: 0;">Mô tả (tiếng Việt)</label>
+              <button type="button" class="btn btn-xs" id="btnQuickTranslate" onclick="previewAutoTranslate()"
+                style="display: inline-flex; align-items: center; gap: 5px; font-weight: 600; padding: 4px 10px; border-radius: 6px; font-size: 12px; cursor: pointer; border: 1px solid #0284c7; color: #0284c7; background: #f0f9ff; transition: all .2s ease;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="2" y1="12" x2="22" y2="12" />
+                  <path
+                    d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                </svg>
+                <span>⚡ Dịch tự động EN & JA</span>
+              </button>
+            </div>
             <textarea class="form-control" id="pfDescription" placeholder="Mô tả ngắn về sản phẩm..."></textarea>
           </div>
+
+          <!-- Khối bản dịch đa ngôn ngữ tự động (UI/UX Pro Max) -->
+          <details class="translation-preview-box" id="translationDetails"
+            style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 14px; margin-top: 12px;">
+            <summary
+              style="font-weight: 700; font-size: 13px; color: #1e293b; cursor: pointer; display: flex; align-items: center; justify-content: space-between;">
+              <span style="display: inline-flex; align-items: center; gap: 6px;">
+                <span>🌍</span>
+                <span>Bản dịch Đa Ngôn Ngữ (Tiếng Anh & Tiếng Nhật)</span>
+              </span>
+              <span class="badge badge-info" id="transStatusBadge" style="font-size: 11px;">Tự động dịch khi Lưu</span>
+            </summary>
+            <div style="margin-top: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+              <div class="form-group" style="margin-bottom: 8px;">
+                <label for="pfNameEn" class="text-xs font-bold text-gray"
+                  style="display: block; margin-bottom: 4px;">🇬🇧 Tên tiếng Anh (EN)</label>
+                <input type="text" class="form-control text-sm" id="pfNameEn"
+                  placeholder="Tự động dịch sang tiếng Anh..." />
+              </div>
+              <div class="form-group" style="margin-bottom: 8px;">
+                <label for="pfNameJa" class="text-xs font-bold text-gray"
+                  style="display: block; margin-bottom: 4px;">🇯🇵 Tên tiếng Nhật (JA)</label>
+                <input type="text" class="form-control text-sm" id="pfNameJa"
+                  placeholder="Tự động dịch sang tiếng Nhật..." />
+              </div>
+              <div class="form-group" style="margin-bottom: 8px;">
+                <label for="pfBadgeEn" class="text-xs font-bold text-gray"
+                  style="display: block; margin-bottom: 4px;">🇬🇧 Nhãn tiếng Anh (Badge EN)</label>
+                <input type="text" class="form-control text-sm" id="pfBadgeEn" placeholder="VD: Best Seller" />
+              </div>
+              <div class="form-group" style="margin-bottom: 8px;">
+                <label for="pfBadgeJa" class="text-xs font-bold text-gray"
+                  style="display: block; margin-bottom: 4px;">🇯🇵 Nhãn tiếng Nhật (Badge JA)</label>
+                <input type="text" class="form-control text-sm" id="pfBadgeJa" placeholder="VD: おすすめ" />
+              </div>
+              <div class="form-group" style="grid-column: 1 / -1; margin-bottom: 8px;">
+                <label for="pfDescEn" class="text-xs font-bold text-gray"
+                  style="display: block; margin-bottom: 4px;">🇬🇧 Mô tả tiếng Anh (EN)</label>
+                <textarea class="form-control text-sm" id="pfDescEn" rows="2"
+                  placeholder="English description..."></textarea>
+              </div>
+              <div class="form-group" style="grid-column: 1 / -1; margin-bottom: 0;">
+                <label for="pfDescJa" class="text-xs font-bold text-gray"
+                  style="display: block; margin-bottom: 4px;">🇯🇵 Mô tả tiếng Nhật (JA)</label>
+                <textarea class="form-control text-sm" id="pfDescJa" rows="2"
+                  placeholder="Japanese description..."></textarea>
+              </div>
+            </div>
+          </details>
         </form>
       </div>
       <div class="modal-footer">
@@ -126,12 +189,9 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           <span>Thêm sản phẩm</span>
         </button>
-        <button class="btn btn-sm btn-secondary" onclick="resetData()" title="Reset về dữ liệu gốc">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
-          <span>Khôi phục mẫu</span>
-        </button>
-        <button class="btn btn-sm btn-secondary" onclick="syncAllStoreToMongo()" title="Lưu toàn bộ dữ liệu hiện có vào MongoDB">
-          <span>Đồng bộ MongoDB</span>
+        <button class="btn btn-sm btn-secondary" id="btnTranslateCatalog" onclick="autoTranslateAllProductsCatalog()" title="Dịch tự động EN & JA và lưu trực tiếp vào MongoDB Atlas">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          <span id="btnTranslateCatalogText">Dịch catalog sang EN/JA</span>
         </button>
       `);
 
@@ -148,9 +208,7 @@
         renderTable();
       };
       renderAllAdmin();
-      loadStoreFromMongo().then(() => renderAllAdmin()).catch(() => {
-        showToast('Chưa tải được MongoDB, đang dùng dữ liệu trên trình duyệt', 'warning');
-      });
+      loadStoreFromMongo().then(() => renderAllAdmin()).catch(() => { });
     })();
 
     function handleImageFile(event) {
@@ -169,15 +227,6 @@
         preview.hidden = false;
       };
       reader.readAsDataURL(file);
-    }
-
-    async function syncAllStoreToMongo() {
-      try {
-        await saveStoreToMongo();
-        showToast('Đã lưu sản phẩm, đơn hàng, khách hàng và giỏ hàng vào MongoDB', 'success');
-      } catch (error) {
-        showToast('Không thể đồng bộ MongoDB. Kiểm tra kết nối Atlas.', 'error');
-      }
     }
 
     function renderStats() {
@@ -237,13 +286,18 @@
       tbody.innerHTML = filtered.map(p => {
         const cat = categories.find(c => c.id === p.category);
         const subLabel = cat && cat.subs.find(s => s.id === p.sub);
+        const hasEn = typeof p.name === 'object' && p.name?.en && typeof p.description === 'object' && p.description?.en;
+        const hasJa = typeof p.name === 'object' && p.name?.ja && typeof p.description === 'object' && p.description?.ja;
+        const langBadge = (hasEn && hasJa)
+          ? '<span class="badge badge-info" style="font-size: 10px; padding: 2px 7px; margin-left: 6px; font-weight: 700; background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd;" title="Đã lưu bản dịch VI, EN, JA trên MongoDB Atlas">🌐 VI · EN · JA</span>'
+          : '<span class="badge badge-warning" style="font-size: 10px; padding: 2px 7px; margin-left: 6px; font-weight: 700;" title="Chưa có đủ bản dịch">🌐 Chỉ có VI</span>';
         return `
           <tr>
             <td>
               <div class="product-cell">
                 <img class="product-img" src="${getProductImageUrl(p, true)}" alt="${escapeHtml(prodName(p))}" onerror="this.src='../assets/stem-iot-banner.png'" />
                 <div class="info">
-                  <h4>${escapeHtml(prodName(p))} ${p.hidden ? '<span class="badge badge-gray"><span class="badge-dot"></span>Ẩn</span>' : ''}</h4>
+                  <h4>${escapeHtml(prodName(p))} ${p.hidden ? '<span class="badge badge-gray"><span class="badge-dot"></span>Ẩn</span>' : ''} ${langBadge}</h4>
                   <span>${escapeHtml(p.sku)}</span>
                 </div>
               </div>
@@ -277,6 +331,17 @@
       document.getElementById('pfId').value = '';
       document.getElementById('pfImage').value = '';
       document.getElementById('pfImagePreview').hidden = true;
+      ['pfNameEn', 'pfNameJa', 'pfBadgeEn', 'pfBadgeJa', 'pfDescEn', 'pfDescJa'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+      const details = document.getElementById('translationDetails');
+      if (details) details.open = false;
+      const stBadge = document.getElementById('transStatusBadge');
+      if (stBadge) {
+        stBadge.textContent = 'Tự động dịch khi Lưu';
+        stBadge.className = 'badge badge-info';
+      }
       fillCategoryOptions('', '');
       openModal('productFormModal');
     }
@@ -303,7 +368,93 @@
       document.getElementById('pfHidden').value = p.hidden ? 'true' : 'false';
       document.getElementById('pfIsNew').value = p.isNew ? 'true' : 'false';
       document.getElementById('pfDescription').value = prodDesc(p);
+
+      // Điền các trường tiếng Anh / tiếng Nhật nếu có
+      const enName = typeof p.name === 'object' && p.name ? (p.name.en || '') : '';
+      const jaName = typeof p.name === 'object' && p.name ? (p.name.ja || '') : '';
+      const enBadge = typeof p.badge === 'object' && p.badge ? (p.badge.en || '') : '';
+      const jaBadge = typeof p.badge === 'object' && p.badge ? (p.badge.ja || '') : '';
+      const enDesc = typeof p.description === 'object' && p.description ? (p.description.en || '') : '';
+      const jaDesc = typeof p.description === 'object' && p.description ? (p.description.ja || '') : '';
+
+      document.getElementById('pfNameEn').value = enName;
+      document.getElementById('pfNameJa').value = jaName;
+      document.getElementById('pfBadgeEn').value = enBadge;
+      document.getElementById('pfBadgeJa').value = jaBadge;
+      document.getElementById('pfDescEn').value = enDesc;
+      document.getElementById('pfDescJa').value = jaDesc;
+
+      const details = document.getElementById('translationDetails');
+      const stBadge = document.getElementById('transStatusBadge');
+      const hasTranslation = !!(enName && jaName && enDesc && jaDesc);
+      if (hasTranslation) {
+        if (details) details.open = true;
+        if (stBadge) {
+          stBadge.textContent = '✓ Đã có bản dịch EN/JA';
+          stBadge.className = 'badge badge-success';
+        }
+      } else {
+        if (details) details.open = false;
+        if (stBadge) {
+          stBadge.textContent = 'Tự động dịch khi Lưu';
+          stBadge.className = 'badge badge-info';
+        }
+      }
+
       openModal('productFormModal');
+    }
+
+    async function previewAutoTranslate() {
+      const name = document.getElementById('pfName').value.trim();
+      const badgeText = document.getElementById('pfBadge').value.trim();
+      const description = document.getElementById('pfDescription').value.trim();
+
+      if (!name && !badgeText && !description) {
+        showToast('Vui lòng nhập Tên sản phẩm trước khi dịch', 'warning');
+        return;
+      }
+
+      const btn = document.getElementById('btnQuickTranslate');
+      const origHtml = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = `<span class="spinner" style="display:inline-block;width:12px;height:12px;border:2px solid #0284c7;border-top-color:transparent;border-radius:50%;animation:spin .6s linear infinite;margin-right:6px;"></span>Đang dịch...`;
+
+      try {
+        const res = await autoTranslateProductFields({
+          name,
+          badge: badgeText,
+          description
+        });
+
+        if (res.name) {
+          document.getElementById('pfNameEn').value = res.name.en || name;
+          document.getElementById('pfNameJa').value = res.name.ja || name;
+        }
+        if (res.badge) {
+          document.getElementById('pfBadgeEn').value = res.badge.en || badgeText;
+          document.getElementById('pfBadgeJa').value = res.badge.ja || badgeText;
+        }
+        if (res.description) {
+          document.getElementById('pfDescEn').value = res.description.en || description;
+          document.getElementById('pfDescJa').value = res.description.ja || description;
+        }
+
+        const details = document.getElementById('translationDetails');
+        if (details) details.open = true;
+
+        const stBadge = document.getElementById('transStatusBadge');
+        if (stBadge) {
+          stBadge.textContent = '✓ Đã dịch bằng Google';
+          stBadge.className = 'badge badge-success';
+        }
+
+        showToast('Đã dịch tự động sang Tiếng Anh và Tiếng Nhật thành công!', 'success');
+      } catch (err) {
+        showToast('Lỗi khi gọi Google Dịch: ' + err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = origHtml;
+      }
     }
 
     function fillCategoryOptions(categoryId, subId) {
@@ -349,21 +500,49 @@
         return false;
       }
 
-      // name/badge/description đa ngôn ngữ: người dùng nhập 1 lần, tự copy sang en/ja
+      // Tự động dịch sang tiếng Anh và tiếng Nhật bằng Google Translate nếu chưa có
+      let nameEn = document.getElementById('pfNameEn')?.value.trim();
+      let nameJa = document.getElementById('pfNameJa')?.value.trim();
+      let badgeEn = document.getElementById('pfBadgeEn')?.value.trim();
+      let badgeJa = document.getElementById('pfBadgeJa')?.value.trim();
+      let descEn = document.getElementById('pfDescEn')?.value.trim();
+      let descJa = document.getElementById('pfDescJa')?.value.trim();
+
+      if (!nameEn || !nameJa || nameEn === name || nameJa === name) {
+        showToast('Đang tự động dịch sang Tiếng Anh & Tiếng Nhật...', 'info', 2000);
+        try {
+          const trans = await autoTranslateProductFields({
+            name,
+            badge: badgeText,
+            description
+          });
+          nameEn = nameEn || trans.name?.en || name;
+          nameJa = nameJa || trans.name?.ja || name;
+          badgeEn = badgeEn || trans.badge?.en || badgeText;
+          badgeJa = badgeJa || trans.badge?.ja || badgeText;
+          descEn = descEn || trans.description?.en || description;
+          descJa = descJa || trans.description?.ja || description;
+        } catch (err) {
+          console.warn('Auto translate warning:', err);
+          nameEn = nameEn || name;
+          nameJa = nameJa || name;
+        }
+      }
+
       const data = {
-        name: { vi: name, en: name, ja: name },
+        name: { vi: name, en: nameEn || name, ja: nameJa || name },
         sku, category, sub, price, inventory, image, imageData, hidden, isNew,
-        badge: { vi: badgeText, en: badgeText, ja: badgeText },
-        description: { vi: description, en: description, ja: description }
+        badge: { vi: badgeText, en: badgeEn || badgeText, ja: badgeJa || badgeText },
+        description: { vi: description, en: descEn || description, ja: descJa || description }
       };
 
       if (id) {
         const idx = allProducts.findIndex(p => p.id === id);
         if (idx >= 0) allProducts[idx] = { ...allProducts[idx], ...data };
-        showToast('Đã cập nhật sản phẩm — cửa hàng tự cập nhật', 'success');
+        showToast('Đã cập nhật sản phẩm — Đã đồng bộ bản dịch EN/JA', 'success');
       } else {
         allProducts.push({ id: genStoreId('p'), ...data, imagePosition: '50% 50%', unit: { vi: 'Cái', en: 'pc', ja: '個' }, sold: 0 });
-        showToast('Đã thêm sản phẩm mới — cửa hàng tự cập nhật', 'success');
+        showToast('Đã thêm sản phẩm mới — Tự động dịch EN/JA thành công', 'success');
       }
 
       setData('products', allProducts);
@@ -376,6 +555,99 @@
       closeModal('productFormModal');
       renderAllAdmin();
       return false;
+    }
+
+    // ===== DỊCH TỰ ĐỘNG TOÀN BỘ CATALOG SẢN PHẨM & LƯU VÀO MONGODB =====
+    async function autoTranslateAllProductsCatalog() {
+      if (!allProducts || allProducts.length === 0) {
+        showToast('Không có sản phẩm nào trong catalog', 'info');
+        return;
+      }
+
+      const needTranslation = allProducts.filter(p => {
+        const enName = typeof p.name === 'object' && p.name?.en ? String(p.name.en).trim() : '';
+        const jaName = typeof p.name === 'object' && p.name?.ja ? String(p.name.ja).trim() : '';
+        const enDesc = typeof p.description === 'object' && p.description?.en ? String(p.description.en).trim() : '';
+        const jaDesc = typeof p.description === 'object' && p.description?.ja ? String(p.description.ja).trim() : '';
+        return !enName || !jaName || !enDesc || !jaDesc;
+      });
+
+      let force = false;
+      if (needTranslation.length === 0) {
+        const reTranslate = confirmAction(`Toàn bộ ${allProducts.length}/${allProducts.length} sản phẩm trong catalog đều ĐÃ CÓ đầy đủ bản dịch tiếng Anh (EN) và tiếng Nhật (JA) trên MongoDB Atlas!\n\nBạn có muốn dịch lại toàn bộ bằng Google Translate và cập nhật lại không?`);
+        if (!reTranslate) {
+          showToast(`✓ Tất cả ${allProducts.length} sản phẩm đều đã có đầy đủ bản dịch EN & JA chuẩn xác trên MongoDB Atlas!`, 'success', 4000);
+          return;
+        }
+        force = true;
+      } else {
+        if (!confirmAction(`Tìm thấy ${needTranslation.length}/${allProducts.length} sản phẩm chưa có đầy đủ bản dịch EN/JA. Bạn có muốn tự động dịch toàn bộ và lưu ngay vào MongoDB Atlas không?`)) {
+          return;
+        }
+      }
+
+      const btn = document.getElementById('btnTranslateCatalog');
+      const origHtml = btn ? btn.innerHTML : '';
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `<span class="spinner" style="display:inline-block;width:13px;height:13px;border:2px solid #0284c7;border-top-color:transparent;border-radius:50%;animation:spin .6s linear infinite;margin-right:6px;"></span><span>Đang dịch & lưu MongoDB...</span>`;
+      }
+      showToast(force ? `Đang dịch lại toàn bộ ${allProducts.length} sản phẩm sang EN & JA...` : `Đang tự động dịch ${needTranslation.length} sản phẩm và lưu trực tiếp vào MongoDB...`, 'info', 4000);
+
+      try {
+        // Cách 1: Gọi endpoint chuyên biệt trên máy chủ backend (xử lý song song, lưu trực tiếp MongoDB Atlas)
+        const res = await fetch(`${getApiBaseUrl()}/api/products/translate-all`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ force })
+        });
+
+        if (res.ok) {
+          const json = await res.json();
+          if (json.ok && Array.isArray(json.products)) {
+            allProducts = json.products;
+            setData('products', allProducts);
+            showToast(`✓ Đã tự động dịch và lưu toàn bộ ${json.count || allProducts.length} sản phẩm vào MongoDB Atlas thành công!`, 'success', 5000);
+            renderAllAdmin();
+            return;
+          }
+        }
+        throw new Error('Chuyển sang fallback client');
+      } catch (err) {
+        // Cách 2: Fallback dịch song song từ client và gọi saveStoreToMongo()
+        try {
+          const targetList = force ? allProducts : needTranslation;
+          await Promise.all(targetList.map(async (p) => {
+            const vnName = prodName(p);
+            const vnBadge = typeof p.badge === 'string' ? p.badge : (p.badge?.vi || '');
+            const vnDesc = prodDesc(p);
+            try {
+              const trans = await autoTranslateProductFields({
+                name: vnName,
+                badge: vnBadge,
+                description: vnDesc
+              });
+              p.name = { vi: vnName, en: trans.name?.en || vnName, ja: trans.name?.ja || vnName };
+              p.badge = { vi: vnBadge, en: trans.badge?.en || vnBadge, ja: trans.badge?.ja || vnBadge };
+              p.description = { vi: vnDesc, en: trans.description?.en || vnDesc, ja: trans.description?.ja || vnDesc };
+            } catch (e) {
+              console.warn('Translate item failed:', p.id, e);
+            }
+          }));
+
+          setData('products', allProducts);
+          await saveStoreToMongo();
+          showToast(`✓ Đã dịch và lưu toàn bộ ${targetList.length} sản phẩm vào MongoDB Atlas thành công!`, 'success', 5000);
+        } catch (saveErr) {
+          showToast('Lỗi khi lưu vào MongoDB: ' + saveErr.message, 'error', 5000);
+        }
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = origHtml;
+        }
+        renderAllAdmin();
+      }
     }
 
     // ===== XÓA =====

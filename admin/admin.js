@@ -54,6 +54,7 @@ function getData(key, fallback = []) {
     case 'products': return getStoreProducts();
     case 'orders': return getStoreOrders();
     case 'users': return getStoreUsers();
+    case 'quotes': return getStoreQuotes();
     case 'cart': return getStoreCart();
     case 'categories': return STORE_CATEGORIES;
     default: return fallback;
@@ -65,6 +66,7 @@ function setData(key, data) {
     case 'products': saveStoreProducts(data); notifyStoreChanged(); break;
     case 'orders': saveStoreOrders(data); notifyStoreChanged(); break;
     case 'users': saveStoreUsers(data); notifyStoreChanged(); break;
+    case 'quotes': saveStoreQuotes(data); notifyStoreChanged(); break;
     case 'cart': writeJSON(STORE_KEYS.cart, data); notifyStoreChanged(); break;
   }
 }
@@ -157,12 +159,29 @@ const USER_ROLE = {
   admin: { label: 'Admin', cls: 'badge-dark' }
 };
 
+const QUOTE_STATUS = {
+  pending: { label: 'Chờ báo giá', cls: 'badge-warning' },
+  contacted: { label: 'Đã liên hệ', cls: 'badge-info' },
+  quoted: { label: 'Đã báo giá', cls: 'badge-purple' },
+  completed: { label: 'Hoàn tất', cls: 'badge-success' },
+  cancelled: { label: 'Đã hủy', cls: 'badge-danger' }
+};
+
+const WARRANTY_STATUS = {
+  pending: { label: 'Mới nhận', cls: 'badge-warning' },
+  processing: { label: 'Đang xử lý', cls: 'badge-info' },
+  resolved: { label: 'Đã giải quyết', cls: 'badge-success' },
+  rejected: { label: 'Không bảo hành', cls: 'badge-danger' }
+};
+
 function badge(status, type) {
   const map = {
     order: ORDER_STATUS,
     payment: PAYMENT_STATUS,
     user: USER_STATUS,
-    role: USER_ROLE
+    role: USER_ROLE,
+    quote: QUOTE_STATUS,
+    warranty: WARRANTY_STATUS
   };
   const item = map[type] && map[type][status];
   if (!item) return `<span class="badge badge-gray"><span class="badge-dot"></span>${escapeHtml(status)}</span>`;
@@ -240,6 +259,19 @@ function buildSidebar(active) {
       href: 'users.html'
     },
     {
+      id: 'quotes',
+      label: 'Báo giá nhanh',
+      icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>`,
+      href: 'quotes.html',
+      badge: (typeof getStoreQuotes === 'function' ? getStoreQuotes().filter(q => q.status === 'pending').length : 0)
+    },
+    {
+      id: 'warranty',
+      label: 'Phiếu Bảo Hành',
+      icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>`,
+      href: 'warranty.html'
+    },
+    {
       id: 'storefront',
       label: 'Xem cửa hàng',
       icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>`,
@@ -262,6 +294,7 @@ function buildSidebar(active) {
           <a href="${it.href}" class="${active === it.id ? 'active' : ''}" ${it.target ? `target="${it.target}" rel="noopener"` : ''}>
             <span class="nav-icon">${it.icon}</span>
             <span>${it.label}</span>
+            ${it.badge ? `<span class="badge badge-warning" style="margin-left: auto; font-size: 11px; padding: 1px 6px; border-radius: 10px;">${it.badge}</span>` : ''}
           </a>
         `).join('')}
       </nav>
@@ -292,9 +325,9 @@ function buildTopbar(title, actions = '') {
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
         </button>
         <h1 class="page-title">${title}</h1>
-        <span class="sync-pill" title="Dữ liệu được đồng bộ liên tục với trang bán hàng">
+        <span class="sync-pill" title="Tự động đồng bộ dữ liệu thời gian thực hai chiều với MongoDB Atlas">
           <span class="pulse-dot"></span>
-          <span>Thời gian thực</span>
+          <span>Tự động đồng bộ</span>
         </span>
       </div>
       <div class="topbar-actions">
@@ -333,9 +366,40 @@ function triggerAdminRefresh() {
   }
 }
 
+// Hàm tự động đồng bộ MongoDB dùng chung cho mọi trang Admin
+window.syncAdminWithMongo = async function (silent = true) {
+  try {
+    if (typeof loadStoreFromMongo === 'function') {
+      await loadStoreFromMongo();
+      triggerAdminRefresh();
+      if (!silent) showToast('Dữ liệu đã được tự động cập nhật từ MongoDB Atlas', 'success');
+    }
+  } catch (e) {
+    console.warn('Auto-sync MongoDB notice:', e.message);
+    if (!silent) {
+      showToast('Chưa kết nối máy chủ MongoDB. Hãy khởi chạy "npm start" để kết nối với Atlas.', 'warning', 5000);
+    }
+  }
+};
+
+// Tự động tải dữ liệu từ MongoDB khi mở bất kỳ trang Admin nào
+function initAdminMongoSync() {
+  if (!window.location.pathname.includes('login.html')) {
+    setTimeout(() => {
+      window.syncAdminWithMongo(true);
+    }, 100);
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initAdminMongoSync);
+} else {
+  initAdminMongoSync();
+}
+
 // Trang chủ (hoặc tab admin khác) thay đổi dữ liệu -> trang hiện tại tự refresh
 window.addEventListener('storage', (event) => {
-  if (!event.key || [STORE_KEYS.products, STORE_KEYS.orders, STORE_KEYS.users, STORE_KEYS.cart, STORE_KEYS.seeded].includes(event.key)) {
+  if (!event.key || [STORE_KEYS.products, STORE_KEYS.orders, STORE_KEYS.users, STORE_KEYS.quotes, STORE_KEYS.seeded].includes(event.key)) {
     triggerAdminRefresh();
   }
 });
@@ -345,14 +409,23 @@ window.addEventListener('store-changed', () => {
   triggerAdminRefresh();
 });
 
-// Khi admin chuyển tab quay lại trang này -> cập nhật ngay số liệu mới nhất
+// Khi admin chuyển tab quay lại trang này -> tự động nạp ngay số liệu mới nhất từ MongoDB
 window.addEventListener('focus', () => {
   triggerAdminRefresh();
+  window.syncAdminWithMongo(true);
 });
 
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') {
     triggerAdminRefresh();
+    window.syncAdminWithMongo(true);
   }
 });
+
+// Tự động đồng bộ ngầm định kỳ mỗi 20 giây khi quản trị viên đang mở trang
+setInterval(() => {
+  if (document.visibilityState === 'visible') {
+    window.syncAdminWithMongo(true);
+  }
+}, 20000);
 
