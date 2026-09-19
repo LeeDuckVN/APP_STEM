@@ -3515,7 +3515,15 @@ img {
   }
 
   .social-bar {
-    display: none;
+    display: flex;
+    left: 14px;
+    bottom: 84px;
+    gap: 8px;
+  }
+
+  .social-icon {
+    width: 40px;
+    height: 40px;
   }
 
   .mobile-nav {
@@ -3529,4 +3537,10 @@ img {
   body {
     padding-bottom: 70px;
   }
+}
+
+.floating-contact-btn,
+.contact-popup-backdrop,
+.contact-popup {
+  display: none !important;
 }

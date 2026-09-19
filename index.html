@@ -176,64 +176,6 @@
     </div>
   </header>
 
-  <!-- Modern Navigation Bar -->
-  <nav class="nav-bar" aria-label="Menu chính">
-    <div class="container nav-inner">
-      <button class="category-toggle" id="categoryToggle" type="button">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="3" width="7" height="7"></rect>
-          <rect x="14" y="3" width="7" height="7"></rect>
-          <rect x="14" y="14" width="7" height="7"></rect>
-          <rect x="3" y="14" width="7" height="7"></rect>
-        </svg>
-        <span data-i18n="categoryMenu">Danh mục sản phẩm</span>
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round">
-          <path d="m6 9 6 6 6-6" />
-        </svg>
-      </button>
-      <div class="nav-links">
-        <a href="#products" class="nav-link">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
-            <polyline points="2 17 12 22 22 17"></polyline>
-            <polyline points="2 12 12 17 22 12"></polyline>
-          </svg>
-          <span data-i18n="products">Sản phẩm</span>
-        </a>
-        <a href="tai-lieu-san-pham.html" class="nav-link">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="16 18 22 12 16 6"></polyline>
-            <polyline points="8 6 2 12 8 18"></polyline>
-          </svg>
-          <span>Tài liệu kỹ thuật</span>
-        </a>
-        <a href="huong-dan-thuc-hanh.html" class="nav-link">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M2 20h20"></path>
-            <path d="M5 20V8l5 4V8l5 4V4h5v16"></path>
-          </svg>
-          <span>Thực hành PCBA</span>
-        </a>
-        <a href="chinh-sach-bao-hanh.html" class="nav-link">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-          </svg>
-          <span data-i18n="warranty">Bảo hành</span>
-        </a>
-        <a href="huong-dan-mua-hang.html" class="nav-link">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"></circle>
-            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-            <line x1="12" y1="17" x2="12.01" y2="17"></line>
-          </svg>
-          <span data-i18n="buyGuide">Hướng dẫn mua hàng</span>
         </a>
       </div>
       <div class="nav-right">
@@ -1055,6 +997,44 @@
   <!-- Scripts -->
   <script src="store.js"></script>
   <script src="app.js"></script>
+  <script>
+    document.querySelectorAll("[data-qr]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const config = {
+          zalo: { src: "assets/qr/zalo.jpg", title: "Quét mã QR Zalo", caption: "Mở Zalo → Quét mã QR để kết bạn" },
+          line: { src: "assets/qr/line.jpg", title: "Quét mã QR Line", caption: "Mở Line → Quét mã QR để kết bạn" },
+          whatsapp: { src: "assets/qr/whatsapp.jpg", title: "Quét mã QR WhatsApp", caption: "Mở WhatsApp → Quét mã QR để nhắn tin" }
+        }[button.dataset.qr];
+        const modal = document.getElementById("qrModal");
+        const backdrop = document.getElementById("qrModalBackdrop");
+        if (!config || !modal || !backdrop) return;
+        document.getElementById("qrModalImage").src = config.src;
+        document.getElementById("qrModalImage").alt = config.title;
+        document.getElementById("qrModalTitle").textContent = config.title;
+        document.getElementById("qrModalCaption").textContent = config.caption;
+        modal.hidden = false;
+        backdrop.hidden = false;
+        modal.classList.add("is-open");
+        backdrop.classList.add("is-open");
+        document.body.style.overflow = "hidden";
+      });
+    });
+
+    const closeQrModal = () => {
+      const modal = document.getElementById("qrModal");
+      const backdrop = document.getElementById("qrModalBackdrop");
+      if (!modal || !backdrop) return;
+      modal.classList.remove("is-open");
+      backdrop.classList.remove("is-open");
+      modal.hidden = true;
+      backdrop.hidden = true;
+      document.getElementById("qrModalImage").src = "";
+      document.body.style.overflow = "";
+    };
+
+    document.getElementById("qrModalClose")?.addEventListener("click", closeQrModal);
+    document.getElementById("qrModalBackdrop")?.addEventListener("click", closeQrModal);
+  </script>
 </body>
 
 </html>
