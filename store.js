@@ -685,6 +685,7 @@ function normalizeSeedProduct(p) {
     inventory: Math.max(0, p.inventory != null ? Number(p.inventory) : (p.stock != null ? Number(p.stock) : 0)),
     image: p.image || 'assets/stem-iot-banner.png',
     imageData: p.imageData || '',
+    images: Array.isArray(p.images) ? p.images.filter((image) => typeof image === 'string' && image) : [],
     imagePosition: p.imagePosition || '50% 50%',
     badge: normI18n(p.badge, 'Mới'),
     description: normI18n(p.description, ''),

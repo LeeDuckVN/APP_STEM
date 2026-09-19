@@ -973,12 +973,20 @@ function openProductModal(productId) {
     .join("");
   renderRelatedProducts(product);
 
-  const thumbs = [modalImg, modalImg, modalImg, modalImg];
+  const productImages = Array.isArray(product.images)
+    ? product.images.filter((image) => typeof image === "string" && image).map((image) => getStoreImageUrl(image, false))
+    : [];
+  const thumbs = [
+    { image: modalImg, position: product.imagePosition, name: label(product.name) },
+    ...productImages
+      .filter((image) => image !== modalImg)
+      .map((image) => ({ image, position: product.imagePosition, name: label(product.name) }))
+  ].slice(0, 4);
   productModalThumbs.innerHTML = thumbs
     .map(
-      (image, index) => `
-        <button class="modal-thumb ${index === 0 ? "is-selected" : ""}" type="button" data-thumb="${image}">
-          <img src="${image}" alt="${label(product.name)} ${index + 1}" />
+      (thumb, index) => `
+        <button class="modal-thumb ${index === 0 ? "is-selected" : ""}" type="button" data-thumb="${thumb.image}" data-position="${thumb.position}">
+          <img src="${thumb.image}" alt="${thumb.name}" />
         </button>
       `
     )
@@ -988,6 +996,7 @@ function openProductModal(productId) {
     button.addEventListener("click", () => {
       productModalThumbs.querySelectorAll(".modal-thumb").forEach((thumb) => thumb.classList.toggle("is-selected", thumb === button));
       productModalImage.src = button.dataset.thumb;
+      productModalImage.style.objectPosition = button.dataset.position || "50% 50%";
     });
   });
 

@@ -3400,7 +3400,46 @@ img {
 
 @media (max-width: 768px) {
   .topbar {
+    display: block;
+  }
+
+  .topbar-inner {
+    gap: 8px;
+    padding: 6px 0;
+  }
+
+  .topbar-contact {
+    flex: 1;
+    min-width: 0;
+    gap: 0;
+  }
+
+  .topbar-contact > .topbar-item:not(:first-child) {
     display: none;
+  }
+
+  .topbar-item,
+  .topbar-contact > span {
+    min-width: 0;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  .topbar-right,
+  .topbar-actions {
+    flex-shrink: 0;
+    gap: 6px;
+  }
+
+  .admin-portal-link,
+  .admin-quick-link {
+    display: none;
+  }
+
+  .customer-account-toggle,
+  .language-toggle {
+    padding: 4px 7px;
+    font-size: 11px;
   }
 
   .header-grid {
@@ -3415,6 +3454,48 @@ img {
 
   .nav-links {
     display: none;
+  }
+
+  .product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .product-body {
+    padding: 10px;
+  }
+
+  .product-name-btn,
+  .product-name-button {
+    font-size: 12px;
+  }
+
+  .product-price,
+  .product-card .price {
+    font-size: 14px;
+  }
+
+  .product-actions-row,
+  .product-card .card-actions {
+    grid-template-columns: 64px minmax(0, 1fr);
+    gap: 5px;
+  }
+
+  .qty-step-btn,
+  .qty-button {
+    width: 20px;
+  }
+
+  .qty-pill-input,
+  .qty-control input {
+    width: 24px;
+  }
+
+  .btn-add-cart,
+  .buy-button {
+    min-width: 0;
+    padding: 0 6px;
+    font-size: 11px;
   }
 
   .split-section {

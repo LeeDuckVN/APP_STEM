@@ -56,11 +56,10 @@
           <div class="form-row">
             <div class="form-group">
               <label for="pfImageFile">Ảnh sản phẩm</label>
-              <input type="file" class="form-control" id="pfImageFile"
+              <input type="file" class="form-control" id="pfImageFile" multiple
                 accept="image/png,image/jpeg,image/webp,image/gif" />
-              <small class="text-xs text-gray">Ảnh sẽ được lưu trực tiếp trong MongoDB.</small>
-              <img id="pfImagePreview" alt="Xem trước ảnh sản phẩm" hidden
-                style="display:block; width:96px; height:72px; object-fit:contain; margin-top:8px; border-radius:8px; border:1px solid #dbe3ef;" />
+              <small class="text-xs text-gray">Chọn nhiều ảnh. Ảnh sẽ được lưu trực tiếp trong MongoDB.</small>
+              <div id="pfImagePreviews" class="product-image-previews" hidden></div>
               <input type="hidden" id="pfImage" />
             </div>
             <div class="form-group">
@@ -177,6 +176,7 @@
     let allProducts = [];
     let categories = [];
     let filterState = { search: '', category: '', sub: '', stock: '' };
+    let pendingProductImages = [];
 
     // ===== Khởi tạo: render layout TRƯỚC, gắn sự kiện SAU =====
     (function () {
@@ -211,22 +211,54 @@
       loadStoreFromMongo().then(() => renderAllAdmin()).catch(() => { });
     })();
 
-    function handleImageFile(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      if (file.size > 8 * 1024 * 1024) {
+    function readImageFile(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error('Không đọc được ảnh'));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function renderImagePreviews() {
+      const container = document.getElementById('pfImagePreviews');
+      if (!container) return;
+      container.innerHTML = pendingProductImages.map((image, index) => {
+        const previewImage = /^data:image\//i.test(image) ? image : getStoreImageUrl(image, true);
+        return `
+        <div class="product-image-preview-item">
+          <img src="${previewImage}" alt="Ảnh sản phẩm ${index + 1}" onerror="this.src='../assets/stem-iot-banner.png'" />
+          <button type="button" class="product-image-remove" data-image-index="${index}" title="Xóa ảnh">×</button>
+        </div>
+      `;
+      }).join('');
+      container.hidden = pendingProductImages.length === 0;
+      container.querySelectorAll('[data-image-index]').forEach(button => {
+        button.addEventListener('click', () => {
+          pendingProductImages.splice(Number(button.dataset.imageIndex), 1);
+          renderImagePreviews();
+        });
+      });
+    }
+
+    async function handleImageFile(event) {
+      const files = [...event.target.files];
+      if (!files.length) return;
+      const oversized = files.find(file => file.size > 8 * 1024 * 1024);
+      if (oversized) {
         event.target.value = '';
-        showToast('Ảnh tối đa 8MB', 'error');
+        showToast('Mỗi ảnh tối đa 8MB', 'error');
         return;
       }
-      const reader = new FileReader();
-      reader.onload = () => {
-        document.getElementById('pfImage').value = reader.result;
-        const preview = document.getElementById('pfImagePreview');
-        preview.src = reader.result;
-        preview.hidden = false;
-      };
-      reader.readAsDataURL(file);
+      try {
+        const images = await Promise.all(files.map(readImageFile));
+        pendingProductImages = [...pendingProductImages, ...images];
+        document.getElementById('pfImage').value = pendingProductImages[0] || '';
+        renderImagePreviews();
+      } catch (error) {
+        showToast(error.message, 'error');
+      }
+      event.target.value = '';
     }
 
     function renderStats() {
@@ -330,7 +362,8 @@
       document.getElementById('productForm').reset();
       document.getElementById('pfId').value = '';
       document.getElementById('pfImage').value = '';
-      document.getElementById('pfImagePreview').hidden = true;
+      pendingProductImages = [];
+      renderImagePreviews();
       ['pfNameEn', 'pfNameJa', 'pfBadgeEn', 'pfBadgeJa', 'pfDescEn', 'pfDescJa'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.value = '';
@@ -356,14 +389,11 @@
       document.getElementById('pfSku').value = p.sku;
       document.getElementById('pfPrice').value = p.price;
       document.getElementById('pfInventory').value = p.inventory;
-      document.getElementById('pfImage').value = p.imageData || p.image || '';
-      const preview = document.getElementById('pfImagePreview');
-      if (p.imageData) {
-        preview.src = p.imageData;
-        preview.hidden = false;
-      } else {
-        preview.hidden = true;
-      }
+      pendingProductImages = Array.isArray(p.images) && p.images.length
+        ? [...p.images]
+        : (p.imageData ? [p.imageData] : []);
+      document.getElementById('pfImage').value = pendingProductImages[0] || p.image || '';
+      renderImagePreviews();
       document.getElementById('pfBadge').value = typeof p.badge === 'string' ? p.badge : (p.badge ? p.badge.vi : '') || '';
       document.getElementById('pfHidden').value = p.hidden ? 'true' : 'false';
       document.getElementById('pfIsNew').value = p.isNew ? 'true' : 'false';
@@ -483,7 +513,10 @@
       const price = Number(document.getElementById('pfPrice').value);
       const inventory = Number(document.getElementById('pfInventory').value);
       const rawImage = document.getElementById('pfImage').value.trim();
-      const imageData = rawImage.startsWith('data:image/') ? rawImage : '';
+      const images = pendingProductImages.length
+        ? [...pendingProductImages]
+        : (rawImage.startsWith('data:image/') ? [rawImage] : []);
+      const imageData = images.find(image => image.startsWith('data:image/')) || '';
       const image = imageData ? 'assets/stem-iot-banner.png' : (rawImage ? rawImage.replace(/^(\.\.\/|\.\/)+/, '') : 'assets/stem-iot-banner.png');
       const badgeText = document.getElementById('pfBadge').value.trim();
       const hidden = document.getElementById('pfHidden').value === 'true';
@@ -531,7 +564,7 @@
 
       const data = {
         name: { vi: name, en: nameEn || name, ja: nameJa || name },
-        sku, category, sub, price, inventory, image, imageData, hidden, isNew,
+        sku, category, sub, price, inventory, image, imageData, images, hidden, isNew,
         badge: { vi: badgeText, en: badgeEn || badgeText, ja: badgeJa || badgeText },
         description: { vi: description, en: descEn || description, ja: descJa || description }
       };
