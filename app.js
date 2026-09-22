@@ -117,6 +117,8 @@ const i18n = {
     modalQty: "Số lượng",
     modalRelated: "Sản phẩm tương tự",
     modalAddToCart: "Thêm vào giỏ hàng",
+    copyProductLink: "Sao chép liên kết",
+    productLinkCopied: "Đã sao chép liên kết sản phẩm.",
     modalTabsAria: "Chi tiết sản phẩm",
     modalActionsAria: "Hành động",
     contactPopupTitle: "Liên hệ với Thegioiic",
@@ -247,6 +249,8 @@ const i18n = {
     modalQty: "Quantity",
     modalRelated: "Related products",
     modalAddToCart: "Add to cart",
+    copyProductLink: "Copy product link",
+    productLinkCopied: "Product link copied.",
     modalTabsAria: "Product details",
     modalActionsAria: "Actions",
     contactPopupTitle: "Contact Thegioiic",
@@ -377,6 +381,8 @@ const i18n = {
     modalQty: "数量",
     modalRelated: "関連商品",
     modalAddToCart: "カートに追加",
+    copyProductLink: "商品リンクをコピー",
+    productLinkCopied: "商品リンクをコピーしました。",
     modalTabsAria: "商品詳細",
     modalActionsAria: "アクション",
     contactPopupTitle: "Thegioiicへのお問い合わせ",
@@ -395,6 +401,12 @@ const languageNames = {
   vi: "Việt Nam",
   en: "English",
   ja: "日本語"
+};
+
+const languageFlags = {
+  vi: "https://static.xx.fbcdn.net/images/emoji.php/v9/tcf/1/16/1f1fb_1f1f3.png",
+  en: "https://static.xx.fbcdn.net/images/emoji.php/v9/t93/1/16/1f1fa_1f1f8.png",
+  ja: "https://static.xx.fbcdn.net/images/emoji.php/v9/t76/1/16/1f1ef_1f1f5.png"
 };
 
 /* Danh muc & san pham nay nam trong store.js - dung chung voi admin */
@@ -710,6 +722,7 @@ const toast = $("#toast");
 const languageToggle = $("#languageToggle");
 const languageMenu = $("#languageMenu");
 const currentLanguage = $("#currentLanguage");
+const currentLanguageFlag = $("#currentLanguageFlag");
 const productModal = $("#productModal");
 const productModalTitle = $("#productModalTitle");
 const productModalMeta = $("#productModalMeta");
@@ -718,6 +731,7 @@ const productModalDescription = $("#productModalDescription");
 const productModalImage = $("#productModalImage");
 const productModalQty = $("#productModalQty");
 const productModalAdd = $("#productModalAdd");
+const productModalShare = $("#productModalShare");
 const productModalThumbs = $("#productModalThumbs");
 const productModalSpecs = $("#productModalSpecs");
 const productModalRelated = $("#productModalRelated");
@@ -764,6 +778,7 @@ function applyI18n() {
   document.title = t("pageTitle");
   document.documentElement.lang = currentLang === "ja" ? "ja" : currentLang === "en" ? "en" : "vi";
   currentLanguage.textContent = languageNames[currentLang];
+  currentLanguageFlag.src = languageFlags[currentLang];
 
   document.querySelectorAll("[data-i18n]").forEach((element) => {
     element.textContent = t(element.dataset.i18n);
@@ -1002,6 +1017,7 @@ function openProductModal(productId) {
 
   productModalQty.value = 1;
   productModalAdd.dataset.productId = product.id;
+  productModalShare.dataset.productId = product.id;
   productModal.classList.remove("hidden");
   productModal.style.display = "flex";
 }
@@ -1013,6 +1029,39 @@ function closeProductModal() {
     modal.style.display = "none";
   }
 }
+
+function getProductShareUrl(productId) {
+  const url = new URL(window.location.href);
+  url.searchParams.set("product", productId);
+  url.hash = "";
+  return url.toString();
+}
+
+async function copyProductLink() {
+  const productId = productModalShare.dataset.productId;
+  if (!productId) return;
+
+  const shareUrl = getProductShareUrl(productId);
+  try {
+    await navigator.clipboard.writeText(shareUrl);
+  } catch (error) {
+    const textArea = document.createElement("textarea");
+    textArea.value = shareUrl;
+    textArea.style.position = "fixed";
+    textArea.style.opacity = "0";
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand("copy");
+    textArea.remove();
+  }
+  showToast(t("productLinkCopied"));
+}
+
+function openSharedProductFromUrl() {
+  const productId = new URLSearchParams(window.location.search).get("product");
+  if (productId) openProductModal(productId);
+}
+
 window.closeProductModal = closeProductModal;
 window.openProductModal = openProductModal;
 
@@ -1337,7 +1386,7 @@ $("#resetFilter").addEventListener("click", () => {
   renderAll();
 });
 
-$("#categoryToggle").addEventListener("click", () => megaMenu.classList.toggle("open"));
+$("#categoryToggle")?.addEventListener("click", () => megaMenu.classList.toggle("open"));
 $("#openCart").addEventListener("click", openCart);
 $("#openCartMobile").addEventListener("click", openCart);
 $("#closeCart").addEventListener("click", closeCart);
@@ -1392,6 +1441,8 @@ productModalAdd.addEventListener("click", () => {
     closeProductModal();
   }
 });
+
+productModalShare.addEventListener("click", copyProductLink);
 
 modalTabs.forEach((button) => {
   button.addEventListener("click", () => {
@@ -1510,6 +1561,7 @@ function toggleContactPopup(event) {
 }
 
 applyI18n();
+openSharedProductFromUrl();
 
 floatingContactBtn.addEventListener("click", toggleContactPopup);
 contactPopupBackdrop.addEventListener("click", (event) => {

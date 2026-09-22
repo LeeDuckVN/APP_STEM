@@ -520,9 +520,31 @@ img {
   color: #ffffff;
 }
 
+.topbar-hotline,
+.footer-hotline,
+.topbar-email,
+.footer-email {
+  color: inherit;
+}
+
+.topbar-hotline:hover,
+.footer-hotline:hover,
+.topbar-email:hover,
+.footer-email:hover {
+  color: var(--cyan);
+  text-decoration: underline;
+}
+
 .language-toggle svg {
   width: 14px;
   height: 14px;
+}
+
+.language-flag {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 14px;
+  object-fit: contain;
 }
 
 .language-menu {
@@ -2578,6 +2600,7 @@ img {
 .modal-detail-tabs {
   display: flex;
   gap: 8px;
+  align-items: center;
   border-bottom: 1px solid var(--border-subtle);
   margin-bottom: 16px;
 }
@@ -2638,6 +2661,47 @@ img {
 .btn-modal-add:hover {
   transform: translateY(-1px);
   box-shadow: 0 6px 20px var(--primary-glow);
+}
+
+.modal-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 20px;
+}
+
+.modal-title-row h2 {
+  min-width: 0;
+}
+
+.btn-modal-share {
+  flex: 0 0 auto;
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 34px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+}
+
+.modal-detail-tabs .btn-modal-share {
+  width: 30px;
+  height: 30px;
+  margin-left: auto;
+  border: 0;
+  border-radius: var(--radius-sm);
+}
+
+.btn-modal-share:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-light);
 }
 
 /* Related Products Grid */
