@@ -299,6 +299,9 @@
                   💬 <em>${escapeHtml(q.notes)}</em>
                 </div>
               ` : ''}
+              ${q.attachment?.data ? `
+                <a href="${q.attachment.data}" download="${escapeHtml(q.attachment.name)}" class="text-xs text-primary" style="display: inline-block; margin-top: 5px; font-weight: 700;">📎 ${escapeHtml(q.attachment.name)}</a>
+              ` : ''}
             </td>
             <td>
               ${badge(q.status, 'quote')}
@@ -374,6 +377,13 @@
 ${escapeHtml(q.content)}
           </div>
         </div>
+
+        ${q.attachment?.data ? `
+          <div class="form-group" style="margin-bottom: 16px;">
+            <span class="text-xs text-gray">File khách hàng đính kèm</span>
+            <div style="margin-top: 6px;"><a href="${q.attachment.data}" download="${escapeHtml(q.attachment.name)}" class="btn btn-sm btn-secondary">📎 Tải ${escapeHtml(q.attachment.name)}</a></div>
+          </div>
+        ` : ''}
 
         <div class="form-row" style="margin-top: 20px;">
           <div class="form-group">

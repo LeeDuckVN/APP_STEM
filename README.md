@@ -33,7 +33,15 @@ Trong file `.env`, cập nhật thông tin MongoDB:
 MONGODB_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/?retryWrites=true&w=majority
 MONGODB_DB=stem_iot
 PORT=3000
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your-email@example.com
+SMTP_PASS=your-app-password
+MAIL_FROM=your-email@example.com
 ```
+
+SMTP là bắt buộc để gửi mã xác thực khi đăng ký và khi quên mật khẩu. Với Gmail, hãy dùng App Password thay cho mật khẩu tài khoản.
 
 Khi phát triển, có thể dùng chế độ tự khởi động lại:
 

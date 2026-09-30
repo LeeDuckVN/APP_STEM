@@ -1,8 +1,10 @@
 require('dotenv').config();
 
 const path = require('path');
+const crypto = require('crypto');
 const express = require('express');
 const bcrypt = require('bcryptjs');
+const nodemailer = require('nodemailer');
 const { MongoClient } = require('mongodb');
 
 const app = express();
@@ -14,6 +16,46 @@ let customers;
 let storeData;
 let warrantyClaims;
 let databaseReady;
+const verificationCodeLifetimeMs = 10 * 60 * 1000;
+let mailTransport;
+
+function getMailTransport() {
+  if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
+    throw new Error('SMTP_HOST, SMTP_USER và SMTP_PASS chưa được cấu hình.');
+  }
+  if (!mailTransport) {
+    mailTransport = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: Number(process.env.SMTP_PORT) || 587,
+      secure: String(process.env.SMTP_SECURE).toLowerCase() === 'true',
+      auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
+    });
+  }
+  return mailTransport;
+}
+
+function createVerificationCode() {
+  return String(crypto.randomInt(100000, 1000000));
+}
+
+function hashVerificationCode(code) {
+  return crypto.createHash('sha256').update(String(code)).digest('hex');
+}
+
+async function sendVerificationEmail({ email, name, code, type }) {
+  const isReset = type === 'reset';
+  const subject = isReset ? 'Mã đổi mật khẩu STEM IoT Shop' : 'Xác thực email đăng ký STEM IoT Shop';
+  const intro = isReset
+    ? 'Bạn vừa yêu cầu đổi mật khẩu. Nhập mã dưới đây để tiếp tục:'
+    : 'Cảm ơn bạn đã đăng ký. Nhập mã dưới đây để xác nhận email của bạn:';
+  await getMailTransport().sendMail({
+    from: process.env.MAIL_FROM || process.env.SMTP_USER,
+    to: email,
+    subject,
+    text: `Xin chào ${name || 'bạn'},\n\n${intro}\n\nMã xác thực: ${code}\nMã có hiệu lực trong 10 phút và chỉ sử dụng một lần.\n\nSTEM IoT Shop`,
+    html: `<p>Xin chào ${name || 'bạn'},</p><p>${intro}</p><p style="font-size:28px;font-weight:700;letter-spacing:6px">${code}</p><p>Mã có hiệu lực trong 10 phút và chỉ sử dụng một lần.</p><p>STEM IoT Shop</p>`
+  });
+}
 
 // CORS middleware hỗ trợ mở từ Live Server (:5500, :5501) hoặc công cụ phát triển khác
 app.use((req, res, next) => {
@@ -36,7 +78,8 @@ function publicCustomer(customer) {
     phone: customer.phone,
     email: customer.email,
     role: customer.role,
-    status: customer.status
+    status: customer.status,
+    emailVerified: customer.emailVerified !== false
   };
 }
 
@@ -366,6 +409,7 @@ app.post('/api/customers/register', async (req, res) => {
     }
 
     const now = new Date();
+    const verificationCode = createVerificationCode();
     const customer = {
       name,
       phone,
@@ -373,6 +417,9 @@ app.post('/api/customers/register', async (req, res) => {
       passwordHash: await bcrypt.hash(password, 12),
       role: 'customer',
       status: 'active',
+      emailVerified: false,
+      verificationCodeHash: hashVerificationCode(verificationCode),
+      verificationCodeExpiresAt: new Date(Date.now() + verificationCodeLifetimeMs),
       orderCount: 0,
       spent: 0,
       createdAt: now,
@@ -380,7 +427,13 @@ app.post('/api/customers/register', async (req, res) => {
     };
     const result = await customers.insertOne(customer);
     customer._id = result.insertedId;
-    res.status(201).json({ customer: publicCustomer(customer) });
+    try {
+      await sendVerificationEmail({ email, name, code: verificationCode, type: 'verify' });
+    } catch (mailError) {
+      await customers.deleteOne({ _id: result.insertedId });
+      throw mailError;
+    }
+    res.status(201).json({ message: 'Mã xác thực đã được gửi tới email của bạn.', customer: publicCustomer(customer) });
   } catch (error) {
     console.error('Register error:', error);
     res.status(500).json({ message: 'Không thể tạo tài khoản lúc này.' });
@@ -396,10 +449,98 @@ app.post('/api/customers/login', async (req, res) => {
     if (!customer || customer.status !== 'active' || !(await bcrypt.compare(password, customer.passwordHash))) {
       return res.status(401).json({ message: 'Email hoặc mật khẩu không chính xác.' });
     }
+    if (customer.emailVerified === false) {
+      return res.status(403).json({ message: 'Vui lòng xác thực email trước khi đăng nhập.', needsVerification: true });
+    }
     res.json({ customer: publicCustomer(customer) });
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ message: 'Không thể đăng nhập lúc này.' });
+  }
+});
+
+app.post('/api/customers/verify-email', async (req, res) => {
+  try {
+    await connectDatabase();
+    const email = String(req.body.email || '').trim().toLowerCase();
+    const code = String(req.body.code || '').trim();
+    const customer = await customers.findOne({ email });
+    if (!customer || customer.emailVerified !== false || !customer.verificationCodeHash ||
+      !customer.verificationCodeExpiresAt || new Date(customer.verificationCodeExpiresAt) < new Date() ||
+      hashVerificationCode(code) !== customer.verificationCodeHash) {
+      return res.status(400).json({ message: 'Mã xác thực không đúng hoặc đã hết hạn.' });
+    }
+    await customers.updateOne({ _id: customer._id }, {
+      $set: { emailVerified: true, updatedAt: new Date() },
+      $unset: { verificationCodeHash: '', verificationCodeExpiresAt: '' }
+    });
+    customer.emailVerified = true;
+    res.json({ message: 'Email đã được xác thực.', customer: publicCustomer(customer) });
+  } catch (error) {
+    console.error('Verify email error:', error);
+    res.status(500).json({ message: 'Không thể xác thực email lúc này.' });
+  }
+});
+
+app.post('/api/customers/resend-verification', async (req, res) => {
+  try {
+    await connectDatabase();
+    const email = String(req.body.email || '').trim().toLowerCase();
+    const customer = await customers.findOne({ email });
+    if (!customer || customer.emailVerified !== false) {
+      return res.json({ message: 'Nếu email chưa xác thực, mã mới đã được gửi.' });
+    }
+    const code = createVerificationCode();
+    await sendVerificationEmail({ email, name: customer.name, code, type: 'verify' });
+    await customers.updateOne({ _id: customer._id }, {
+      $set: { verificationCodeHash: hashVerificationCode(code), verificationCodeExpiresAt: new Date(Date.now() + verificationCodeLifetimeMs) }
+    });
+    res.json({ message: 'Mã xác thực mới đã được gửi.' });
+  } catch (error) {
+    console.error('Resend verification error:', error);
+    res.status(500).json({ message: 'Không thể gửi lại mã xác thực lúc này.' });
+  }
+});
+
+app.post('/api/customers/forgot-password', async (req, res) => {
+  try {
+    await connectDatabase();
+    const email = String(req.body.email || '').trim().toLowerCase();
+    const customer = await customers.findOne({ email });
+    if (customer) {
+      const code = createVerificationCode();
+      await sendVerificationEmail({ email, name: customer.name, code, type: 'reset' });
+      await customers.updateOne({ _id: customer._id }, {
+        $set: { resetCodeHash: hashVerificationCode(code), resetCodeExpiresAt: new Date(Date.now() + verificationCodeLifetimeMs) }
+      });
+    }
+    res.json({ message: 'Nếu email tồn tại, mã đổi mật khẩu đã được gửi.' });
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({ message: 'Không thể gửi mã đổi mật khẩu lúc này.' });
+  }
+});
+
+app.post('/api/customers/reset-password', async (req, res) => {
+  try {
+    await connectDatabase();
+    const email = String(req.body.email || '').trim().toLowerCase();
+    const code = String(req.body.code || '').trim();
+    const password = String(req.body.password || '');
+    const customer = await customers.findOne({ email });
+    if (!customer || password.length < 6 || !customer.resetCodeHash ||
+      !customer.resetCodeExpiresAt || new Date(customer.resetCodeExpiresAt) < new Date() ||
+      hashVerificationCode(code) !== customer.resetCodeHash) {
+      return res.status(400).json({ message: 'Mã không đúng, đã hết hạn hoặc mật khẩu chưa đủ 6 ký tự.' });
+    }
+    await customers.updateOne({ _id: customer._id }, {
+      $set: { passwordHash: await bcrypt.hash(password, 12), updatedAt: new Date() },
+      $unset: { resetCodeHash: '', resetCodeExpiresAt: '' }
+    });
+    res.json({ message: 'Đổi mật khẩu thành công. Bạn có thể đăng nhập lại.' });
+  } catch (error) {
+    console.error('Reset password error:', error);
+    res.status(500).json({ message: 'Không thể đổi mật khẩu lúc này.' });
   }
 });
 

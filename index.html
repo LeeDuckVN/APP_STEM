@@ -71,6 +71,7 @@
             <button type="button" data-account-action="login">Đăng nhập</button>
             <button type="button" data-account-action="orders">Mua hàng</button>
             <button type="button" data-account-action="history">Xem lịch sử đơn hàng</button>
+            <button type="button" data-account-action="quotes">Lịch sử báo giá</button>
             <button type="button" data-account-action="logout" hidden>Đăng xuất</button>
           </div>
         </div>
@@ -484,6 +485,11 @@
         <textarea id="quoteContent" name="content"
           placeholder="Danh sách linh kiện, số lượng, yêu cầu xuất hóa đơn và thời gian giao..."
           data-i18n-placeholder="quoteDetails" rows="4" required></textarea>
+        <label class="quote-file-input" for="quoteAttachment">
+          <span>Đính kèm file danh sách linh kiện</span>
+          <small>PDF, Excel, Word hoặc ảnh, tối đa 5 MB</small>
+          <input type="file" id="quoteAttachment" accept=".pdf,.xls,.xlsx,.doc,.docx,.csv,.jpg,.jpeg,.png" />
+        </label>
         <button class="primary-button" type="submit">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round">
@@ -913,6 +919,7 @@
         placeholder="Tối thiểu 6 ký tự" />
       <p class="account-form-message" id="customerLoginMessage" role="alert"></p>
       <button class="account-submit" type="submit">Đăng nhập</button>
+      <button class="account-link" id="customerForgotPassword" type="button">Quên mật khẩu?</button>
     </form>
     <form id="customerRegisterForm" class="account-form" hidden>
       <label for="customerRegisterName">Họ và tên</label>
@@ -927,6 +934,35 @@
       <p class="account-form-message" id="customerRegisterMessage" role="alert"></p>
       <button class="account-submit" type="submit">Tạo tài khoản</button>
     </form>
+    <form id="customerVerifyForm" class="account-form" hidden>
+      <label for="customerVerifyEmail">Email đăng ký</label>
+      <input id="customerVerifyEmail" type="email" autocomplete="email" required readonly />
+      <label for="customerVerifyCode">Mã xác thực 6 số</label>
+      <input id="customerVerifyCode" type="text" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required
+        placeholder="Nhập mã trong email" />
+      <p class="account-form-message" id="customerVerifyMessage" role="alert"></p>
+      <button class="account-submit" type="submit">Xác thực email</button>
+      <button class="account-link" id="customerResendVerification" type="button">Gửi lại mã</button>
+    </form>
+    <form id="customerForgotForm" class="account-form" hidden>
+      <label for="customerForgotEmail">Email đăng ký</label>
+      <input id="customerForgotEmail" type="email" autocomplete="email" required placeholder="you@example.com" />
+      <p class="account-form-message" id="customerForgotMessage" role="alert"></p>
+      <button class="account-submit" type="submit">Gửi mã đổi mật khẩu</button>
+      <button class="account-link" id="customerBackToLogin" type="button">Quay lại đăng nhập</button>
+    </form>
+    <form id="customerResetForm" class="account-form" hidden>
+      <label for="customerResetEmail">Email</label>
+      <input id="customerResetEmail" type="email" autocomplete="email" required readonly />
+      <label for="customerResetCode">Mã xác thực 6 số</label>
+      <input id="customerResetCode" type="text" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required />
+      <label for="customerResetPassword">Mật khẩu mới</label>
+      <input id="customerResetPassword" type="password" autocomplete="new-password" minlength="6" required
+        placeholder="Tối thiểu 6 ký tự" />
+      <p class="account-form-message" id="customerResetMessage" role="alert"></p>
+      <button class="account-submit" type="submit">Đổi mật khẩu</button>
+      <button class="account-link" id="customerResetBackToLogin" type="button">Quay lại đăng nhập</button>
+    </form>
   </div>
 
   <!-- Customer Order History Modal -->
@@ -940,6 +976,16 @@
     <div id="customerOrdersList" class="customer-orders-list">
       <!-- Generated dynamically in app.js -->
     </div>
+  </div>
+
+  <!-- Customer Quote History Modal -->
+  <div class="account-modal-backdrop" id="customerQuotesBackdrop" hidden></div>
+  <div class="account-modal customer-orders-modal" id="customerQuotesModal" hidden role="dialog" aria-modal="true"
+    aria-labelledby="customerQuotesTitle">
+    <button class="account-modal-close" id="customerQuotesClose" type="button" aria-label="Đóng">&times;</button>
+    <h2 id="customerQuotesTitle">Lịch sử báo giá</h2>
+    <p class="account-modal-subtitle">Các yêu cầu báo giá bạn đã gửi.</p>
+    <div id="customerQuotesList" class="customer-orders-list"></div>
   </div>
 
   <!-- Floating Social Media Bar -->

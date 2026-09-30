@@ -301,6 +301,17 @@ img {
   background: var(--primary-hover);
 }
 
+.account-link {
+  padding: 2px;
+  color: var(--primary);
+  font-size: 12px;
+  text-align: center;
+}
+
+.account-link:hover {
+  text-decoration: underline;
+}
+
 .checkout-customer-notice {
   display: flex;
   align-items: center;
@@ -411,6 +422,36 @@ img {
   padding: 32px 16px;
   color: var(--text-muted);
   font-size: 13px;
+}
+
+.quote-file-input {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.quote-file-input small {
+  color: var(--text-muted);
+}
+
+.quote-file-input input {
+  margin-top: 4px;
+  font-size: 12px;
+}
+
+.customer-quote-attachment {
+  display: inline-flex;
+  margin-top: 8px;
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
 }
 
 /* ==========================================================================

@@ -440,6 +440,9 @@ const accountModalBackdrop = $("#accountModalBackdrop");
 const accountModalClose = $("#accountModalClose");
 const customerLoginForm = $("#customerLoginForm");
 const customerRegisterForm = $("#customerRegisterForm");
+const customerVerifyForm = $("#customerVerifyForm");
+const customerForgotForm = $("#customerForgotForm");
+const customerResetForm = $("#customerResetForm");
 const accountTabs = Array.from(document.querySelectorAll("[data-account-tab]"));
 const accountActions = Array.from(document.querySelectorAll("[data-account-action]"));
 const customerSessionKey = "stem_customer_session";
@@ -509,6 +512,10 @@ const customerOrdersModal = $("#customerOrdersModal");
 const customerOrdersBackdrop = $("#customerOrdersBackdrop");
 const customerOrdersClose = $("#customerOrdersClose");
 const customerOrdersList = $("#customerOrdersList");
+const customerQuotesModal = $("#customerQuotesModal");
+const customerQuotesBackdrop = $("#customerQuotesBackdrop");
+const customerQuotesClose = $("#customerQuotesClose");
+const customerQuotesList = $("#customerQuotesList");
 
 function openCustomerOrdersModal() {
   const session = getCustomerSession();
@@ -581,15 +588,64 @@ function renderCustomerOrders(session) {
 customerOrdersClose?.addEventListener("click", closeCustomerOrdersModal);
 customerOrdersBackdrop?.addEventListener("click", closeCustomerOrdersModal);
 
+function openCustomerQuotesModal() {
+  const session = getCustomerSession();
+  if (!session) {
+    openAccountModal("login");
+    $("#customerLoginMessage").textContent = "Vui lòng đăng nhập để xem lịch sử báo giá.";
+    return;
+  }
+  const quotes = getStoreQuotes().filter((quote) => {
+    return (session.id && quote.customerId && String(quote.customerId) === String(session.id)) ||
+      (session.email && quote.email && String(quote.email).toLowerCase() === String(session.email).toLowerCase());
+  }).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  const statusMap = {
+    pending: { label: "Chờ báo giá", class: "pending" },
+    contacted: { label: "Đã liên hệ", class: "processing" },
+    quoted: { label: "Đã báo giá", class: "shipped" },
+    completed: { label: "Hoàn tất", class: "completed" },
+    cancelled: { label: "Đã hủy", class: "cancelled" }
+  };
+  customerQuotesList.innerHTML = quotes.length ? quotes.map((quote) => {
+    const status = statusMap[quote.status] || statusMap.pending;
+    const date = quote.createdAt ? new Date(quote.createdAt).toLocaleString("vi-VN") : "—";
+    const attachment = quote.attachment?.data
+      ? `<a class="customer-quote-attachment" href="${quote.attachment.data}" download="${escapeHtml(quote.attachment.name)}">Tải file: ${escapeHtml(quote.attachment.name)}</a>`
+      : "";
+    return `<div class="customer-order-card">
+      <div class="customer-order-card-header"><span class="customer-order-card-id">${escapeHtml(quote.id)}</span><span class="customer-order-card-status ${status.class}">${status.label}</span></div>
+      <div class="customer-order-items">${escapeHtml(quote.content)}</div>
+      ${attachment}
+      <div class="customer-order-card-footer"><span>${date}</span><span>${escapeHtml(quote.notes || "Đang chờ shop phản hồi")}</span></div>
+    </div>`;
+  }).join("") : `<div class="customer-orders-empty">Bạn chưa gửi yêu cầu báo giá nào.</div>`;
+  customerQuotesModal.hidden = false;
+  customerQuotesBackdrop.hidden = false;
+}
+
+function closeCustomerQuotesModal() {
+  customerQuotesModal.hidden = true;
+  customerQuotesBackdrop.hidden = true;
+}
+
+customerQuotesClose?.addEventListener("click", closeCustomerQuotesModal);
+customerQuotesBackdrop?.addEventListener("click", closeCustomerQuotesModal);
+
 function setAccountMode(mode) {
   const isLogin = mode === "login";
   customerLoginForm.hidden = !isLogin;
-  customerRegisterForm.hidden = isLogin;
+  customerRegisterForm.hidden = mode !== "register";
+  customerVerifyForm.hidden = mode !== "verify";
+  customerForgotForm.hidden = mode !== "forgot";
+  customerResetForm.hidden = mode !== "reset";
   accountTabs.forEach((tab) => tab.classList.toggle("is-active", tab.dataset.accountTab === mode));
-  $("#accountModalTitle").textContent = isLogin ? "Đăng nhập" : "Tạo tài khoản";
-  $("#accountModalSubtitle").textContent = isLogin
+  $("#accountModalTitle").textContent = mode === "login" ? "Đăng nhập" : mode === "register" ? "Tạo tài khoản" : mode === "verify" ? "Xác thực email" : mode === "forgot" ? "Quên mật khẩu" : "Đổi mật khẩu";
+  $("#accountModalSubtitle").textContent = mode === "login"
     ? "Đăng nhập để theo dõi đơn hàng của bạn."
-    : "Tạo tài khoản để lưu thông tin và xem lịch sử mua hàng.";
+    : mode === "register" ? "Tạo tài khoản để lưu thông tin và xem lịch sử mua hàng."
+      : mode === "verify" ? "Nhập mã đã gửi tới email đăng ký của bạn."
+        : mode === "forgot" ? "Nhập email để nhận mã đổi mật khẩu."
+          : "Nhập mã trong email và đặt mật khẩu mới.";
   $("#customerLoginMessage").textContent = "";
   $("#customerRegisterMessage").textContent = "";
 }
@@ -634,9 +690,9 @@ if (customerAccountToggle) {
       setCustomerSession(null);
       refreshCustomerAccount();
     }
-    if (type === "orders" || type === "history") {
-      openCustomerOrdersModal();
-    }
+    if (type === "orders") openCart();
+    if (type === "history") openCustomerOrdersModal();
+    if (type === "quotes") openCustomerQuotesModal();
   }));
   accountTabs.forEach((tab) => tab.addEventListener("click", () => setAccountMode(tab.dataset.accountTab)));
   accountModalClose?.addEventListener("click", closeAccountModal);
@@ -661,9 +717,9 @@ if (customerAccountToggle) {
         message.textContent = result.message || "Không thể tạo tài khoản.";
         return;
       }
-      setCustomerSession(result.customer);
-      refreshCustomerAccount();
-      closeAccountModal();
+      $("#customerVerifyEmail").value = email;
+      setAccountMode("verify");
+      $("#customerVerifyMessage").textContent = result.message || "Kiểm tra email để lấy mã xác thực.";
     } catch (error) {
       message.textContent = "Không kết nối được máy chủ. Hãy chạy website bằng npm start.";
     }
@@ -684,6 +740,10 @@ if (customerAccountToggle) {
       const result = await response.json();
       if (!response.ok) {
         message.textContent = result.message || "Email hoặc mật khẩu không chính xác.";
+        if (result.needsVerification) {
+          $("#customerVerifyEmail").value = email;
+          setAccountMode("verify");
+        }
         return;
       }
       setCustomerSession(result.customer);
@@ -692,6 +752,78 @@ if (customerAccountToggle) {
     } catch (error) {
       message.textContent = "Không kết nối được máy chủ. Hãy chạy website bằng npm start.";
     }
+  });
+
+  customerVerifyForm?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const email = $("#customerVerifyEmail").value.trim().toLowerCase();
+    const code = $("#customerVerifyCode").value.trim();
+    const message = $("#customerVerifyMessage");
+    message.textContent = "";
+    try {
+      const response = await fetch(`${customerApiBase}/verify-email`, {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, code })
+      });
+      const result = await response.json();
+      if (!response.ok) { message.textContent = result.message || "Mã xác thực không hợp lệ."; return; }
+      setCustomerSession(result.customer);
+      refreshCustomerAccount();
+      closeAccountModal();
+    } catch (error) { message.textContent = "Không kết nối được máy chủ."; }
+  });
+
+  $("#customerResendVerification")?.addEventListener("click", async () => {
+    const email = $("#customerVerifyEmail").value.trim().toLowerCase();
+    const message = $("#customerVerifyMessage");
+    try {
+      const response = await fetch(`${customerApiBase}/resend-verification`, {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email })
+      });
+      const result = await response.json();
+      message.textContent = result.message || "Đã gửi lại mã.";
+    } catch (error) { message.textContent = "Không kết nối được máy chủ."; }
+  });
+
+  $("#customerForgotPassword")?.addEventListener("click", () => setAccountMode("forgot"));
+  $("#customerBackToLogin")?.addEventListener("click", () => setAccountMode("login"));
+  $("#customerResetBackToLogin")?.addEventListener("click", () => setAccountMode("login"));
+
+  customerForgotForm?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const email = $("#customerForgotEmail").value.trim().toLowerCase();
+    const message = $("#customerForgotMessage");
+    message.textContent = "";
+    try {
+      const response = await fetch(`${customerApiBase}/forgot-password`, {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email })
+      });
+      const result = await response.json();
+      if (!response.ok) { message.textContent = result.message || "Không thể gửi mã."; return; }
+      $("#customerResetEmail").value = email;
+      setAccountMode("reset");
+      $("#customerResetMessage").textContent = result.message;
+    } catch (error) { message.textContent = "Không kết nối được máy chủ."; }
+  });
+
+  customerResetForm?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const email = $("#customerResetEmail").value.trim().toLowerCase();
+    const code = $("#customerResetCode").value.trim();
+    const password = $("#customerResetPassword").value;
+    const message = $("#customerResetMessage");
+    message.textContent = "";
+    try {
+      const response = await fetch(`${customerApiBase}/reset-password`, {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, code, password })
+      });
+      const result = await response.json();
+      if (response.ok) {
+        setAccountMode("login");
+        $("#customerLoginMessage").textContent = result.message || "Đổi mật khẩu thành công. Hãy đăng nhập lại.";
+      } else {
+        message.textContent = result.message || "Không thể đổi mật khẩu.";
+      }
+    } catch (error) { message.textContent = "Không kết nối được máy chủ."; }
   });
 }
 const localeMap = { vi: "vi-VN", en: "en-US", ja: "ja-JP" };
@@ -1463,7 +1595,21 @@ modalTabs.forEach((button) => {
   });
 });
 
-$("#quote")?.addEventListener("submit", (event) => {
+function readQuoteAttachment(file) {
+  return new Promise((resolve, reject) => {
+    if (!file) return resolve(null);
+    if (file.size > 5 * 1024 * 1024) {
+      reject(new Error("File đính kèm không được vượt quá 5 MB."));
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => resolve({ name: file.name, type: file.type, size: file.size, data: reader.result });
+    reader.onerror = () => reject(new Error("Không thể đọc file đính kèm."));
+    reader.readAsDataURL(file);
+  });
+}
+
+$("#quote")?.addEventListener("submit", async (event) => {
   event.preventDefault();
   const form = event.currentTarget;
   const customer = $("#quoteCustomer") ? $("#quoteCustomer").value.trim() : "";
@@ -1476,11 +1622,27 @@ $("#quote")?.addEventListener("submit", (event) => {
   }
 
   const session = typeof getCustomerSession === "function" ? getCustomerSession() : null;
+  if (!session) {
+    openAccountModal("login");
+    $("#customerLoginMessage").textContent = "Vui lòng đăng nhập để gửi và theo dõi yêu cầu báo giá.";
+    return;
+  }
+
+  let attachment;
+  try {
+    attachment = await readQuoteAttachment($("#quoteAttachment")?.files?.[0]);
+  } catch (error) {
+    showToast(error.message, "warning");
+    return;
+  }
+
   const newQuote = typeof addStoreQuote === "function" ? addStoreQuote({
     customer,
     phone,
-    email: session?.email || "",
-    content
+    email: session.email || "",
+    customerId: session.id || null,
+    content,
+    attachment
   }) : null;
 
   form.reset();
@@ -1500,6 +1662,12 @@ $("#checkoutForm").addEventListener("submit", (event) => {
   }
   const form = event.currentTarget;
   const session = getCustomerSession();
+  if (!session) {
+    closeCart();
+    openAccountModal("login");
+    $("#customerLoginMessage").textContent = "Vui lòng đăng nhập trước khi đặt hàng.";
+    return;
+  }
   const customerName = $("#checkoutName") ? $("#checkoutName").value.trim() : "";
   const customerPhone = $("#checkoutPhone") ? $("#checkoutPhone").value.trim() : "";
   const customerEmail = $("#checkoutEmail") ? $("#checkoutEmail").value.trim() : (session?.email || "");
