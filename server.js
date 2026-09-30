@@ -453,7 +453,7 @@ app.post('/api/customers/login', async (req, res) => {
     const password = String(req.body.password || '');
     const customer = await customers.findOne({ email });
     if (!customer || customer.status !== 'active' || !(await bcrypt.compare(password, customer.passwordHash))) {
-      return res.status(401).json({ message: 'Email hoặc mật khẩu không chính xác.' });
+      return res.status(401).json({ message: 'Email hoặc mật khẩu không đúng. Vui lòng kiểm tra lại.' });
     }
     if (customer.emailVerified === false) {
       return res.status(403).json({ message: 'Vui lòng xác thực email trước khi đăng nhập.', needsVerification: true });
@@ -461,6 +461,9 @@ app.post('/api/customers/login', async (req, res) => {
     res.json({ customer: publicCustomer(customer) });
   } catch (error) {
     console.error('Login error:', error);
+    if (error.message.includes('MONGODB_URI is missing') || error.name === 'MongoServerSelectionError') {
+      return res.status(503).json({ message: 'Không kết nối được cơ sở dữ liệu. Hãy kiểm tra MongoDB hoặc khởi động lại server.' });
+    }
     res.status(500).json({ message: 'Không thể đăng nhập lúc này.' });
   }
 });
@@ -523,6 +526,12 @@ app.post('/api/customers/forgot-password', async (req, res) => {
     res.json({ message: 'Nếu email tồn tại, mã đổi mật khẩu đã được gửi.' });
   } catch (error) {
     console.error('Forgot password error:', error);
+    if (error.message.includes('SMTP_HOST') || error.message.includes('Invalid login') || error.code === 'EAUTH') {
+      return res.status(503).json({ message: 'SMTP chưa sẵn sàng hoặc Gmail từ chối đăng nhập. Hãy kiểm tra App Password.' });
+    }
+    if (error.message.includes('MONGODB_URI is missing') || error.name === 'MongoServerSelectionError') {
+      return res.status(503).json({ message: 'Không kết nối được cơ sở dữ liệu MongoDB.' });
+    }
     res.status(500).json({ message: 'Không thể gửi mã đổi mật khẩu lúc này.' });
   }
 });

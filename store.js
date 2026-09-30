@@ -46,8 +46,9 @@ function getApiBaseUrl() {
     if (window.location.protocol === 'file:') {
       return 'http://localhost:3000';
     }
-    // Khi mở qua Live Server (:5500, :5501...) hoặc port bất kỳ khác 3000
-    if (window.location.port && String(window.location.port) !== '3000') {
+    // Khi mở qua Live Server ở local (:5500, :5501...), chuyển API về server :3000.
+    const isLocalhost = ['localhost', '127.0.0.1', '[::1]'].includes(window.location.hostname);
+    if (isLocalhost && window.location.port && String(window.location.port) !== '3000') {
       const hostname = window.location.hostname || 'localhost';
       return `${window.location.protocol}//${hostname}:3000`;
     }
