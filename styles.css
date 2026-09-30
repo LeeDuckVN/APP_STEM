@@ -2590,6 +2590,26 @@ img {
   object-fit: contain;
 }
 
+.cart-product-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+}
+
+.cart-product-link:hover h4,
+.cart-product-link:focus-visible h4 {
+  color: var(--primary);
+}
+
+.cart-product-link:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+}
+
 .modal-thumbs {
   display: flex;
   gap: 8px;

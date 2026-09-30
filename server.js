@@ -436,6 +436,12 @@ app.post('/api/customers/register', async (req, res) => {
     res.status(201).json({ message: 'Mã xác thực đã được gửi tới email của bạn.', customer: publicCustomer(customer) });
   } catch (error) {
     console.error('Register error:', error);
+    if (error.message.includes('MONGODB_URI is missing')) {
+      return res.status(503).json({ message: 'Server chưa cấu hình MONGODB_URI. Hãy tạo file .env và điền kết nối MongoDB.' });
+    }
+    if (error.message.includes('SMTP_HOST') || error.message.includes('Invalid login') || error.code === 'EAUTH') {
+      return res.status(503).json({ message: 'Server chưa cấu hình SMTP để gửi mã xác thực email.' });
+    }
     res.status(500).json({ message: 'Không thể tạo tài khoản lúc này.' });
   }
 });

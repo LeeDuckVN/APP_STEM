@@ -1401,10 +1401,12 @@ function renderCart() {
       .map(
         (item) => `
             <div class="cart-line">
-              <img src="${getProductImageUrl(item, false)}" alt="${label(item.name)}" />
-              <div class="cart-line-info">
-                <h4>${label(item.name)}</h4>
-                <small>${formatMoney(item.price)} × ${item.qty} ${label(item.unit)}</small>
+              <div class="cart-product-link" data-cart-product="${item.id}" role="button" tabindex="0" title="Xem chi tiết sản phẩm">
+                <img src="${getProductImageUrl(item, false)}" alt="${label(item.name)}" />
+                <div class="cart-line-info">
+                  <h4>${label(item.name)}</h4>
+                  <small>${formatMoney(item.price)} × ${item.qty} ${label(item.unit)}</small>
+                </div>
               </div>
               <div class="cart-line-actions">
                 <button type="button" data-cart-step="-1" data-cart-id="${item.id}" aria-label="Giảm 1">−</button>
@@ -1435,6 +1437,15 @@ function renderCart() {
 
   document.querySelectorAll("[data-cart-id]").forEach((button) => {
     button.addEventListener("click", () => changeCartQty(button.dataset.cartId, Number(button.dataset.cartStep)));
+  });
+  document.querySelectorAll("[data-cart-product]").forEach((productLink) => {
+    productLink.addEventListener("click", () => openProductModal(productLink.dataset.cartProduct));
+    productLink.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        openProductModal(productLink.dataset.cartProduct);
+      }
+    });
   });
   document.querySelectorAll("[data-cart-remove]").forEach((button) => {
     button.addEventListener("click", () => removeFromCart(button.dataset.cartRemove));
