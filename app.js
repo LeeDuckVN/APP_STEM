@@ -717,6 +717,12 @@ if (customerAccountToggle) {
         message.textContent = result.message || "Không thể tạo tài khoản.";
         return;
       }
+      if (result.needsVerification === false || result.autoVerified) {
+        setCustomerSession(result.customer);
+        refreshCustomerAccount();
+        closeAccountModal();
+        return;
+      }
       $("#customerVerifyEmail").value = email;
       setAccountMode("verify");
       $("#customerVerifyMessage").textContent = result.message || "Kiểm tra email để lấy mã xác thực.";

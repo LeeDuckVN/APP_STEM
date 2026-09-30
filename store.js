@@ -47,9 +47,12 @@ function getApiBaseUrl() {
       return 'http://localhost:3000';
     }
     // Khi mở qua Live Server ở local (:5500, :5501...), chuyển API về server :3000.
-    const isLocalhost = ['localhost', '127.0.0.1', '[::1]'].includes(window.location.hostname);
+    const hostname = window.location.hostname || 'localhost';
+    const isLocalhost = ['localhost', '127.0.0.1', '[::1]'].includes(hostname) ||
+      hostname.startsWith('192.168.') ||
+      hostname.startsWith('10.') ||
+      hostname.endsWith('.local');
     if (isLocalhost && window.location.port && String(window.location.port) !== '3000') {
-      const hostname = window.location.hostname || 'localhost';
       return `${window.location.protocol}//${hostname}:3000`;
     }
   }

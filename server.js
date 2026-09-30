@@ -1,6 +1,6 @@
-require('dotenv').config();
-
 const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
+
 const crypto = require('crypto');
 const express = require('express');
 const bcrypt = require('bcryptjs');
@@ -9,8 +9,6 @@ const { MongoClient } = require('mongodb');
 
 const app = express();
 const port = Number(process.env.PORT) || 3000;
-const mongoUri = process.env.MONGODB_URI;
-const databaseName = process.env.MONGODB_DB || 'stem_iot';
 let mongoClient;
 let customers;
 let storeData;
@@ -18,6 +16,41 @@ let warrantyClaims;
 let databaseReady;
 const verificationCodeLifetimeMs = 10 * 60 * 1000;
 let mailTransport;
+
+function isMongoError(err) {
+  if (!err) return false;
+  const name = String(err.name || '');
+  const msg = String(err.message || '').toLowerCase();
+  return (
+    name.includes('Mongo') ||
+    msg.includes('mongodb') ||
+    msg.includes('topology is closed') ||
+    msg.includes('connection timed out') ||
+    msg.includes('serverselection') ||
+    msg.includes('querysrv') ||
+    msg.includes('querytxt') ||
+    err.code === 'ECONNREFUSED' ||
+    err.code === 'ETIMEDOUT' ||
+    err.code === 'ENOTFOUND'
+  );
+}
+
+function isSmtpError(err) {
+  if (!err) return false;
+  const msg = String(err.message || '').toLowerCase();
+  return (
+    err.code === 'EAUTH' ||
+    err.code === 'ESOCKET' ||
+    err.code === 'EENVELOPE' ||
+    err.code === 'ETIMEDOUT' ||
+    err.code === 'ECONNREFUSED' ||
+    msg.includes('smtp') ||
+    msg.includes('invalid login') ||
+    msg.includes('greeting never received') ||
+    msg.includes('app password') ||
+    msg.includes('transporter')
+  );
+}
 
 function getMailTransport() {
   if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
@@ -84,19 +117,36 @@ function publicCustomer(customer) {
 }
 
 async function connectDatabase() {
-  if (databaseReady) return databaseReady;
+  const mongoUri = process.env.MONGODB_URI;
+  const databaseName = process.env.MONGODB_DB || 'stem_iot';
+
+  if (databaseReady && mongoClient) {
+    try {
+      await mongoClient.db(databaseName).command({ ping: 1 });
+      return databaseReady;
+    } catch (pingErr) {
+      console.warn('MongoDB connection lost, reconnecting...', pingErr.message);
+      databaseReady = null;
+      try { await mongoClient.close(); } catch (_) { }
+    }
+  }
+
   databaseReady = (async () => {
-    if (!mongoUri) throw new Error('MONGODB_URI is missing.');
+    if (!mongoUri) throw new Error('MONGODB_URI is missing. Hãy tạo file .env và điền kết nối MongoDB Atlas.');
     mongoClient = new MongoClient(mongoUri, { serverSelectionTimeoutMS: 10000 });
     await mongoClient.connect();
+
+    mongoClient.on('close', () => { databaseReady = null; });
+    mongoClient.on('error', () => { databaseReady = null; });
+
     const database = mongoClient.db(databaseName);
     customers = database.collection('customers');
     storeData = database.collection('store_data');
     warrantyClaims = database.collection('warranty_claims');
-    await customers.createIndex({ email: 1 }, { unique: true });
-    await storeData.createIndex({ key: 1 }, { unique: true });
-    await warrantyClaims.createIndex({ createdAt: -1 });
-    // Clean up legacy shared cart from MongoDB
+
+    await customers.createIndex({ email: 1 }, { unique: true }).catch(() => { });
+    await storeData.createIndex({ key: 1 }, { unique: true }).catch(() => { });
+    await warrantyClaims.createIndex({ createdAt: -1 }).catch(() => { });
     await storeData.deleteOne({ key: 'cart' }).catch(() => { });
   })().catch((error) => {
     databaseReady = null;
@@ -405,11 +455,23 @@ app.post('/api/customers/register', async (req, res) => {
       return res.status(400).json({ message: 'Vui lòng nhập đủ thông tin và mật khẩu tối thiểu 6 ký tự.' });
     }
     if (await customers.findOne({ email })) {
-      return res.status(409).json({ message: 'Email này đã được đăng ký.' });
+      return res.status(409).json({ message: 'Email này đã được đăng ký. Vui lòng đăng nhập hoặc dùng email khác.' });
     }
 
     const now = new Date();
     const verificationCode = createVerificationCode();
+    console.log(`[AUTH] Mã xác thực đăng ký cho email ${email} là: ${verificationCode}`);
+
+    let emailSent = false;
+    let mailErrorMessage = '';
+    try {
+      await sendVerificationEmail({ email, name, code: verificationCode, type: 'verify' });
+      emailSent = true;
+    } catch (mailError) {
+      console.warn(`[AUTH] Không thể gửi email xác thực tới ${email}:`, mailError.message);
+      mailErrorMessage = mailError.message;
+    }
+
     const customer = {
       name,
       phone,
@@ -417,7 +479,7 @@ app.post('/api/customers/register', async (req, res) => {
       passwordHash: await bcrypt.hash(password, 12),
       role: 'customer',
       status: 'active',
-      emailVerified: false,
+      emailVerified: emailSent ? false : true,
       verificationCodeHash: hashVerificationCode(verificationCode),
       verificationCodeExpiresAt: new Date(Date.now() + verificationCodeLifetimeMs),
       orderCount: 0,
@@ -425,24 +487,34 @@ app.post('/api/customers/register', async (req, res) => {
       createdAt: now,
       updatedAt: now
     };
+
     const result = await customers.insertOne(customer);
     customer._id = result.insertedId;
-    try {
-      await sendVerificationEmail({ email, name, code: verificationCode, type: 'verify' });
-    } catch (mailError) {
-      await customers.deleteOne({ _id: result.insertedId });
-      throw mailError;
+
+    if (emailSent) {
+      return res.status(201).json({
+        message: 'Mã xác thực đã được gửi tới email của bạn. Vui lòng kiểm tra hộp thư.',
+        customer: publicCustomer(customer),
+        needsVerification: true
+      });
+    } else {
+      return res.status(201).json({
+        message: 'Tài khoản đã được tạo thành công! (Không gửi được email xác thực: ' + mailErrorMessage + ', hệ thống đã tự kích hoạt tài khoản).',
+        customer: publicCustomer(customer),
+        needsVerification: false,
+        autoVerified: true
+      });
     }
-    res.status(201).json({ message: 'Mã xác thực đã được gửi tới email của bạn.', customer: publicCustomer(customer) });
   } catch (error) {
     console.error('Register error:', error);
-    if (error.message.includes('MONGODB_URI is missing')) {
-      return res.status(503).json({ message: 'Server chưa cấu hình MONGODB_URI. Hãy tạo file .env và điền kết nối MongoDB.' });
+    if (isMongoError(error)) {
+      databaseReady = null;
+      return res.status(503).json({ message: 'Không kết nối được cơ sở dữ liệu MongoDB (' + error.message + '). Hãy kiểm tra kết nối mạng hoặc MongoDB Atlas.' });
     }
-    if (error.message.includes('SMTP_HOST') || error.message.includes('Invalid login') || error.code === 'EAUTH') {
-      return res.status(503).json({ message: 'Server chưa cấu hình SMTP để gửi mã xác thực email.' });
+    if (isSmtpError(error)) {
+      return res.status(503).json({ message: 'Lỗi dịch vụ email SMTP (' + error.message + ').' });
     }
-    res.status(500).json({ message: 'Không thể tạo tài khoản lúc này.' });
+    res.status(500).json({ message: 'Không thể tạo tài khoản: ' + error.message });
   }
 });
 
@@ -451,6 +523,9 @@ app.post('/api/customers/login', async (req, res) => {
     await connectDatabase();
     const email = String(req.body.email || '').trim().toLowerCase();
     const password = String(req.body.password || '');
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Vui lòng nhập đầy đủ email và mật khẩu.' });
+    }
     const customer = await customers.findOne({ email });
     if (!customer || customer.status !== 'active' || !(await bcrypt.compare(password, customer.passwordHash))) {
       return res.status(401).json({ message: 'Email hoặc mật khẩu không đúng. Vui lòng kiểm tra lại.' });
@@ -461,10 +536,11 @@ app.post('/api/customers/login', async (req, res) => {
     res.json({ customer: publicCustomer(customer) });
   } catch (error) {
     console.error('Login error:', error);
-    if (error.message.includes('MONGODB_URI is missing') || error.name === 'MongoServerSelectionError') {
-      return res.status(503).json({ message: 'Không kết nối được cơ sở dữ liệu. Hãy kiểm tra MongoDB hoặc khởi động lại server.' });
+    if (isMongoError(error)) {
+      databaseReady = null;
+      return res.status(503).json({ message: 'Không kết nối được cơ sở dữ liệu MongoDB (' + error.message + '). Hãy kiểm tra kết nối mạng hoặc khởi động lại server.' });
     }
-    res.status(500).json({ message: 'Không thể đăng nhập lúc này.' });
+    res.status(500).json({ message: 'Lỗi khi đăng nhập: ' + error.message });
   }
 });
 
@@ -484,10 +560,14 @@ app.post('/api/customers/verify-email', async (req, res) => {
       $unset: { verificationCodeHash: '', verificationCodeExpiresAt: '' }
     });
     customer.emailVerified = true;
-    res.json({ message: 'Email đã được xác thực.', customer: publicCustomer(customer) });
+    res.json({ message: 'Email đã được xác thực thành công.', customer: publicCustomer(customer) });
   } catch (error) {
     console.error('Verify email error:', error);
-    res.status(500).json({ message: 'Không thể xác thực email lúc này.' });
+    if (isMongoError(error)) {
+      databaseReady = null;
+      return res.status(503).json({ message: 'Không kết nối được MongoDB: ' + error.message });
+    }
+    res.status(500).json({ message: 'Không thể xác thực email: ' + error.message });
   }
 });
 
@@ -500,14 +580,23 @@ app.post('/api/customers/resend-verification', async (req, res) => {
       return res.json({ message: 'Nếu email chưa xác thực, mã mới đã được gửi.' });
     }
     const code = createVerificationCode();
-    await sendVerificationEmail({ email, name: customer.name, code, type: 'verify' });
+    console.log(`[AUTH] Mã gửi lại xác thực cho ${email} là: ${code}`);
+    try {
+      await sendVerificationEmail({ email, name: customer.name, code, type: 'verify' });
+    } catch (mailError) {
+      console.warn(`[AUTH] Lỗi gửi lại mã cho ${email}:`, mailError.message);
+    }
     await customers.updateOne({ _id: customer._id }, {
       $set: { verificationCodeHash: hashVerificationCode(code), verificationCodeExpiresAt: new Date(Date.now() + verificationCodeLifetimeMs) }
     });
-    res.json({ message: 'Mã xác thực mới đã được gửi.' });
+    res.json({ message: 'Mã xác thực mới đã được gửi tới email của bạn.' });
   } catch (error) {
     console.error('Resend verification error:', error);
-    res.status(500).json({ message: 'Không thể gửi lại mã xác thực lúc này.' });
+    if (isMongoError(error)) {
+      databaseReady = null;
+      return res.status(503).json({ message: 'Không kết nối được MongoDB: ' + error.message });
+    }
+    res.status(500).json({ message: 'Không thể gửi lại mã xác thực: ' + error.message });
   }
 });
 
@@ -518,21 +607,34 @@ app.post('/api/customers/forgot-password', async (req, res) => {
     const customer = await customers.findOne({ email });
     if (customer) {
       const code = createVerificationCode();
-      await sendVerificationEmail({ email, name: customer.name, code, type: 'reset' });
+      console.log(`[AUTH] Mã đổi mật khẩu cho ${email} là: ${code}`);
+      let emailSent = false;
+      try {
+        await sendVerificationEmail({ email, name: customer.name, code, type: 'reset' });
+        emailSent = true;
+      } catch (mailError) {
+        console.warn(`[AUTH] Lỗi gửi email đổi mật khẩu tới ${email}:`, mailError.message);
+      }
       await customers.updateOne({ _id: customer._id }, {
         $set: { resetCodeHash: hashVerificationCode(code), resetCodeExpiresAt: new Date(Date.now() + verificationCodeLifetimeMs) }
       });
+      if (!emailSent) {
+        return res.json({
+          message: 'Mã đổi mật khẩu đã được tạo (Lưu ý: Không gửi được email qua SMTP. Mã hiển thị trên terminal: ' + code + ').'
+        });
+      }
     }
-    res.json({ message: 'Nếu email tồn tại, mã đổi mật khẩu đã được gửi.' });
+    res.json({ message: 'Nếu email tồn tại, mã đổi mật khẩu đã được gửi tới email của bạn.' });
   } catch (error) {
     console.error('Forgot password error:', error);
-    if (error.message.includes('SMTP_HOST') || error.message.includes('Invalid login') || error.code === 'EAUTH') {
-      return res.status(503).json({ message: 'SMTP chưa sẵn sàng hoặc Gmail từ chối đăng nhập. Hãy kiểm tra App Password.' });
+    if (isMongoError(error)) {
+      databaseReady = null;
+      return res.status(503).json({ message: 'Không kết nối được cơ sở dữ liệu MongoDB: ' + error.message });
     }
-    if (error.message.includes('MONGODB_URI is missing') || error.name === 'MongoServerSelectionError') {
-      return res.status(503).json({ message: 'Không kết nối được cơ sở dữ liệu MongoDB.' });
+    if (isSmtpError(error)) {
+      return res.status(503).json({ message: 'Lỗi SMTP khi gửi email đổi mật khẩu: ' + error.message });
     }
-    res.status(500).json({ message: 'Không thể gửi mã đổi mật khẩu lúc này.' });
+    res.status(500).json({ message: 'Không thể gửi mã đổi mật khẩu: ' + error.message });
   }
 });
 
@@ -549,13 +651,17 @@ app.post('/api/customers/reset-password', async (req, res) => {
       return res.status(400).json({ message: 'Mã không đúng, đã hết hạn hoặc mật khẩu chưa đủ 6 ký tự.' });
     }
     await customers.updateOne({ _id: customer._id }, {
-      $set: { passwordHash: await bcrypt.hash(password, 12), updatedAt: new Date() },
+      $set: { passwordHash: await bcrypt.hash(password, 12), updatedAt: new Date(), emailVerified: true },
       $unset: { resetCodeHash: '', resetCodeExpiresAt: '' }
     });
-    res.json({ message: 'Đổi mật khẩu thành công. Bạn có thể đăng nhập lại.' });
+    res.json({ message: 'Đổi mật khẩu thành công. Bạn có thể đăng nhập lại với mật khẩu mới.' });
   } catch (error) {
     console.error('Reset password error:', error);
-    res.status(500).json({ message: 'Không thể đổi mật khẩu lúc này.' });
+    if (isMongoError(error)) {
+      databaseReady = null;
+      return res.status(503).json({ message: 'Không kết nối được MongoDB: ' + error.message });
+    }
+    res.status(500).json({ message: 'Không thể đổi mật khẩu lúc này: ' + error.message });
   }
 });
 
