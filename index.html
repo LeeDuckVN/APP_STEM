@@ -906,7 +906,6 @@
       <p class="account-form-message" id="customerLoginMessage" role="alert"></p>
       <button class="account-submit" type="submit">Đăng nhập</button>
       <button class="account-link" id="customerForgotPassword" type="button">Quên mật khẩu?</button>
-      <button class="account-link" id="customerLookupOrdersLink" type="button" style="margin-top: 6px; color: var(--text-muted); font-size: 11.5px;">🔍 Tra cứu đơn hàng bằng SĐT hoặc Mã đơn</button>
     </form>
     <form id="customerRegisterForm" class="account-form" hidden>
       <label for="customerRegisterName">Họ và tên</label>
@@ -960,8 +959,8 @@
     <h2 id="customerOrdersTitle" data-i18n="myOrdersTitle">Đơn hàng của bạn</h2>
     <p class="account-modal-subtitle" id="customerOrdersSubtitle" data-i18n="myOrdersSubtitle">Lịch sử các đơn hàng đã đặt của bạn.</p>
     <form class="order-lookup-bar" id="orderLookupForm" style="display: flex; gap: 8px; margin-bottom: 16px;">
-      <input type="text" id="orderLookupInput" placeholder="Nhập SĐT hoặc Mã đơn (ví dụ: 0937... hoặc DH-...)" style="flex: 1; padding: 9px 12px; border: 1.5px solid var(--border-subtle); border-radius: var(--radius-sm); font-size: 13px; outline: none;" />
-      <button type="submit" class="account-submit" style="padding: 9px 16px; font-size: 13px; white-space: nowrap;">Tra cứu</button>
+      <input type="text" id="orderLookupInput" placeholder="Lọc theo mã đơn (#ORD-...) hoặc tên linh kiện..." style="flex: 1; padding: 9px 12px; border: 1.5px solid var(--border-subtle); border-radius: var(--radius-sm); font-size: 13px; outline: none;" />
+      <button type="submit" class="account-submit" style="padding: 9px 16px; font-size: 13px; white-space: nowrap;">Lọc</button>
     </form>
     <div id="customerOrdersList" class="customer-orders-list">
       <!-- Generated dynamically in app.js -->

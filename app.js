@@ -519,9 +519,16 @@ const customerQuotesList = $("#customerQuotesList");
 
 function openCustomerOrdersModal(query = "") {
   const session = getCustomerSession();
+  if (!session) {
+    openAccountModal("login");
+    const msg = $("#customerLoginMessage");
+    if (msg) msg.textContent = "Vui lòng đăng nhập để xem lịch sử đơn hàng của bạn.";
+    return;
+  }
   const input = $("#orderLookupInput");
   if (input) {
-    input.value = query || (session?.phone || "");
+    input.value = query || "";
+    input.placeholder = "Lọc theo mã đơn (#ORD-...) hoặc tên linh kiện...";
   }
   renderCustomerOrders(session, query);
   if (customerOrdersModal) customerOrdersModal.hidden = false;
@@ -535,38 +542,11 @@ function closeCustomerOrdersModal() {
 
 function renderCustomerOrders(session, query = "") {
   if (!customerOrdersList) return;
-  const allOrders = getStoreOrders();
-  const cleanQ = String(query || "").trim().toLowerCase();
-  const sEmail = String(session?.email || "").toLowerCase().trim();
-  const sPhone = String(session?.phone || "").trim();
-  const sId = String(session?.id || "").trim();
-
-  let userOrders = [];
-
-  if (cleanQ) {
-    userOrders = allOrders.filter((o) => {
-      const idMatch = String(o.id || "").toLowerCase().includes(cleanQ);
-      const phoneMatch = String(o.phone || "").replace(/\s+/g, "").includes(cleanQ.replace(/\s+/g, ""));
-      const emailMatch = String(o.email || "").toLowerCase().includes(cleanQ);
-      const nameMatch = String(o.customer || "").toLowerCase().includes(cleanQ);
-      return idMatch || phoneMatch || emailMatch || nameMatch;
-    });
-  } else if (session) {
-    userOrders = allOrders.filter((o) => {
-      if (sId && o.customerId && String(o.customerId) === sId) return true;
-      if (sEmail && o.email && String(o.email).toLowerCase().trim() === sEmail) return true;
-      if (sPhone && o.phone && String(o.phone).trim() === sPhone) return true;
-      return false;
-    });
-  } else {
+  if (!session) {
     customerOrdersList.innerHTML = `
       <div class="customer-orders-empty" style="text-align: center; padding: 28px 16px;">
-        <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 10px; display: block; color: var(--text-light);">
-          <circle cx="11" cy="11" r="8"></circle>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-        </svg>
         <p style="color: var(--text-secondary); margin-bottom: 12px; font-size: 13.5px;">
-          Vui lòng nhập <strong>Số điện thoại</strong> hoặc <strong>Mã đơn hàng</strong> vào ô phía trên để tra cứu đơn, hoặc đăng nhập để xem toàn bộ:
+          Vui lòng đăng nhập để xem các đơn hàng đã đặt của bạn:
         </p>
         <button type="button" class="account-submit" id="ordersPromptLogin" style="display: inline-block;">Đăng nhập tài khoản</button>
       </div>
@@ -578,13 +558,47 @@ function renderCustomerOrders(session, query = "") {
     return;
   }
 
+  const allOrders = getStoreOrders();
+  const cleanQ = String(query || "").trim().toLowerCase();
+  const sEmail = String(session.email || "").toLowerCase().trim();
+  const sId = String(session.id || "").trim();
+
+  // BẢO MẬT & PHÂN QUYỀN: Chỉ hiển thị đơn hàng thuộc về đúng tài khoản đang đăng nhập!
+  // 1. Nếu đơn hàng có customerId -> BẮT BUỘC phải trùng với session.id
+  // 2. Nếu đơn hàng cũ không có customerId -> BẮT BUỘC phải trùng email tài khoản
+  // TUYỆT ĐỐI KHÔNG đối chiếu bằng số điện thoại để tránh lộ đơn giữa các tài khoản khác nhau.
+  const myOrders = allOrders.filter((o) => {
+    if (o.customerId) {
+      return sId && String(o.customerId) === sId;
+    }
+    if (sEmail && o.email) {
+      return String(o.email).toLowerCase().trim() === sEmail;
+    }
+    return false;
+  });
+
+  // Nếu người dùng nhập từ khóa tìm kiếm -> Chỉ tìm trong phạm vi đơn hàng CỦA CHÍNH HỌ
+  let userOrders = myOrders;
+  if (cleanQ) {
+    userOrders = myOrders.filter((o) => {
+      const idMatch = String(o.id || "").toLowerCase().includes(cleanQ);
+      const itemMatch = (o.items || []).some((it) => {
+        const name = typeof it.name === "string" ? it.name : (it.name?.vi || it.name?.en || "");
+        return name.toLowerCase().includes(cleanQ);
+      });
+      return idMatch || itemMatch;
+    });
+  }
+
   userOrders.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
+  if (myOrders.length === 0) {
+    customerOrdersList.innerHTML = `<div class="customer-orders-empty" style="text-align: center; padding: 24px 16px; color: var(--text-muted);">Bạn chưa có đơn hàng nào.</div>`;
+    return;
+  }
+
   if (userOrders.length === 0) {
-    const msg = cleanQ
-      ? `Không tìm thấy đơn hàng nào khớp với "<strong>${escapeHtml(cleanQ)}</strong>". Vui lòng kiểm tra lại SĐT hoặc Mã đơn.`
-      : "Bạn chưa có đơn hàng nào.";
-    customerOrdersList.innerHTML = `<div class="customer-orders-empty" style="text-align: center; padding: 24px 16px; color: var(--text-muted);">${msg}</div>`;
+    customerOrdersList.innerHTML = `<div class="customer-orders-empty" style="text-align: center; padding: 24px 16px; color: var(--text-muted);">Không tìm thấy đơn hàng nào của bạn khớp với "<strong>${escapeHtml(cleanQ)}</strong>".</div>`;
     return;
   }
 
@@ -638,12 +652,22 @@ function renderCustomerOrders(session, query = "") {
   customerOrdersList.querySelectorAll("[data-cancel-order]").forEach((btn) => {
     btn.addEventListener("click", () => {
       const orderId = btn.dataset.cancelOrder;
+      // Kiểm tra xác thực quyền sở hữu đơn hàng
+      const order = allOrders.find((o) => o.id === orderId);
+      const isMine = order && (
+        (order.customerId && String(order.customerId) === sId) ||
+        (!order.customerId && sEmail && String(order.email).toLowerCase().trim() === sEmail)
+      );
+      if (!isMine) {
+        showToast("Bạn không có quyền thao tác trên đơn hàng này.", "error");
+        return;
+      }
       if (!confirm(`Bạn có chắc chắn muốn hủy đơn hàng #${orderId}?`)) return;
       if (typeof cancelStoreOrder === "function") {
         const res = cancelStoreOrder(orderId);
         if (res.ok) {
           showToast(`Đã hủy đơn hàng #${orderId}`, "info");
-          renderCustomerOrders(session, query);
+          renderCustomerOrders(session, $("#orderLookupInput")?.value || "");
         } else {
           showToast(res.message || "Không thể hủy đơn hàng", "error");
         }
@@ -663,8 +687,13 @@ function openCustomerQuotesModal() {
     return;
   }
   const quotes = getStoreQuotes().filter((quote) => {
-    return (session.id && quote.customerId && String(quote.customerId) === String(session.id)) ||
-      (session.email && quote.email && String(quote.email).toLowerCase() === String(session.email).toLowerCase());
+    if (quote.customerId) {
+      return session.id && String(quote.customerId) === String(session.id);
+    }
+    if (session.email && quote.email) {
+      return String(quote.email).toLowerCase().trim() === String(session.email).toLowerCase().trim();
+    }
+    return false;
   }).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
   const statusMap = {
     pending: { label: "Chờ báo giá", class: "pending" },
@@ -877,14 +906,13 @@ if (customerAccountToggle) {
   $("#customerForgotPassword")?.addEventListener("click", () => setAccountMode("forgot"));
   $("#customerBackToLogin")?.addEventListener("click", () => setAccountMode("login"));
   $("#customerResetBackToLogin")?.addEventListener("click", () => setAccountMode("login"));
-  $("#customerLookupOrdersLink")?.addEventListener("click", () => {
-    closeAccountModal();
-    openCustomerOrdersModal();
-  });
-
   $("#orderLookupForm")?.addEventListener("submit", (e) => {
     e.preventDefault();
     const val = $("#orderLookupInput")?.value.trim() || "";
+    renderCustomerOrders(getCustomerSession(), val);
+  });
+  $("#orderLookupInput")?.addEventListener("input", (e) => {
+    const val = e.target.value.trim();
     renderCustomerOrders(getCustomerSession(), val);
   });
 
