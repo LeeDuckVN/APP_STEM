@@ -517,13 +517,13 @@ const customerQuotesBackdrop = $("#customerQuotesBackdrop");
 const customerQuotesClose = $("#customerQuotesClose");
 const customerQuotesList = $("#customerQuotesList");
 
-function openCustomerOrdersModal() {
+function openCustomerOrdersModal(query = "") {
   const session = getCustomerSession();
-  if (!session) {
-    openAccountModal("login");
-    return;
+  const input = $("#orderLookupInput");
+  if (input) {
+    input.value = query || (session?.phone || "");
   }
-  renderCustomerOrders(session);
+  renderCustomerOrders(session, query);
   if (customerOrdersModal) customerOrdersModal.hidden = false;
   if (customerOrdersBackdrop) customerOrdersBackdrop.hidden = false;
 }
@@ -533,22 +533,58 @@ function closeCustomerOrdersModal() {
   if (customerOrdersBackdrop) customerOrdersBackdrop.hidden = true;
 }
 
-function renderCustomerOrders(session) {
+function renderCustomerOrders(session, query = "") {
   if (!customerOrdersList) return;
   const allOrders = getStoreOrders();
-  const sEmail = String(session.email || "").toLowerCase().trim();
-  const sPhone = String(session.phone || "").trim();
-  const sId = String(session.id || "").trim();
+  const cleanQ = String(query || "").trim().toLowerCase();
+  const sEmail = String(session?.email || "").toLowerCase().trim();
+  const sPhone = String(session?.phone || "").trim();
+  const sId = String(session?.id || "").trim();
 
-  const userOrders = allOrders.filter((o) => {
-    if (sId && o.customerId && String(o.customerId) === sId) return true;
-    if (sEmail && o.email && String(o.email).toLowerCase().trim() === sEmail) return true;
-    if (sPhone && o.phone && String(o.phone).trim() === sPhone) return true;
-    return false;
-  }).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+  let userOrders = [];
+
+  if (cleanQ) {
+    userOrders = allOrders.filter((o) => {
+      const idMatch = String(o.id || "").toLowerCase().includes(cleanQ);
+      const phoneMatch = String(o.phone || "").replace(/\s+/g, "").includes(cleanQ.replace(/\s+/g, ""));
+      const emailMatch = String(o.email || "").toLowerCase().includes(cleanQ);
+      const nameMatch = String(o.customer || "").toLowerCase().includes(cleanQ);
+      return idMatch || phoneMatch || emailMatch || nameMatch;
+    });
+  } else if (session) {
+    userOrders = allOrders.filter((o) => {
+      if (sId && o.customerId && String(o.customerId) === sId) return true;
+      if (sEmail && o.email && String(o.email).toLowerCase().trim() === sEmail) return true;
+      if (sPhone && o.phone && String(o.phone).trim() === sPhone) return true;
+      return false;
+    });
+  } else {
+    customerOrdersList.innerHTML = `
+      <div class="customer-orders-empty" style="text-align: center; padding: 28px 16px;">
+        <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 10px; display: block; color: var(--text-light);">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <p style="color: var(--text-secondary); margin-bottom: 12px; font-size: 13.5px;">
+          Vui lòng nhập <strong>Số điện thoại</strong> hoặc <strong>Mã đơn hàng</strong> vào ô phía trên để tra cứu đơn, hoặc đăng nhập để xem toàn bộ:
+        </p>
+        <button type="button" class="account-submit" id="ordersPromptLogin" style="display: inline-block;">Đăng nhập tài khoản</button>
+      </div>
+    `;
+    $("#ordersPromptLogin")?.addEventListener("click", () => {
+      closeCustomerOrdersModal();
+      openAccountModal("login");
+    });
+    return;
+  }
+
+  userOrders.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
   if (userOrders.length === 0) {
-    customerOrdersList.innerHTML = `<div class="customer-orders-empty">${t("noOrders") || "Bạn chưa có đơn hàng nào."}</div>`;
+    const msg = cleanQ
+      ? `Không tìm thấy đơn hàng nào khớp với "<strong>${escapeHtml(cleanQ)}</strong>". Vui lòng kiểm tra lại SĐT hoặc Mã đơn.`
+      : "Bạn chưa có đơn hàng nào.";
+    customerOrdersList.innerHTML = `<div class="customer-orders-empty" style="text-align: center; padding: 24px 16px; color: var(--text-muted);">${msg}</div>`;
     return;
   }
 
@@ -566,23 +602,54 @@ function renderCustomerOrders(session) {
     const dateStr = o.createdAt ? new Date(o.createdAt).toLocaleString("vi-VN") : "—";
     const itemsSummary = (o.items || []).map((it) => {
       const name = typeof it.name === "string" ? it.name : (it.name?.[currentLang] || it.name?.vi || "Sản phẩm");
-      return `${it.qty}x ${name}`;
-    }).join(", ");
+      const priceStr = it.price ? ` (${formatMoney(it.price)})` : "";
+      return `<div style="display: flex; justify-content: space-between; gap: 8px; margin-bottom: 4px; font-size: 13px;">
+        <span>• ${escapeHtml(name)} <strong style="color: var(--primary);">× ${it.qty}</strong></span>
+        <span style="color: var(--text-muted); font-size: 12px;">${priceStr}</span>
+      </div>`;
+    }).join("");
 
     return `
-      <div class="customer-order-card">
-        <div class="customer-order-card-header">
-          <span class="customer-order-card-id">${escapeHtml(o.id)}</span>
+      <div class="customer-order-card" data-order-id="${escapeHtml(o.id)}" style="background: #ffffff; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 16px; margin-bottom: 12px; box-shadow: var(--shadow-xs);">
+        <div class="customer-order-card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span class="customer-order-card-id" style="font-weight: 700; color: var(--text-primary); font-size: 14px;">Mã đơn: <span style="color: var(--primary); font-family: 'JetBrains Mono', monospace;">#${escapeHtml(o.id)}</span></span>
           <span class="customer-order-card-status ${st.class}">${st.label}</span>
         </div>
-        <div class="customer-order-items">${escapeHtml(itemsSummary || "Chi tiết đơn")}</div>
-        <div class="customer-order-card-footer">
-          <span>${dateStr}</span>
-          <span class="customer-order-card-total">${formatCurrency(o.total)}</span>
+        <div class="customer-order-recipient" style="font-size: 12px; color: var(--text-secondary); margin-bottom: 10px; background: var(--bg-surface-alt); padding: 8px 12px; border-radius: 6px;">
+          <div><strong>Người nhận:</strong> ${escapeHtml(o.customer || "Khách hàng")} • <strong>SĐT:</strong> ${escapeHtml(o.phone || "—")}</div>
+          ${o.address ? `<div style="margin-top: 3px;"><strong>Địa chỉ:</strong> ${escapeHtml(o.address)}</div>` : ''}
         </div>
+        <div class="customer-order-items" style="margin-bottom: 10px;">
+          ${itemsSummary || "Chi tiết đơn hàng"}
+        </div>
+        <div class="customer-order-card-footer" style="display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed var(--border-subtle); padding-top: 10px; font-size: 12px; color: var(--text-muted);">
+          <span>Đặt lúc: ${dateStr}</span>
+          <span style="font-size: 13.5px;">Tổng tiền: <strong style="color: var(--primary); font-size: 16px; font-weight: 800;">${formatMoney(o.total)}</strong></span>
+        </div>
+        ${o.status === "pending" ? `
+          <div style="margin-top: 10px; text-align: right; border-top: 1px solid #f1f5f9; padding-top: 8px;">
+            <button type="button" class="order-cancel-btn" data-cancel-order="${escapeHtml(o.id)}" style="font-size: 12px; color: #dc2626; background: #fef2f2; border: 1px solid rgba(220,38,38,0.25); border-radius: 4px; padding: 4px 10px; cursor: pointer; font-weight: 600;">Hủy đơn hàng</button>
+          </div>
+        ` : ''}
       </div>
     `;
   }).join("");
+
+  customerOrdersList.querySelectorAll("[data-cancel-order]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const orderId = btn.dataset.cancelOrder;
+      if (!confirm(`Bạn có chắc chắn muốn hủy đơn hàng #${orderId}?`)) return;
+      if (typeof cancelStoreOrder === "function") {
+        const res = cancelStoreOrder(orderId);
+        if (res.ok) {
+          showToast(`Đã hủy đơn hàng #${orderId}`, "info");
+          renderCustomerOrders(session, query);
+        } else {
+          showToast(res.message || "Không thể hủy đơn hàng", "error");
+        }
+      }
+    });
+  });
 }
 
 customerOrdersClose?.addEventListener("click", closeCustomerOrdersModal);
@@ -668,18 +735,29 @@ function refreshCustomerAccount() {
   }
   accountActions.forEach((action) => {
     const act = action.dataset?.accountAction;
-    if (act === "logout") action.hidden = !session;
-    if (act === "login" || act === "register") action.hidden = Boolean(session);
+    if (act === "logout" || act === "history" || act === "quotes" || act === "orders") {
+      action.hidden = !session;
+    }
+    if (act === "login" || act === "register") {
+      action.hidden = Boolean(session);
+    }
   });
   autoFillCheckoutCustomer();
 }
 
 if (customerAccountToggle) {
   refreshCustomerAccount();
-  customerAccountToggle.addEventListener("click", () => {
+  customerAccountToggle.addEventListener("click", (event) => {
+    event.stopPropagation();
     const isOpen = !customerAccountMenu.hidden;
     customerAccountMenu.hidden = isOpen;
     customerAccountToggle.setAttribute("aria-expanded", String(!isOpen));
+  });
+  document.addEventListener("click", (event) => {
+    if (customerAccountMenu && !customerAccountMenu.hidden && !event.target.closest(".customer-account")) {
+      customerAccountMenu.hidden = true;
+      customerAccountToggle.setAttribute("aria-expanded", "false");
+    }
   });
   accountActions.forEach((action) => action.addEventListener("click", () => {
     const type = action.dataset.accountAction;
@@ -687,8 +765,11 @@ if (customerAccountToggle) {
     customerAccountToggle.setAttribute("aria-expanded", "false");
     if (type === "login" || type === "register") openAccountModal(type);
     if (type === "logout") {
+      const prevSession = getCustomerSession();
+      const userName = prevSession?.name || "bạn";
       setCustomerSession(null);
       refreshCustomerAccount();
+      showToast(`Đã đăng xuất thành công. Hẹn gặp lại ${userName}!`, "info");
     }
     if (type === "orders") openCart();
     if (type === "history") openCustomerOrdersModal();
@@ -721,6 +802,7 @@ if (customerAccountToggle) {
         setCustomerSession(result.customer);
         refreshCustomerAccount();
         closeAccountModal();
+        showToast(`Đăng ký và đăng nhập thành công! Xin chào ${result.customer.name || result.customer.email}`, "success");
         return;
       }
       $("#customerVerifyEmail").value = email;
@@ -755,6 +837,7 @@ if (customerAccountToggle) {
       setCustomerSession(result.customer);
       refreshCustomerAccount();
       closeAccountModal();
+      showToast(`Đăng nhập thành công! Xin chào ${result.customer.name || result.customer.email}`, "success");
     } catch (error) {
       message.textContent = "Không kết nối được máy chủ. Hãy chạy website bằng npm start.";
     }
@@ -775,6 +858,7 @@ if (customerAccountToggle) {
       setCustomerSession(result.customer);
       refreshCustomerAccount();
       closeAccountModal();
+      showToast(`Xác thực email và đăng nhập thành công! Xin chào ${result.customer.name || result.customer.email}`, "success");
     } catch (error) { message.textContent = "Không kết nối được máy chủ."; }
   });
 
@@ -793,6 +877,16 @@ if (customerAccountToggle) {
   $("#customerForgotPassword")?.addEventListener("click", () => setAccountMode("forgot"));
   $("#customerBackToLogin")?.addEventListener("click", () => setAccountMode("login"));
   $("#customerResetBackToLogin")?.addEventListener("click", () => setAccountMode("login"));
+  $("#customerLookupOrdersLink")?.addEventListener("click", () => {
+    closeAccountModal();
+    openCustomerOrdersModal();
+  });
+
+  $("#orderLookupForm")?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const val = $("#orderLookupInput")?.value.trim() || "";
+    renderCustomerOrders(getCustomerSession(), val);
+  });
 
   customerForgotForm?.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -889,6 +983,9 @@ function label(value) {
 function formatMoney(amount) {
   return `${new Intl.NumberFormat(localeMap[currentLang]).format(amount)}${t("currencySuffix")}`;
 }
+window.formatMoney = formatMoney;
+window.formatCurrency = formatMoney;
+window.openCustomerOrdersModal = openCustomerOrdersModal;
 
 function getCategory(categoryId) {
   const found = categories.find((category) => category.id === categoryId);
@@ -905,11 +1002,20 @@ function saveCart() {
   localStorage.setItem("stemCart", JSON.stringify(cart));
 }
 
-function showToast(message) {
-  toast.textContent = message;
-  toast.classList.add("show");
+function showToast(message, type = "success") {
+  if (!toast) return;
+  const icon = type === "info"
+    ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`
+    : type === "error"
+    ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`
+    : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M20 6L9 17l-5-5"/></svg>`;
+
+  toast.innerHTML = `${icon}<span>${escapeHtml(message)}</span>`;
+  toast.className = `toast toast-${type} show`;
   window.clearTimeout(showToast.timer);
-  showToast.timer = window.setTimeout(() => toast.classList.remove("show"), 2200);
+  showToast.timer = window.setTimeout(() => {
+    toast.classList.remove("show");
+  }, 3200);
 }
 
 function applyI18n() {
@@ -1025,6 +1131,17 @@ function matchesPrice(product) {
   return product.price >= min && product.price <= max;
 }
 
+function removeVietnameseTones(str) {
+  if (!str) return "";
+  return String(str)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D")
+    .toLowerCase()
+    .trim();
+}
+
 function productSearchText(product) {
   if (!product) return "";
   const category = getCategory(product.category);
@@ -1048,6 +1165,58 @@ function productSearchText(product) {
     .toLowerCase();
 }
 
+function matchProductQuery(product, rawQuery) {
+  if (!product || !rawQuery) return false;
+  const rawQ = String(rawQuery).trim().toLowerCase();
+  if (!rawQ) return false;
+  const cleanQ = removeVietnameseTones(rawQ);
+
+  const rawSearch = productSearchText(product);
+  const cleanSearch = removeVietnameseTones(rawSearch);
+
+  // Exact or direct substring match
+  if (rawSearch.includes(rawQ) || cleanSearch.includes(cleanQ)) {
+    return true;
+  }
+
+  // All individual words in query must be present in search text
+  const words = cleanQ.split(/\s+/).filter(Boolean);
+  if (words.length > 1 && words.every((w) => cleanSearch.includes(w))) {
+    return true;
+  }
+
+  return false;
+}
+
+function scoreProductMatch(product, rawQuery) {
+  if (!product || !rawQuery) return 0;
+  const rawQ = String(rawQuery).trim().toLowerCase();
+  const cleanQ = removeVietnameseTones(rawQ);
+  const prodName = label(product.name);
+  const cleanName = removeVietnameseTones(prodName);
+  const sku = String(product.sku || "").toLowerCase();
+  const cleanSku = removeVietnameseTones(sku);
+
+  let score = 0;
+  if (cleanSku === cleanQ || sku === rawQ) score += 120;
+  else if (cleanSku.startsWith(cleanQ)) score += 95;
+  else if (cleanSku.includes(cleanQ)) score += 70;
+
+  if (cleanName === cleanQ) score += 110;
+  else if (cleanName.startsWith(cleanQ)) score += 90;
+  else if (cleanName.includes(cleanQ)) score += 80;
+
+  const words = cleanQ.split(/\s+/).filter(Boolean);
+  if (words.length > 1) {
+    const matchCount = words.filter((w) => cleanName.includes(w)).length;
+    score += matchCount * 15;
+  }
+
+  if ((product.inventory || 0) > 0) score += 5;
+
+  return score;
+}
+
 function getVisibleProducts() {
   const query = (searchInput?.value || "").trim().toLowerCase();
   const scopedCategory = searchScope?.value || "all";
@@ -1063,7 +1232,7 @@ function getVisibleProducts() {
       stockVal === "all" ||
       (stockVal === "inStock" && product.inventory > 0) ||
       (stockVal === "lowStock" && product.inventory > 0 && product.inventory <= 20);
-    const searchOk = !query || productSearchText(product).includes(query);
+    const searchOk = !query || matchProductQuery(product, query);
     return categoryOk && subOk && scopeOk && hiddenOk && stockOk && matchesPrice(product) && searchOk;
   });
 
@@ -1302,26 +1471,120 @@ function renderNewProducts() {
   });
 }
 
+let selectedSuggestionIndex = -1;
+
+function updateSuggestionSelection(items) {
+  items.forEach((item, idx) => {
+    if (idx === selectedSuggestionIndex) {
+      item.classList.add("is-selected");
+      item.scrollIntoView({ block: "nearest" });
+    } else {
+      item.classList.remove("is-selected");
+    }
+  });
+}
+
 function renderSuggestions() {
-  const query = searchInput.value.trim().toLowerCase();
-  if (query.length < 2) {
+  if (!suggestions || !searchInput) return;
+  const rawQuery = searchInput.value.trim();
+  selectedSuggestionIndex = -1;
+
+  if (!rawQuery) {
     suggestions.hidden = true;
+    suggestions.innerHTML = "";
     return;
   }
 
-  const matches = products.filter((product) => !product.hidden && productSearchText(product).includes(query)).slice(0, 5);
-  suggestions.hidden = matches.length === 0;
-  suggestions.innerHTML = matches
-    .map((product) => `<button type="button" data-suggestion="${label(product.name)}">${label(product.name)}<br><small>${product.sku}</small></button>`)
+  const scopedCategory = searchScope?.value || "all";
+  const matched = products.filter((product) => {
+    if (product.hidden) return false;
+    if (scopedCategory && scopedCategory !== "all" && product.category !== scopedCategory) return false;
+    return matchProductQuery(product, rawQuery);
+  });
+
+  if (matched.length === 0) {
+    suggestions.hidden = false;
+    suggestions.innerHTML = `
+      <div class="suggestion-empty">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 6px; display: block; color: var(--text-light);">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        Không tìm thấy sản phẩm nào khớp với "<strong>${escapeHtml(rawQuery)}</strong>"
+      </div>
+    `;
+    return;
+  }
+
+  matched.sort((a, b) => scoreProductMatch(b, rawQuery) - scoreProductMatch(a, rawQuery));
+  const displayList = matched.slice(0, 7);
+  suggestions.hidden = false;
+
+  let html = displayList
+    .map((product) => {
+      const name = label(product.name);
+      const priceFormatted = formatMoney(product.price);
+      const sku = product.sku || "";
+      const img = product.image || "assets/arduino-proto-shield-rev3.png";
+      const inStock = (product.inventory || 0) > 0;
+      const stockBadge = inStock
+        ? `<span class="suggestion-stock in-stock">Còn ${product.inventory}</span>`
+        : `<span class="suggestion-stock out-of-stock">Hết hàng</span>`;
+
+      return `
+        <button type="button" class="suggestion-item" data-suggestion-id="${escapeHtml(product.id)}" role="option">
+          <img src="${escapeHtml(img)}" alt="${escapeHtml(name)}" onerror="this.src='assets/arduino-proto-shield-rev3.png'" />
+          <div class="suggestion-info">
+            <h4>${escapeHtml(name)}</h4>
+            <div class="suggestion-meta">
+              <span class="suggestion-sku">${escapeHtml(sku)}</span>
+              ${stockBadge}
+            </div>
+          </div>
+          <div class="suggestion-price">${priceFormatted}</div>
+        </button>
+      `;
+    })
     .join("");
 
-  document.querySelectorAll("[data-suggestion]").forEach((button) => {
-    button.addEventListener("click", () => {
-      searchInput.value = button.dataset.suggestion;
+  if (matched.length > 7) {
+    html += `
+      <div class="suggestion-footer">
+        <button type="button" class="suggestion-footer-btn" id="seeAllSearchMatches">
+          Xem tất cả <strong>${matched.length}</strong> kết quả cho "<em>${escapeHtml(rawQuery)}</em>" &rarr;
+        </button>
+      </div>
+    `;
+  }
+
+  suggestions.innerHTML = html;
+
+  suggestions.querySelectorAll(".suggestion-item").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const prodId = btn.dataset.suggestionId;
+      const prod = products.find((p) => p.id === prodId);
+      if (prod) {
+        searchInput.value = label(prod.name);
+      }
       suggestions.hidden = true;
       renderProducts();
+      if (prodId) {
+        openProductModal(prodId);
+      }
     });
   });
+
+  const seeAllBtn = $("#seeAllSearchMatches");
+  if (seeAllBtn) {
+    seeAllBtn.addEventListener("click", () => {
+      suggestions.hidden = true;
+      renderProducts();
+      const productSection = $("#products") || $("#productGrid");
+      if (productSection) {
+        productSection.scrollIntoView({ behavior: "smooth" });
+      }
+    });
+  }
 }
 
 function addToCart(productId, qty = 1) {
@@ -1517,10 +1780,51 @@ searchInput.addEventListener("input", () => {
   renderProducts();
 });
 
+searchInput.addEventListener("focus", () => {
+  if (searchInput.value.trim()) {
+    renderSuggestions();
+  }
+});
+
+searchInput.addEventListener("search", () => {
+  if (!searchInput.value.trim()) {
+    suggestions.hidden = true;
+    renderProducts();
+  }
+});
+
+searchInput.addEventListener("keydown", (event) => {
+  if (suggestions.hidden) return;
+  const items = Array.from(suggestions.querySelectorAll(".suggestion-item"));
+  if (items.length === 0) return;
+
+  if (event.key === "ArrowDown") {
+    event.preventDefault();
+    selectedSuggestionIndex = (selectedSuggestionIndex + 1) % items.length;
+    updateSuggestionSelection(items);
+  } else if (event.key === "ArrowUp") {
+    event.preventDefault();
+    selectedSuggestionIndex = (selectedSuggestionIndex - 1 + items.length) % items.length;
+    updateSuggestionSelection(items);
+  } else if (event.key === "Enter") {
+    if (selectedSuggestionIndex >= 0 && items[selectedSuggestionIndex]) {
+      event.preventDefault();
+      items[selectedSuggestionIndex].click();
+    }
+  } else if (event.key === "Escape") {
+    suggestions.hidden = true;
+    selectedSuggestionIndex = -1;
+  }
+});
+
 $("#searchForm").addEventListener("submit", (event) => {
   event.preventDefault();
   suggestions.hidden = true;
   renderProducts();
+  const productSection = $("#products") || $("#productGrid");
+  if (productSection) {
+    productSection.scrollIntoView({ behavior: "smooth" });
+  }
 });
 
 $("#resetFilter").addEventListener("click", () => {
@@ -1555,6 +1859,9 @@ document.querySelectorAll("[data-language]").forEach((button) => {
 });
 
 document.addEventListener("click", (event) => {
+  if (suggestions && !suggestions.hidden && !event.target.closest("#searchForm")) {
+    suggestions.hidden = true;
+  }
   if (!languageMenu.hidden && !event.target.closest(".language-picker")) {
     closeLanguageMenu();
   }
@@ -1562,6 +1869,7 @@ document.addEventListener("click", (event) => {
 
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") {
+    if (suggestions) suggestions.hidden = true;
     closeLanguageMenu();
     closeProductModal();
   }
