@@ -133,6 +133,27 @@ function prodDesc(p) {
   if (typeof p.description === 'string') return p.description;
   return (p.description && (p.description.vi || p.description.en)) || '';
 }
+
+function prodSuitable(p) {
+  if (p == null) return '';
+  if (typeof p.suitableFor === 'string') return p.suitableFor;
+  return (p.suitableFor && (p.suitableFor.vi || p.suitableFor.en || p.suitableFor.ja)) || '';
+}
+
+function prodSpecs(p) {
+  if (p == null || !p.specs) return [];
+  if (Array.isArray(p.specs)) return p.specs;
+  if (typeof p.specs === 'string') {
+    return p.specs.split('\n').map(l => l.trim()).filter(Boolean).map(line => {
+      const idx = line.indexOf(':');
+      if (idx > -1) {
+        return { key: line.slice(0, idx).trim(), value: line.slice(idx + 1).trim() };
+      }
+      return { key: '', value: line };
+    });
+  }
+  return [];
+}
 // ============== STATUS BADGES ==============
 const ORDER_STATUS = {
   pending: { label: 'Chờ xử lý', cls: 'badge-warning' },

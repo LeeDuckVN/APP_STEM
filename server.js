@@ -319,29 +319,37 @@ app.post('/api/products/translate-all', async (req, res) => {
       const viName = typeof p.name === 'string' ? p.name : (p.name?.vi || '');
       const viBadge = typeof p.badge === 'string' ? p.badge : (p.badge?.vi || '');
       const viDesc = typeof p.description === 'string' ? p.description : (p.description?.vi || '');
+      const viSuitable = typeof p.suitableFor === 'string' ? p.suitableFor : (p.suitableFor?.vi || '');
 
       const currentEnName = typeof p.name === 'object' && p.name?.en ? p.name.en : '';
       const currentJaName = typeof p.name === 'object' && p.name?.ja ? p.name.ja : '';
       const currentEnDesc = typeof p.description === 'object' && p.description?.en ? p.description.en : '';
       const currentJaDesc = typeof p.description === 'object' && p.description?.ja ? p.description.ja : '';
+      const currentEnSuitable = typeof p.suitableFor === 'object' && p.suitableFor?.en ? p.suitableFor.en : '';
+      const currentJaSuitable = typeof p.suitableFor === 'object' && p.suitableFor?.ja ? p.suitableFor.ja : '';
 
-      const needEn = force || !currentEnName || !currentEnDesc;
-      const needJa = force || !currentJaName || !currentJaDesc;
+      const needEn = force || !currentEnName || !currentEnDesc || (viSuitable && !currentEnSuitable);
+      const needJa = force || !currentJaName || !currentJaDesc || (viSuitable && !currentJaSuitable);
 
       if (needEn || needJa) {
         try {
-          const [enName, jaName, enBadge, jaBadge, enDesc, jaDesc] = await Promise.all([
+          const [enName, jaName, enBadge, jaBadge, enDesc, jaDesc, enSuitable, jaSuitable] = await Promise.all([
             needEn && viName ? googleTranslateText(viName, 'en') : currentEnName,
             needJa && viName ? googleTranslateText(viName, 'ja') : currentJaName,
             needEn && viBadge ? googleTranslateText(viBadge, 'en') : (p.badge?.en || viBadge),
             needJa && viBadge ? googleTranslateText(viBadge, 'ja') : (p.badge?.ja || viBadge),
             needEn && viDesc ? googleTranslateText(viDesc, 'en') : (p.description?.en || viDesc),
-            needJa && viDesc ? googleTranslateText(viDesc, 'ja') : (p.description?.ja || viDesc)
+            needJa && viDesc ? googleTranslateText(viDesc, 'ja') : (p.description?.ja || viDesc),
+            needEn && viSuitable ? googleTranslateText(viSuitable, 'en') : (p.suitableFor?.en || viSuitable),
+            needJa && viSuitable ? googleTranslateText(viSuitable, 'ja') : (p.suitableFor?.ja || viSuitable)
           ]);
 
           p.name = { vi: viName, en: enName || viName, ja: jaName || viName };
-          p.badge = { vi: viBadge, en: enBadge || viBadge, ja: jaBadge || viBadge };
-          p.description = { vi: viDesc, en: enDesc || viDesc, ja: jaDesc || viDesc };
+          p.badge = { vi: viBadge, en: enBadge || viBadge, ja: badgeJa || viBadge };
+          p.description = { vi: viDesc, en: enDesc || viDesc, ja: descJa || viDesc };
+          if (viSuitable || enSuitable || jaSuitable) {
+            p.suitableFor = { vi: viSuitable, en: enSuitable || viSuitable, ja: jaSuitable || viSuitable };
+          }
           translatedCount++;
         } catch (e) {
           console.warn(`Error translating product ${p.id}:`, e.message);
@@ -450,9 +458,13 @@ app.post('/api/customers/register', async (req, res) => {
     const phone = String(req.body.phone || '').trim();
     const email = String(req.body.email || '').trim().toLowerCase();
     const password = String(req.body.password || '');
+    const confirmPassword = req.body.confirmPassword !== undefined ? String(req.body.confirmPassword) : null;
 
     if (!name || !phone || !email || password.length < 6) {
       return res.status(400).json({ message: 'Vui lòng nhập đủ thông tin và mật khẩu tối thiểu 6 ký tự.' });
+    }
+    if (confirmPassword !== null && password !== confirmPassword) {
+      return res.status(400).json({ message: 'Mật khẩu nhập lại không khớp.' });
     }
     if (await customers.findOne({ email })) {
       return res.status(409).json({ message: 'Email này đã được đăng ký. Vui lòng đăng nhập hoặc dùng email khác.' });

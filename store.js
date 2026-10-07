@@ -221,10 +221,20 @@ var SEED_PRODUCTS = [
     imagePosition: "50% 50%",
     badge: { vi: "Prototype", en: "Prototype", ja: "プロトタイプ" },
     description: {
-      vi: "Shield proto dành cho học tập, mô phỏng mạch và thử nghiệm linh kiện nhanh chóng.",
-      en: "Prototype shield for electronics learning, quick circuit experiments, and component testing.",
-      ja: "回路の学習や実験、部品テストに使えるプロトタイプシールド。"
+      vi: "Shield proto dành cho học tập, mô phỏng mạch và thử nghiệm linh kiện nhanh chóng trên bo mạch Arduino.",
+      en: "Prototype shield for electronics learning, quick circuit experiments, and component testing on Arduino.",
+      ja: "回路の学習や実験、部品テストに使えるArduino用プロトタイプシールド。"
     },
+    suitableFor: {
+      vi: "Học tập điện tử, thực hành môn STEM, chế tạo mạch thử nghiệm DIY và đồ án sinh viên.",
+      en: "Electronics learning, STEM education, DIY prototyping, and student projects.",
+      ja: "エレクトロニクス学習、STEM教育、DIY試作、学生プロジェクトに最適。"
+    },
+    specs: [
+      { key: "Tương thích", value: "Arduino Uno R3, Mega 2560, Leonardo" },
+      { key: "Vùng hàn linh kiện", value: "Hỗ trợ chân cắm DIP và SMD" },
+      { key: "Phụ kiện tích hợp", value: "Nút Reset, chân nguồn 5V/GND mở rộng" }
+    ],
     isNew: true
   },
   {
@@ -240,10 +250,23 @@ var SEED_PRODUCTS = [
     imagePosition: "50% 50%",
     badge: { vi: "ESP32", en: "ESP32", ja: "ESP32" },
     description: {
-      vi: "Module WiFi co-processor cho ESP32, phù hợp dự án IoT, cảm biến và hệ thống giám sát từ xa.",
-      en: "ESP32 WiFi co-processor module for IoT projects, sensor systems, and remote monitoring.",
-      ja: "IoTプロジェクト、センサーシステム、遠隔監視向けのESP32 WiFi共役モジュール。"
+      vi: "Module WiFi co-processor cho ESP32 hỗ trợ truyền tải dữ liệu không dây tốc độ cao, tích hợp ăng-ten trên bo mạch và giao tiếp SPI mượt mà.",
+      en: "ESP32 WiFi co-processor module supporting high-speed wireless connectivity with onboard antenna and smooth SPI communication.",
+      ja: "オンボードアンテナと高速SPIインターフェースを備えたESP32用WiFiコプロセッサモジュール。"
     },
+    suitableFor: {
+      vi: "Module WiFi co-processor cho ESP32, phù hợp dự án IoT, cảm biến và hệ thống giám sát từ xa.",
+      en: "Suitable for ESP32 IoT projects, sensor hubs, and remote monitoring systems.",
+      ja: "ESP32 IoTプロジェクト、センサーネットワーク、遠隔監視システムに最適。"
+    },
+    specs: [
+      { key: "Vi điều khiển", value: "ESP32-WROOM-32 (240MHz)" },
+      { key: "Điện áp hoạt động", value: "3.3V - 5V DC" },
+      { key: "Chuẩn giao tiếp", value: "SPI, UART, I2C" },
+      { key: "Kết nối không dây", value: "WiFi 802.11 b/g/n & BLE 4.2" },
+      { key: "Bộ nhớ Flash", value: "4MB SPI Flash" },
+      { key: "Nhiệt độ hoạt động", value: "-40°C đến 85°C" }
+    ],
     isNew: true
   },
   {
@@ -263,6 +286,17 @@ var SEED_PRODUCTS = [
       en: "TFT touch display for Arduino dashboards, educational robots, and interactive interfaces.",
       ja: "Arduinoダッシュボードや教育用ロボット向けのTFTタッチ表示モジュール。"
     },
+    suitableFor: {
+      vi: "Dự án Arduino cần giao diện đồ họa, máy chơi game mini, thiết bị cầm tay và robot điều khiển.",
+      en: "Arduino GUI dashboards, handheld gadgets, retro game emulators, and educational robots.",
+      ja: "GUIダッシュボード、携帯端末、レトロゲーム、教育用ロボットに最適。"
+    },
+    specs: [
+      { key: "Kích thước màn hình", value: "2.8 inch TFT LCD" },
+      { key: "Độ phân giải", value: "240 x 320 pixels (18-bit 262K màu)" },
+      { key: "Cảm ứng", value: "Cảm ứng điện trở 4 dây (Resistive Touch)" },
+      { key: "Giao tiếp", value: "SPI tốc độ cao + MicroSD slot" }
+    ],
     isNew: false
   },
   {
@@ -278,10 +312,21 @@ var SEED_PRODUCTS = [
     imagePosition: "50% 50%",
     badge: { vi: "ePaper", en: "ePaper", ja: "ePaper" },
     description: {
-      vi: "Shield ePaper tiết kiệm điện năng, phù hợp bảng thông tin, sản phẩm DIY và ứng dụng hiển thị nhàn rỗi.",
-      en: "Low-power ePaper shield for signage, DIY projects, and low-refresh displays.",
-      ja: "低消費電力のePaperシールドで、表示板やDIYプロジェクトに適しています。"
+      vi: "Shield ePaper tiết kiệm điện năng, hiển thị rõ nét ngoài trời và giữ hình ảnh ngay cả khi mất nguồn.",
+      en: "Ultra low-power ePaper shield with daylight readability and persistent image retention without power.",
+      ja: "超低消費電力のePaperシールドで、直射日光下でも鮮明に表示され、電源OFF時も表示を保持します。"
     },
+    suitableFor: {
+      vi: "Bảng tên điện tử, thẻ giá siêu thị, thiết bị theo dõi thời tiết phòng ngủ và biển báo thông tin.",
+      en: "Digital name tags, smart shelf labels, weather trackers, and static information displays.",
+      ja: "電子名札、スマート値札、卓上時計、各種情報ディスプレイに最適。"
+    },
+    specs: [
+      { key: "Kích thước màn hình", value: "2.7 inch E-Ink Display" },
+      { key: "Màu sắc hiển thị", value: "Đỏ, Đen, Trắng (Tri-color)" },
+      { key: "Độ phân giải", value: "176 x 264 pixels" },
+      { key: "Bộ nhớ đệm", value: "SRAM tích hợp và khe thẻ nhớ MicroSD" }
+    ],
     isNew: true
   },
   {
@@ -297,10 +342,21 @@ var SEED_PRODUCTS = [
     imagePosition: "50% 50%",
     badge: { vi: "Cảm biến", en: "Sensor", ja: "センサー" },
     description: {
-      vi: "Cảm biến nhiệt độ, độ ẩm và áp suất cho hệ thống giám sát môi trường, nhà thông minh và lab.",
-      en: "Temperature, humidity, and pressure sensor for environmental monitoring and smart lab systems.",
-      ja: "温度、湿度、気圧を測る環境監視やスマートラボ向けのセンサー。"
+      vi: "Cảm biến môi trường tích hợp đo đồng thời nhiệt độ, độ ẩm và áp suất khí quyển với độ chính xác cao.",
+      en: "Precision environmental sensor measuring temperature, humidity, and barometric pressure simultaneously.",
+      ja: "高精度で温度、湿度、気圧を同時に測定する環境センサーシールド。"
     },
+    suitableFor: {
+      vi: "Trạm đo thời tiết IoT, hệ thống giám sát môi trường nhà kính, nhà thông minh và phòng thí nghiệm.",
+      en: "IoT weather stations, greenhouse environmental controls, smart homes, and science labs.",
+      ja: "IoT気象ステーション、温室環境制御、スマートホーム、研究室に最適。"
+    },
+    specs: [
+      { key: "Thông số đo", value: "Nhiệt độ (-40 ~ 85°C), Độ ẩm (0 ~ 100%), Áp suất (300 ~ 1100 hPa)" },
+      { key: "Độ chính xác", value: "±1.0°C, ±3% RH, ±1 hPa" },
+      { key: "Chuẩn giao tiếp", value: "I2C (mặc định địa chỉ 0x77/0x76) và SPI" },
+      { key: "Điện áp hoạt động", value: "3.3V - 5V DC (có tích hợp level shifter)" }
+    ],
     isNew: true
   },
   {
@@ -678,6 +734,26 @@ function normalizeSeedProduct(p) {
     };
   };
 
+  const normSpecs = (specs) => {
+    if (!specs) return [];
+    if (Array.isArray(specs)) {
+      return specs.map((s) => {
+        if (typeof s === 'string') {
+          const idx = s.indexOf(':');
+          return idx > -1 ? { key: s.slice(0, idx).trim(), value: s.slice(idx + 1).trim() } : { key: '', value: s.trim() };
+        }
+        return { key: String(s.key || s.name || '').trim(), value: String(s.value || '').trim() };
+      }).filter((s) => s.key || s.value);
+    }
+    if (typeof specs === 'string') {
+      return specs.split('\n').map((l) => l.trim()).filter(Boolean).map((l) => {
+        const idx = l.indexOf(':');
+        return idx > -1 ? { key: l.slice(0, idx).trim(), value: l.slice(idx + 1).trim() } : { key: '', value: l };
+      });
+    }
+    return [];
+  };
+
   return {
     id: String(p.id || genStoreId('p')),
     sku: String(p.sku || 'ST-000'),
@@ -693,6 +769,8 @@ function normalizeSeedProduct(p) {
     imagePosition: p.imagePosition || '50% 50%',
     badge: normI18n(p.badge, 'Mới'),
     description: normI18n(p.description, ''),
+    suitableFor: normI18n(p.suitableFor, ''),
+    specs: normSpecs(p.specs),
     isNew: !!p.isNew,
     sold: Math.max(0, Number(p.sold) || 0),
     hidden: !!p.hidden
@@ -747,6 +825,31 @@ function getStoreProducts() {
   const seeded = localStorage.getItem(STORE_KEYS.seeded);
   const stored = readJSON(STORE_KEYS.products, null);
   if (seeded && Array.isArray(stored)) {
+    let updated = false;
+    stored.forEach((p) => {
+      if (p.suitableFor === undefined) {
+        const seed = SEED_PRODUCTS.find((s) => s.id === p.id || s.sku === p.sku);
+        p.suitableFor = seed && seed.suitableFor ? seed.suitableFor : { vi: '', en: '', ja: '' };
+        updated = true;
+      }
+      if (p.specs === undefined) {
+        const seed = SEED_PRODUCTS.find((s) => s.id === p.id || s.sku === p.sku);
+        p.specs = seed && seed.specs ? seed.specs : [];
+        updated = true;
+      }
+      if (p.id === 'adafruit-airlift-esp32' && (!p.suitableFor?.vi || p.suitableFor?.vi === p.description?.vi)) {
+        const seed = SEED_PRODUCTS.find((s) => s.id === 'adafruit-airlift-esp32');
+        if (seed) {
+          p.suitableFor = seed.suitableFor;
+          p.description = seed.description;
+          p.specs = seed.specs;
+          updated = true;
+        }
+      }
+    });
+    if (updated) {
+      saveStoreProducts(stored, false);
+    }
     return stored;
   }
   const initial = SEED_PRODUCTS.map(normalizeSeedProduct);
@@ -857,7 +960,27 @@ async function loadStoreFromMongo() {
   const hasRemoteData = [data.products, data.orders, data.users, data.quotes]
     .some((items) => Array.isArray(items) && items.length > 0);
   if (!hasRemoteData) return data;
-  if (Array.isArray(data.products)) saveStoreProducts(data.products, false);
+  if (Array.isArray(data.products)) {
+    data.products.forEach((p) => {
+      if (p.suitableFor === undefined) {
+        const seed = SEED_PRODUCTS.find((s) => s.id === p.id || s.sku === p.sku);
+        p.suitableFor = seed && seed.suitableFor ? seed.suitableFor : { vi: '', en: '', ja: '' };
+      }
+      if (p.specs === undefined) {
+        const seed = SEED_PRODUCTS.find((s) => s.id === p.id || s.sku === p.sku);
+        p.specs = seed && seed.specs ? seed.specs : [];
+      }
+      if (p.id === 'adafruit-airlift-esp32' && (!p.suitableFor?.vi || p.suitableFor?.vi === p.description?.vi)) {
+        const seed = SEED_PRODUCTS.find((s) => s.id === 'adafruit-airlift-esp32');
+        if (seed) {
+          p.suitableFor = seed.suitableFor;
+          p.description = seed.description;
+          p.specs = seed.specs;
+        }
+      }
+    });
+    saveStoreProducts(data.products, false);
+  }
   if (Array.isArray(data.orders)) saveStoreOrders(data.orders, false);
   if (Array.isArray(data.users)) saveStoreUsers(data.users, false);
   if (Array.isArray(data.quotes)) saveStoreQuotes(data.quotes, false);

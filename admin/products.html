@@ -97,7 +97,66 @@
                 <span>⚡ Dịch tự động EN & JA</span>
               </button>
             </div>
-            <textarea class="form-control" id="pfDescription" placeholder="Mô tả ngắn về sản phẩm..."></textarea>
+            <textarea class="form-control" id="pfDescription" placeholder="Mô tả chi tiết về sản phẩm..."></textarea>
+          </div>
+
+          <!-- Nhập Phù hợp / Ứng dụng (Tách riêng khỏi Mô tả) -->
+          <div class="form-group">
+            <label for="pfSuitableFor">Phù hợp / Ứng dụng (tiếng Việt)</label>
+            <textarea class="form-control" id="pfSuitableFor" rows="2"
+              placeholder="VD: Dự án IoT, trạm đo môi trường, hệ thống cảm biến và giám sát từ xa..."></textarea>
+            <small class="text-xs text-gray">Nội dung này hiển thị riêng tại mục "Phù hợp" trong tab Thông số kỹ thuật của trang chi tiết.</small>
+          </div>
+
+          <!-- Khối nhập Thông số kỹ thuật chi tiết -->
+          <div class="specs-builder-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
+              <div>
+                <label style="font-weight: 700; font-size: 13.5px; color: #1e293b; margin-bottom: 2px; display: flex; align-items: center; gap: 6px;">
+                  <span>⚙️</span>
+                  <span>Thông số kỹ thuật</span>
+                </label>
+                <span class="text-xs text-gray">Nhập thông số kỹ thuật chi tiết (Điện áp, Vi điều khiển, Chuẩn giao tiếp, Kích thước...)</span>
+              </div>
+              <div style="display: flex; gap: 6px;">
+                <button type="button" class="btn btn-xs btn-secondary" id="btnToggleSpecMode" onclick="toggleSpecInputMode()" title="Chuyển đổi giữa bảng nhập và dán văn bản nhanh">
+                  <span id="btnSpecModeText">📝 Nhập nhanh văn bản</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Gợi ý nhanh thông số phổ biến -->
+            <div id="specQuickChips" style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; align-items: center;">
+              <span class="text-xs text-gray" style="font-weight: 600;">Gợi ý:</span>
+              <button type="button" class="spec-chip" onclick="addSpecRowWithKey('Điện áp hoạt động')">+ Điện áp</button>
+              <button type="button" class="spec-chip" onclick="addSpecRowWithKey('Vi điều khiển')">+ Vi điều khiển</button>
+              <button type="button" class="spec-chip" onclick="addSpecRowWithKey('Chuẩn giao tiếp')">+ Chuẩn giao tiếp</button>
+              <button type="button" class="spec-chip" onclick="addSpecRowWithKey('Kết nối không dây')">+ WiFi / BLE</button>
+              <button type="button" class="spec-chip" onclick="addSpecRowWithKey('Kích thước')">+ Kích thước</button>
+              <button type="button" class="spec-chip" onclick="addSpecRowWithKey('Tần số xung nhịp')">+ Tần số</button>
+              <button type="button" class="spec-chip" onclick="addSpecRowWithKey('Bộ nhớ Flash')">+ Bộ nhớ</button>
+              <button type="button" class="spec-chip" onclick="addSpecRowWithKey('Nhiệt độ hoạt động')">+ Nhiệt độ</button>
+            </div>
+
+            <!-- Chế độ 1: Danh sách các hàng thông số (Key - Value) -->
+            <div id="specRowsContainer" style="display: flex; flex-direction: column; gap: 8px;"></div>
+
+            <div id="specRowsActions" style="margin-top: 10px; display: flex; justify-content: space-between; align-items: center;">
+              <button type="button" class="btn btn-xs btn-secondary" onclick="addSpecRow('', '')" style="display: inline-flex; align-items: center; gap: 4px; font-weight: 600;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                <span>Thêm dòng thông số</span>
+              </button>
+              <button type="button" class="btn btn-xs text-danger" onclick="clearAllSpecs()" style="background: none; border: none; cursor: pointer; font-size: 12px;">
+                Xóa tất cả
+              </button>
+            </div>
+
+            <!-- Chế độ 2: Textarea dán nhanh (Mỗi dòng một thông số dạng Tên: Giá trị) -->
+            <div id="specRawContainer" style="display: none; margin-top: 8px;">
+              <textarea class="form-control text-sm" id="pfSpecsRaw" rows="5"
+                placeholder="Ví dụ (mỗi dòng một thông số dạng Tên: Giá trị):&#10;Điện áp hoạt động: 3.3V - 5V DC&#10;Vi điều khiển: ESP32-WROOM-32&#10;Chuẩn giao tiếp: SPI, UART&#10;Kết nối không dây: WiFi 802.11 b/g/n & BLE 4.2"></textarea>
+              <small class="text-xs text-gray" style="margin-top: 4px; display: block;">Mỗi dòng một thông số theo cú pháp <code>Tên thông số: Giá trị</code></small>
+            </div>
           </div>
 
           <!-- Khối bản dịch đa ngôn ngữ tự động (UI/UX Pro Max) -->
@@ -140,11 +199,23 @@
                 <textarea class="form-control text-sm" id="pfDescEn" rows="2"
                   placeholder="English description..."></textarea>
               </div>
-              <div class="form-group" style="grid-column: 1 / -1; margin-bottom: 0;">
+              <div class="form-group" style="grid-column: 1 / -1; margin-bottom: 8px;">
                 <label for="pfDescJa" class="text-xs font-bold text-gray"
                   style="display: block; margin-bottom: 4px;">🇯🇵 Mô tả tiếng Nhật (JA)</label>
                 <textarea class="form-control text-sm" id="pfDescJa" rows="2"
                   placeholder="Japanese description..."></textarea>
+              </div>
+              <div class="form-group" style="grid-column: 1 / -1; margin-bottom: 8px;">
+                <label for="pfSuitableEn" class="text-xs font-bold text-gray"
+                  style="display: block; margin-bottom: 4px;">🇬🇧 Phù hợp tiếng Anh (Suitable for EN)</label>
+                <textarea class="form-control text-sm" id="pfSuitableEn" rows="2"
+                  placeholder="Suitable for IoT projects, sensor monitoring..."></textarea>
+              </div>
+              <div class="form-group" style="grid-column: 1 / -1; margin-bottom: 0;">
+                <label for="pfSuitableJa" class="text-xs font-bold text-gray"
+                  style="display: block; margin-bottom: 4px;">🇯🇵 Phù hợp tiếng Nhật (Suitable for JA)</label>
+                <textarea class="form-control text-sm" id="pfSuitableJa" rows="2"
+                  placeholder="IoTプロジェクト、センサー監視に最適..."></textarea>
               </div>
             </div>
           </details>
@@ -356,6 +427,149 @@
         `;
       }).join('');
     }
+    // ===== QUẢN LÝ THÔNG SỐ KỸ THUẬT (SPECS) =====
+    let isSpecRawMode = false;
+
+    function addSpecRow(key = '', value = '') {
+      const container = document.getElementById('specRowsContainer');
+      if (!container) return null;
+      const row = document.createElement('div');
+      row.className = 'spec-row-item';
+      row.innerHTML = `
+        <input type="text" class="form-control text-sm spec-key-input" placeholder="Tên thông số (VD: Điện áp)" value="${escapeHtml(key)}" />
+        <input type="text" class="form-control text-sm spec-val-input" placeholder="Giá trị (VD: 3.3V - 5V DC)" value="${escapeHtml(value)}" />
+        <button type="button" class="spec-row-remove" onclick="this.closest('.spec-row-item').remove()" title="Xóa thông số này">✕</button>
+      `;
+      container.appendChild(row);
+      return row;
+    }
+
+    function addSpecRowWithKey(keyName) {
+      if (isSpecRawMode) {
+        toggleSpecInputMode();
+      }
+      const row = addSpecRow(keyName, '');
+      if (row) {
+        const valInput = row.querySelector('.spec-val-input');
+        if (valInput) valInput.focus();
+      }
+    }
+
+    function clearAllSpecs() {
+      const container = document.getElementById('specRowsContainer');
+      if (container) container.innerHTML = '';
+      const raw = document.getElementById('pfSpecsRaw');
+      if (raw) raw.value = '';
+    }
+
+    function toggleSpecInputMode() {
+      const container = document.getElementById('specRowsContainer');
+      const actions = document.getElementById('specRowsActions');
+      const chips = document.getElementById('specQuickChips');
+      const rawBox = document.getElementById('specRawContainer');
+      const rawText = document.getElementById('pfSpecsRaw');
+      const btnText = document.getElementById('btnSpecModeText');
+
+      if (!container || !rawBox || !rawText) return;
+
+      if (!isSpecRawMode) {
+        // Chuyển sang dạng văn bản
+        const rows = getSpecsFromRows();
+        rawText.value = rows.map(r => r.key ? `${r.key}: ${r.value}` : r.value).join('\n');
+        container.style.display = 'none';
+        actions.style.display = 'none';
+        chips.style.display = 'none';
+        rawBox.style.display = 'block';
+        if (btnText) btnText.textContent = '📋 Bảng thông số';
+        isSpecRawMode = true;
+      } else {
+        // Chuyển về bảng
+        const specs = parseSpecsFromRaw(rawText.value);
+        setSpecsRows(specs);
+        container.style.display = 'flex';
+        actions.style.display = 'flex';
+        chips.style.display = 'flex';
+        rawBox.style.display = 'none';
+        if (btnText) btnText.textContent = '📝 Nhập nhanh văn bản';
+        isSpecRawMode = false;
+      }
+    }
+
+    function getSpecsFromRows() {
+      const items = [];
+      const rows = document.querySelectorAll('#specRowsContainer .spec-row-item');
+      rows.forEach(r => {
+        const key = r.querySelector('.spec-key-input')?.value.trim() || '';
+        const value = r.querySelector('.spec-val-input')?.value.trim() || '';
+        if (key || value) {
+          items.push({ key, value });
+        }
+      });
+      return items;
+    }
+
+    function parseSpecsFromRaw(text) {
+      if (!text || !text.trim()) return [];
+      return text.split('\n')
+        .map(l => l.trim())
+        .filter(Boolean)
+        .map(l => {
+          const idx = l.indexOf(':');
+          if (idx > -1) {
+            return { key: l.slice(0, idx).trim(), value: l.slice(idx + 1).trim() };
+          }
+          return { key: '', value: l };
+        });
+    }
+
+    function setSpecsRows(specs) {
+      const container = document.getElementById('specRowsContainer');
+      if (!container) return;
+      container.innerHTML = '';
+      if (!specs || !specs.length) {
+        addSpecRow('', '');
+        return;
+      }
+      specs.forEach(s => {
+        const k = typeof s === 'object' ? (s.key || s.name || '') : '';
+        const v = typeof s === 'object' ? (s.value || '') : String(s);
+        addSpecRow(k, v);
+      });
+    }
+
+    function setSpecsInForm(specs) {
+      isSpecRawMode = false;
+      const container = document.getElementById('specRowsContainer');
+      const actions = document.getElementById('specRowsActions');
+      const chips = document.getElementById('specQuickChips');
+      const rawBox = document.getElementById('specRawContainer');
+      const btnText = document.getElementById('btnSpecModeText');
+      if (container) container.style.display = 'flex';
+      if (actions) actions.style.display = 'flex';
+      if (chips) chips.style.display = 'flex';
+      if (rawBox) rawBox.style.display = 'none';
+      if (btnText) btnText.textContent = '📝 Nhập nhanh văn bản';
+
+      setSpecsRows(specs);
+      const raw = document.getElementById('pfSpecsRaw');
+      if (raw) {
+        const list = Array.isArray(specs) ? specs : [];
+        raw.value = list.map(s => {
+          const k = typeof s === 'object' ? (s.key || s.name || '') : '';
+          const v = typeof s === 'object' ? (s.value || '') : String(s);
+          return k ? `${k}: ${v}` : v;
+        }).join('\n');
+      }
+    }
+
+    function getSpecsFromForm() {
+      if (isSpecRawMode) {
+        const raw = document.getElementById('pfSpecsRaw')?.value || '';
+        return parseSpecsFromRaw(raw);
+      }
+      return getSpecsFromRows();
+    }
+
     // ===== THÊM / SỬA SẢN PHẨM =====
     function openAddProduct() {
       document.getElementById('productFormTitle').textContent = 'Thêm sản phẩm';
@@ -364,10 +578,11 @@
       document.getElementById('pfImage').value = '';
       pendingProductImages = [];
       renderImagePreviews();
-      ['pfNameEn', 'pfNameJa', 'pfBadgeEn', 'pfBadgeJa', 'pfDescEn', 'pfDescJa'].forEach(id => {
+      ['pfNameEn', 'pfNameJa', 'pfBadgeEn', 'pfBadgeJa', 'pfDescEn', 'pfDescJa', 'pfSuitableFor', 'pfSuitableEn', 'pfSuitableJa'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.value = '';
       });
+      setSpecsInForm([]);
       const details = document.getElementById('translationDetails');
       if (details) details.open = false;
       const stBadge = document.getElementById('transStatusBadge');
@@ -398,6 +613,8 @@
       document.getElementById('pfHidden').value = p.hidden ? 'true' : 'false';
       document.getElementById('pfIsNew').value = p.isNew ? 'true' : 'false';
       document.getElementById('pfDescription').value = prodDesc(p);
+      document.getElementById('pfSuitableFor').value = prodSuitable(p);
+      setSpecsInForm(p.specs || []);
 
       // Điền các trường tiếng Anh / tiếng Nhật nếu có
       const enName = typeof p.name === 'object' && p.name ? (p.name.en || '') : '';
@@ -406,6 +623,8 @@
       const jaBadge = typeof p.badge === 'object' && p.badge ? (p.badge.ja || '') : '';
       const enDesc = typeof p.description === 'object' && p.description ? (p.description.en || '') : '';
       const jaDesc = typeof p.description === 'object' && p.description ? (p.description.ja || '') : '';
+      const enSuitable = typeof p.suitableFor === 'object' && p.suitableFor ? (p.suitableFor.en || '') : '';
+      const jaSuitable = typeof p.suitableFor === 'object' && p.suitableFor ? (p.suitableFor.ja || '') : '';
 
       document.getElementById('pfNameEn').value = enName;
       document.getElementById('pfNameJa').value = jaName;
@@ -413,6 +632,8 @@
       document.getElementById('pfBadgeJa').value = jaBadge;
       document.getElementById('pfDescEn').value = enDesc;
       document.getElementById('pfDescJa').value = jaDesc;
+      document.getElementById('pfSuitableEn').value = enSuitable;
+      document.getElementById('pfSuitableJa').value = jaSuitable;
 
       const details = document.getElementById('translationDetails');
       const stBadge = document.getElementById('transStatusBadge');
@@ -438,9 +659,10 @@
       const name = document.getElementById('pfName').value.trim();
       const badgeText = document.getElementById('pfBadge').value.trim();
       const description = document.getElementById('pfDescription').value.trim();
+      const suitableFor = document.getElementById('pfSuitableFor').value.trim();
 
-      if (!name && !badgeText && !description) {
-        showToast('Vui lòng nhập Tên sản phẩm trước khi dịch', 'warning');
+      if (!name && !badgeText && !description && !suitableFor) {
+        showToast('Vui lòng nhập Tên sản phẩm, Mô tả hoặc Phù hợp trước khi dịch', 'warning');
         return;
       }
 
@@ -453,7 +675,8 @@
         const res = await autoTranslateProductFields({
           name,
           badge: badgeText,
-          description
+          description,
+          suitableFor
         });
 
         if (res.name) {
@@ -467,6 +690,10 @@
         if (res.description) {
           document.getElementById('pfDescEn').value = res.description.en || description;
           document.getElementById('pfDescJa').value = res.description.ja || description;
+        }
+        if (res.suitableFor) {
+          document.getElementById('pfSuitableEn').value = res.suitableFor.en || suitableFor;
+          document.getElementById('pfSuitableJa').value = res.suitableFor.ja || suitableFor;
         }
 
         const details = document.getElementById('translationDetails');
@@ -522,6 +749,8 @@
       const hidden = document.getElementById('pfHidden').value === 'true';
       const isNew = document.getElementById('pfIsNew').value === 'true';
       const description = document.getElementById('pfDescription').value.trim();
+      const suitableFor = document.getElementById('pfSuitableFor').value.trim();
+      const specs = getSpecsFromForm();
 
       if (!name || !sku || !category || isNaN(price)) {
         showToast('Vui lòng nhập đủ thông tin bắt buộc', 'error');
@@ -540,14 +769,17 @@
       let badgeJa = document.getElementById('pfBadgeJa')?.value.trim();
       let descEn = document.getElementById('pfDescEn')?.value.trim();
       let descJa = document.getElementById('pfDescJa')?.value.trim();
+      let suitableEn = document.getElementById('pfSuitableEn')?.value.trim();
+      let suitableJa = document.getElementById('pfSuitableJa')?.value.trim();
 
-      if (!nameEn || !nameJa || nameEn === name || nameJa === name) {
+      if (!nameEn || !nameJa || nameEn === name || nameJa === name || (suitableFor && (!suitableEn || !suitableJa))) {
         showToast('Đang tự động dịch sang Tiếng Anh & Tiếng Nhật...', 'info', 2000);
         try {
           const trans = await autoTranslateProductFields({
             name,
             badge: badgeText,
-            description
+            description,
+            suitableFor
           });
           nameEn = nameEn || trans.name?.en || name;
           nameJa = nameJa || trans.name?.ja || name;
@@ -555,10 +787,14 @@
           badgeJa = badgeJa || trans.badge?.ja || badgeText;
           descEn = descEn || trans.description?.en || description;
           descJa = descJa || trans.description?.ja || description;
+          suitableEn = suitableEn || trans.suitableFor?.en || suitableFor;
+          suitableJa = suitableJa || trans.suitableFor?.ja || suitableFor;
         } catch (err) {
           console.warn('Auto translate warning:', err);
           nameEn = nameEn || name;
           nameJa = nameJa || name;
+          suitableEn = suitableEn || suitableFor;
+          suitableJa = suitableJa || suitableFor;
         }
       }
 
@@ -566,7 +802,9 @@
         name: { vi: name, en: nameEn || name, ja: nameJa || name },
         sku, category, sub, price, inventory, image, imageData, images, hidden, isNew,
         badge: { vi: badgeText, en: badgeEn || badgeText, ja: badgeJa || badgeText },
-        description: { vi: description, en: descEn || description, ja: descJa || description }
+        description: { vi: description, en: descEn || description, ja: descJa || description },
+        suitableFor: { vi: suitableFor, en: suitableEn || suitableFor, ja: suitableJa || suitableFor },
+        specs
       };
 
       if (id) {
@@ -602,7 +840,11 @@
         const jaName = typeof p.name === 'object' && p.name?.ja ? String(p.name.ja).trim() : '';
         const enDesc = typeof p.description === 'object' && p.description?.en ? String(p.description.en).trim() : '';
         const jaDesc = typeof p.description === 'object' && p.description?.ja ? String(p.description.ja).trim() : '';
-        return !enName || !jaName || !enDesc || !jaDesc;
+        const hasViSuitable = typeof p.suitableFor === 'string' ? !!p.suitableFor.trim() : (p.suitableFor?.vi ? !!p.suitableFor.vi.trim() : false);
+        const enSuitable = typeof p.suitableFor === 'object' && p.suitableFor?.en ? String(p.suitableFor.en).trim() : '';
+        const jaSuitable = typeof p.suitableFor === 'object' && p.suitableFor?.ja ? String(p.suitableFor.ja).trim() : '';
+        const needSuitable = hasViSuitable && (!enSuitable || !jaSuitable);
+        return !enName || !jaName || !enDesc || !jaDesc || needSuitable;
       });
 
       let force = false;
@@ -654,15 +896,20 @@
             const vnName = prodName(p);
             const vnBadge = typeof p.badge === 'string' ? p.badge : (p.badge?.vi || '');
             const vnDesc = prodDesc(p);
+            const vnSuitable = prodSuitable(p);
             try {
               const trans = await autoTranslateProductFields({
                 name: vnName,
                 badge: vnBadge,
-                description: vnDesc
+                description: vnDesc,
+                suitableFor: vnSuitable
               });
               p.name = { vi: vnName, en: trans.name?.en || vnName, ja: trans.name?.ja || vnName };
               p.badge = { vi: vnBadge, en: trans.badge?.en || vnBadge, ja: trans.badge?.ja || vnBadge };
               p.description = { vi: vnDesc, en: trans.description?.en || vnDesc, ja: trans.description?.ja || vnDesc };
+              if (vnSuitable || trans.suitableFor?.en || trans.suitableFor?.ja) {
+                p.suitableFor = { vi: vnSuitable, en: trans.suitableFor?.en || vnSuitable, ja: trans.suitableFor?.ja || vnSuitable };
+              }
             } catch (e) {
               console.warn('Translate item failed:', p.id, e);
             }
@@ -714,7 +961,20 @@
           <div><span class="text-xs text-gray">Đã bán</span><div class="font-bold">${p.sold || 0}</div></div>
           <div><span class="text-xs text-gray">Trạng thái</span><div>${p.hidden ? '<span class="badge badge-gray">Đang ẩn</span>' : '<span class="badge badge-success">Đang bán</span>'}</div></div>
         </div>
-        ${prodDesc(p) ? `<p style="margin-top: 16px;" class="text-sm">${escapeHtml(prodDesc(p))}</p>` : ''}
+        ${prodDesc(p) ? `<div style="margin-top: 14px;"><span class="text-xs text-gray font-bold">Mô tả sản phẩm:</span><p class="text-sm" style="margin-top: 3px;">${escapeHtml(prodDesc(p))}</p></div>` : ''}
+        ${prodSuitable(p) ? `<div style="margin-top: 10px;"><span class="text-xs text-gray font-bold">Phù hợp / Ứng dụng:</span><p class="text-sm" style="color: #0284c7; margin-top: 3px;">${escapeHtml(prodSuitable(p))}</p></div>` : ''}
+        ${p.specs && p.specs.length ? `
+          <div style="margin-top: 12px;">
+            <span class="text-xs text-gray font-bold">Thông số kỹ thuật:</span>
+            <div style="margin-top: 6px; display: flex; flex-direction: column; gap: 4px;">
+              ${(Array.isArray(p.specs) ? p.specs : []).map(s => {
+                const k = typeof s === 'object' ? (s.key || s.name || '') : '';
+                const v = typeof s === 'object' ? (s.value || '') : String(s);
+                return `<div class="text-xs" style="background:#f1f5f9; padding:5px 8px; border-radius:4px;"><strong>${escapeHtml(k ? k + ': ' : '')}</strong>${escapeHtml(v)}</div>`;
+              }).join('')}
+            </div>
+          </div>
+        ` : ''}
       `;
       document.getElementById('productFooter').innerHTML = `
         <button class="btn btn-secondary" onclick="closeModal('productModal')">Đóng</button>

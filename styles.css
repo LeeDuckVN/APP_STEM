@@ -212,6 +212,8 @@ img {
   left: 50%;
   z-index: 201;
   width: min(420px, calc(100% - 32px));
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
   padding: 28px;
   transform: translate(-50%, -50%);
   background: #ffffff;
@@ -293,6 +295,67 @@ img {
 .account-form input:focus {
   border-color: var(--primary);
   box-shadow: 0 0 0 3px var(--primary-glow);
+}
+
+.password-field-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.password-field-wrapper input {
+  padding-right: 42px;
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.password-toggle-btn:hover {
+  color: var(--primary);
+  background: var(--bg-surface-alt);
+}
+
+.password-toggle-btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
+
+.password-toggle-btn svg {
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+.password-toggle-btn[aria-pressed="true"] .eye-show {
+  display: none !important;
+}
+
+.password-toggle-btn[aria-pressed="true"] .eye-hide {
+  display: block !important;
+}
+
+.password-toggle-btn[aria-pressed="false"] .eye-show {
+  display: block !important;
+}
+
+.password-toggle-btn[aria-pressed="false"] .eye-hide {
+  display: none !important;
 }
 
 .account-form-message {

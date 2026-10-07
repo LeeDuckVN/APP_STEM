@@ -744,6 +744,24 @@ function setAccountMode(mode) {
           : "Nhập mã trong email và đặt mật khẩu mới.";
   $("#customerLoginMessage").textContent = "";
   $("#customerRegisterMessage").textContent = "";
+  resetPasswordVisibility();
+}
+
+function resetPasswordVisibility() {
+  document.querySelectorAll(".password-field-wrapper").forEach((wrap) => {
+    const input = wrap.querySelector("input");
+    const btn = wrap.querySelector(".password-toggle-btn");
+    if (input) input.type = "password";
+    if (btn) {
+      btn.setAttribute("aria-pressed", "false");
+      btn.setAttribute("aria-label", "Hiện mật khẩu");
+      btn.setAttribute("title", "Hiện mật khẩu");
+    }
+  });
+  const loginInput = $("#customerLoginPassword");
+  if (loginInput) loginInput.type = "password";
+  const confirmInput = $("#customerRegisterConfirmPassword");
+  if (confirmInput) confirmInput.type = "password";
 }
 
 function openAccountModal(mode = "login") {
@@ -755,6 +773,7 @@ function openAccountModal(mode = "login") {
 function closeAccountModal() {
   accountModal.hidden = true;
   accountModalBackdrop.hidden = true;
+  resetPasswordVisibility();
 }
 
 function refreshCustomerAccount() {
@@ -808,19 +827,43 @@ if (customerAccountToggle) {
   accountModalClose?.addEventListener("click", closeAccountModal);
   accountModalBackdrop?.addEventListener("click", closeAccountModal);
 
+  document.querySelectorAll(".password-toggle-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const wrapper = btn.closest(".password-field-wrapper");
+      const input = wrapper ? wrapper.querySelector("input") : null;
+      if (!input) return;
+
+      const isPassword = input.type === "password";
+      input.type = isPassword ? "text" : "password";
+      btn.setAttribute("aria-pressed", String(isPassword));
+      const label = isPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu";
+      btn.setAttribute("aria-label", label);
+      btn.setAttribute("title", label);
+      input.focus();
+    });
+  });
+
   customerRegisterForm?.addEventListener("submit", async (event) => {
     event.preventDefault();
     const name = $("#customerRegisterName").value.trim();
     const phone = $("#customerRegisterPhone").value.trim();
     const email = $("#customerRegisterEmail").value.trim().toLowerCase();
     const password = $("#customerRegisterPassword").value;
+    const confirmPassword = $("#customerRegisterConfirmPassword") ? $("#customerRegisterConfirmPassword").value : "";
     const message = $("#customerRegisterMessage");
     message.textContent = "";
+
+    if (password !== confirmPassword) {
+      message.textContent = "Mật khẩu nhập lại không khớp. Vui lòng kiểm tra lại.";
+      $("#customerRegisterConfirmPassword")?.focus();
+      return;
+    }
+
     try {
       const response = await fetch(`${customerApiBase}/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, phone, email, password })
+        body: JSON.stringify({ name, phone, email, password, confirmPassword })
       });
       const result = await response.json();
       if (!response.ok) {
@@ -1275,13 +1318,40 @@ function getVisibleProducts() {
 function getProductSpecs(product) {
   const sub = getSub(product.category, product.sub);
   const subName = sub ? label(sub.label) : "";
-  return [
+  const list = [
     `${t("specProductType")}: ${subName}`,
     `${t("specBrand")}: ${label(product.badge)}`,
     `${t("specSku")}: ${product.sku || ""}`,
-    `${t("specStatus")}: ${product.inventory > 0 ? t("inStockStatus") : t("outStockStatus")}`,
-    `${t("specFit")}: ${label(product.description)}`
+    `${t("specStatus")}: ${product.inventory > 0 ? t("inStockStatus") : t("outStockStatus")}`
   ];
+
+  // Thông số kỹ thuật chi tiết
+  if (Array.isArray(product.specs)) {
+    product.specs.forEach((s) => {
+      if (!s) return;
+      if (typeof s === "string" && s.trim()) {
+        list.push(s.trim());
+      } else if (typeof s === "object") {
+        const k = (s.key || s.name || "").trim();
+        const v = (s.value || "").trim();
+        if (k && v) {
+          list.push(`${k}: ${v}`);
+        } else if (v) {
+          list.push(v);
+        }
+      }
+    });
+  }
+
+  // Mục Phù hợp (Tách riêng biệt khỏi Mô tả)
+  const fitText = typeof product.suitableFor === "string"
+    ? product.suitableFor.trim()
+    : (label(product.suitableFor) || "").trim();
+  if (fitText) {
+    list.push(`${t("specFit")}: ${fitText}`);
+  }
+
+  return list;
 }
 
 function renderRelatedProducts(product) {
