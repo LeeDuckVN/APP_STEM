@@ -328,28 +328,23 @@ app.post('/api/products/translate-all', async (req, res) => {
       const currentEnSuitable = typeof p.suitableFor === 'object' && p.suitableFor?.en ? p.suitableFor.en : '';
       const currentJaSuitable = typeof p.suitableFor === 'object' && p.suitableFor?.ja ? p.suitableFor.ja : '';
 
-      const needEn = force || !currentEnName || !currentEnDesc || (viSuitable && !currentEnSuitable);
-      const needJa = force || !currentJaName || !currentJaDesc || (viSuitable && !currentJaSuitable);
+      const needEn = force || !currentEnName || !currentEnDesc;
+      const needJa = force || !currentJaName || !currentJaDesc;
 
       if (needEn || needJa) {
         try {
-          const [enName, jaName, enBadge, jaBadge, enDesc, jaDesc, enSuitable, jaSuitable] = await Promise.all([
+          const [enName, jaName, enBadge, jaBadge, enDesc, jaDesc] = await Promise.all([
             needEn && viName ? googleTranslateText(viName, 'en') : currentEnName,
             needJa && viName ? googleTranslateText(viName, 'ja') : currentJaName,
             needEn && viBadge ? googleTranslateText(viBadge, 'en') : (p.badge?.en || viBadge),
             needJa && viBadge ? googleTranslateText(viBadge, 'ja') : (p.badge?.ja || viBadge),
             needEn && viDesc ? googleTranslateText(viDesc, 'en') : (p.description?.en || viDesc),
-            needJa && viDesc ? googleTranslateText(viDesc, 'ja') : (p.description?.ja || viDesc),
-            needEn && viSuitable ? googleTranslateText(viSuitable, 'en') : (p.suitableFor?.en || viSuitable),
-            needJa && viSuitable ? googleTranslateText(viSuitable, 'ja') : (p.suitableFor?.ja || viSuitable)
+            needJa && viDesc ? googleTranslateText(viDesc, 'ja') : (p.description?.ja || viDesc)
           ]);
 
           p.name = { vi: viName, en: enName || viName, ja: jaName || viName };
-          p.badge = { vi: viBadge, en: enBadge || viBadge, ja: badgeJa || viBadge };
-          p.description = { vi: viDesc, en: enDesc || viDesc, ja: descJa || viDesc };
-          if (viSuitable || enSuitable || jaSuitable) {
-            p.suitableFor = { vi: viSuitable, en: enSuitable || viSuitable, ja: jaSuitable || viSuitable };
-          }
+          p.badge = { vi: viBadge, en: enBadge || viBadge, ja: jaBadge || viBadge };
+          p.description = { vi: viDesc, en: enDesc || viDesc, ja: jaDesc || viDesc };
           translatedCount++;
         } catch (e) {
           console.warn(`Error translating product ${p.id}:`, e.message);

@@ -1343,14 +1343,6 @@ function getProductSpecs(product) {
     });
   }
 
-  // Mục Phù hợp (Tách riêng biệt khỏi Mô tả)
-  const fitText = typeof product.suitableFor === "string"
-    ? product.suitableFor.trim()
-    : (label(product.suitableFor) || "").trim();
-  if (fitText) {
-    list.push(`${t("specFit")}: ${fitText}`);
-  }
-
   return list;
 }
 

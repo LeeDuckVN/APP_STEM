@@ -100,14 +100,6 @@
             <textarea class="form-control" id="pfDescription" placeholder="Mô tả chi tiết về sản phẩm..."></textarea>
           </div>
 
-          <!-- Nhập Phù hợp / Ứng dụng (Tách riêng khỏi Mô tả) -->
-          <div class="form-group">
-            <label for="pfSuitableFor">Phù hợp / Ứng dụng (tiếng Việt)</label>
-            <textarea class="form-control" id="pfSuitableFor" rows="2"
-              placeholder="VD: Dự án IoT, trạm đo môi trường, hệ thống cảm biến và giám sát từ xa..."></textarea>
-            <small class="text-xs text-gray">Nội dung này hiển thị riêng tại mục "Phù hợp" trong tab Thông số kỹ thuật của trang chi tiết.</small>
-          </div>
-
           <!-- Khối nhập Thông số kỹ thuật chi tiết -->
           <div class="specs-builder-card">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
@@ -199,23 +191,11 @@
                 <textarea class="form-control text-sm" id="pfDescEn" rows="2"
                   placeholder="English description..."></textarea>
               </div>
-              <div class="form-group" style="grid-column: 1 / -1; margin-bottom: 8px;">
+              <div class="form-group" style="grid-column: 1 / -1; margin-bottom: 0;">
                 <label for="pfDescJa" class="text-xs font-bold text-gray"
                   style="display: block; margin-bottom: 4px;">🇯🇵 Mô tả tiếng Nhật (JA)</label>
                 <textarea class="form-control text-sm" id="pfDescJa" rows="2"
                   placeholder="Japanese description..."></textarea>
-              </div>
-              <div class="form-group" style="grid-column: 1 / -1; margin-bottom: 8px;">
-                <label for="pfSuitableEn" class="text-xs font-bold text-gray"
-                  style="display: block; margin-bottom: 4px;">🇬🇧 Phù hợp tiếng Anh (Suitable for EN)</label>
-                <textarea class="form-control text-sm" id="pfSuitableEn" rows="2"
-                  placeholder="Suitable for IoT projects, sensor monitoring..."></textarea>
-              </div>
-              <div class="form-group" style="grid-column: 1 / -1; margin-bottom: 0;">
-                <label for="pfSuitableJa" class="text-xs font-bold text-gray"
-                  style="display: block; margin-bottom: 4px;">🇯🇵 Phù hợp tiếng Nhật (Suitable for JA)</label>
-                <textarea class="form-control text-sm" id="pfSuitableJa" rows="2"
-                  placeholder="IoTプロジェクト、センサー監視に最適..."></textarea>
               </div>
             </div>
           </details>
@@ -578,7 +558,7 @@
       document.getElementById('pfImage').value = '';
       pendingProductImages = [];
       renderImagePreviews();
-      ['pfNameEn', 'pfNameJa', 'pfBadgeEn', 'pfBadgeJa', 'pfDescEn', 'pfDescJa', 'pfSuitableFor', 'pfSuitableEn', 'pfSuitableJa'].forEach(id => {
+      ['pfNameEn', 'pfNameJa', 'pfBadgeEn', 'pfBadgeJa', 'pfDescEn', 'pfDescJa'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.value = '';
       });
@@ -613,7 +593,6 @@
       document.getElementById('pfHidden').value = p.hidden ? 'true' : 'false';
       document.getElementById('pfIsNew').value = p.isNew ? 'true' : 'false';
       document.getElementById('pfDescription').value = prodDesc(p);
-      document.getElementById('pfSuitableFor').value = prodSuitable(p);
       setSpecsInForm(p.specs || []);
 
       // Điền các trường tiếng Anh / tiếng Nhật nếu có
@@ -623,8 +602,6 @@
       const jaBadge = typeof p.badge === 'object' && p.badge ? (p.badge.ja || '') : '';
       const enDesc = typeof p.description === 'object' && p.description ? (p.description.en || '') : '';
       const jaDesc = typeof p.description === 'object' && p.description ? (p.description.ja || '') : '';
-      const enSuitable = typeof p.suitableFor === 'object' && p.suitableFor ? (p.suitableFor.en || '') : '';
-      const jaSuitable = typeof p.suitableFor === 'object' && p.suitableFor ? (p.suitableFor.ja || '') : '';
 
       document.getElementById('pfNameEn').value = enName;
       document.getElementById('pfNameJa').value = jaName;
@@ -632,8 +609,6 @@
       document.getElementById('pfBadgeJa').value = jaBadge;
       document.getElementById('pfDescEn').value = enDesc;
       document.getElementById('pfDescJa').value = jaDesc;
-      document.getElementById('pfSuitableEn').value = enSuitable;
-      document.getElementById('pfSuitableJa').value = jaSuitable;
 
       const details = document.getElementById('translationDetails');
       const stBadge = document.getElementById('transStatusBadge');
@@ -659,10 +634,9 @@
       const name = document.getElementById('pfName').value.trim();
       const badgeText = document.getElementById('pfBadge').value.trim();
       const description = document.getElementById('pfDescription').value.trim();
-      const suitableFor = document.getElementById('pfSuitableFor').value.trim();
 
-      if (!name && !badgeText && !description && !suitableFor) {
-        showToast('Vui lòng nhập Tên sản phẩm, Mô tả hoặc Phù hợp trước khi dịch', 'warning');
+      if (!name && !badgeText && !description) {
+        showToast('Vui lòng nhập Tên sản phẩm hoặc Mô tả trước khi dịch', 'warning');
         return;
       }
 
@@ -675,8 +649,7 @@
         const res = await autoTranslateProductFields({
           name,
           badge: badgeText,
-          description,
-          suitableFor
+          description
         });
 
         if (res.name) {
@@ -690,10 +663,6 @@
         if (res.description) {
           document.getElementById('pfDescEn').value = res.description.en || description;
           document.getElementById('pfDescJa').value = res.description.ja || description;
-        }
-        if (res.suitableFor) {
-          document.getElementById('pfSuitableEn').value = res.suitableFor.en || suitableFor;
-          document.getElementById('pfSuitableJa').value = res.suitableFor.ja || suitableFor;
         }
 
         const details = document.getElementById('translationDetails');
@@ -749,7 +718,6 @@
       const hidden = document.getElementById('pfHidden').value === 'true';
       const isNew = document.getElementById('pfIsNew').value === 'true';
       const description = document.getElementById('pfDescription').value.trim();
-      const suitableFor = document.getElementById('pfSuitableFor').value.trim();
       const specs = getSpecsFromForm();
 
       if (!name || !sku || !category || isNaN(price)) {
@@ -769,17 +737,14 @@
       let badgeJa = document.getElementById('pfBadgeJa')?.value.trim();
       let descEn = document.getElementById('pfDescEn')?.value.trim();
       let descJa = document.getElementById('pfDescJa')?.value.trim();
-      let suitableEn = document.getElementById('pfSuitableEn')?.value.trim();
-      let suitableJa = document.getElementById('pfSuitableJa')?.value.trim();
 
-      if (!nameEn || !nameJa || nameEn === name || nameJa === name || (suitableFor && (!suitableEn || !suitableJa))) {
+      if (!nameEn || !nameJa || nameEn === name || nameJa === name) {
         showToast('Đang tự động dịch sang Tiếng Anh & Tiếng Nhật...', 'info', 2000);
         try {
           const trans = await autoTranslateProductFields({
             name,
             badge: badgeText,
-            description,
-            suitableFor
+            description
           });
           nameEn = nameEn || trans.name?.en || name;
           nameJa = nameJa || trans.name?.ja || name;
@@ -787,14 +752,10 @@
           badgeJa = badgeJa || trans.badge?.ja || badgeText;
           descEn = descEn || trans.description?.en || description;
           descJa = descJa || trans.description?.ja || description;
-          suitableEn = suitableEn || trans.suitableFor?.en || suitableFor;
-          suitableJa = suitableJa || trans.suitableFor?.ja || suitableFor;
         } catch (err) {
           console.warn('Auto translate warning:', err);
           nameEn = nameEn || name;
           nameJa = nameJa || name;
-          suitableEn = suitableEn || suitableFor;
-          suitableJa = suitableJa || suitableFor;
         }
       }
 
@@ -803,7 +764,7 @@
         sku, category, sub, price, inventory, image, imageData, images, hidden, isNew,
         badge: { vi: badgeText, en: badgeEn || badgeText, ja: badgeJa || badgeText },
         description: { vi: description, en: descEn || description, ja: descJa || description },
-        suitableFor: { vi: suitableFor, en: suitableEn || suitableFor, ja: suitableJa || suitableFor },
+        suitableFor: { vi: '', en: '', ja: '' },
         specs
       };
 
@@ -840,11 +801,7 @@
         const jaName = typeof p.name === 'object' && p.name?.ja ? String(p.name.ja).trim() : '';
         const enDesc = typeof p.description === 'object' && p.description?.en ? String(p.description.en).trim() : '';
         const jaDesc = typeof p.description === 'object' && p.description?.ja ? String(p.description.ja).trim() : '';
-        const hasViSuitable = typeof p.suitableFor === 'string' ? !!p.suitableFor.trim() : (p.suitableFor?.vi ? !!p.suitableFor.vi.trim() : false);
-        const enSuitable = typeof p.suitableFor === 'object' && p.suitableFor?.en ? String(p.suitableFor.en).trim() : '';
-        const jaSuitable = typeof p.suitableFor === 'object' && p.suitableFor?.ja ? String(p.suitableFor.ja).trim() : '';
-        const needSuitable = hasViSuitable && (!enSuitable || !jaSuitable);
-        return !enName || !jaName || !enDesc || !jaDesc || needSuitable;
+        return !enName || !jaName || !enDesc || !jaDesc;
       });
 
       let force = false;
@@ -896,20 +853,15 @@
             const vnName = prodName(p);
             const vnBadge = typeof p.badge === 'string' ? p.badge : (p.badge?.vi || '');
             const vnDesc = prodDesc(p);
-            const vnSuitable = prodSuitable(p);
             try {
               const trans = await autoTranslateProductFields({
                 name: vnName,
                 badge: vnBadge,
-                description: vnDesc,
-                suitableFor: vnSuitable
+                description: vnDesc
               });
               p.name = { vi: vnName, en: trans.name?.en || vnName, ja: trans.name?.ja || vnName };
               p.badge = { vi: vnBadge, en: trans.badge?.en || vnBadge, ja: trans.badge?.ja || vnBadge };
               p.description = { vi: vnDesc, en: trans.description?.en || vnDesc, ja: trans.description?.ja || vnDesc };
-              if (vnSuitable || trans.suitableFor?.en || trans.suitableFor?.ja) {
-                p.suitableFor = { vi: vnSuitable, en: trans.suitableFor?.en || vnSuitable, ja: trans.suitableFor?.ja || vnSuitable };
-              }
             } catch (e) {
               console.warn('Translate item failed:', p.id, e);
             }
@@ -962,7 +914,6 @@
           <div><span class="text-xs text-gray">Trạng thái</span><div>${p.hidden ? '<span class="badge badge-gray">Đang ẩn</span>' : '<span class="badge badge-success">Đang bán</span>'}</div></div>
         </div>
         ${prodDesc(p) ? `<div style="margin-top: 14px;"><span class="text-xs text-gray font-bold">Mô tả sản phẩm:</span><p class="text-sm" style="margin-top: 3px;">${escapeHtml(prodDesc(p))}</p></div>` : ''}
-        ${prodSuitable(p) ? `<div style="margin-top: 10px;"><span class="text-xs text-gray font-bold">Phù hợp / Ứng dụng:</span><p class="text-sm" style="color: #0284c7; margin-top: 3px;">${escapeHtml(prodSuitable(p))}</p></div>` : ''}
         ${p.specs && p.specs.length ? `
           <div style="margin-top: 12px;">
             <span class="text-xs text-gray font-bold">Thông số kỹ thuật:</span>
