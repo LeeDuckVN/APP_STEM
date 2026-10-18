@@ -5,7 +5,7 @@ const crypto = require('crypto');
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
-const { MongoClient } = require('mongodb');
+const { MongoClient, ObjectId } = require('mongodb');
 
 const app = express();
 const port = Number(process.env.PORT) || 3000;
@@ -104,15 +104,45 @@ app.use((req, res, next) => {
 app.use(express.json({ limit: '25mb' }));
 app.use(express.static(path.join(__dirname)));
 
+function safeObjectId(id) {
+  try {
+    if (typeof id === 'string' && /^[0-9a-fA-F]{24}$/.test(id)) {
+      return new ObjectId(id);
+    }
+  } catch (e) { }
+  return null;
+}
+
+function findCustomerQuery(identifier) {
+  if (!identifier) return { _id: null };
+  const str = String(identifier).trim();
+  const oid = safeObjectId(str);
+  if (oid) {
+    return { $or: [{ _id: oid }, { email: str.toLowerCase() }] };
+  }
+  return { email: str.toLowerCase() };
+}
+
 function publicCustomer(customer) {
+  if (!customer) return null;
   return {
-    id: customer._id.toString(),
-    name: customer.name,
-    phone: customer.phone,
-    email: customer.email,
-    role: customer.role,
-    status: customer.status,
-    emailVerified: customer.emailVerified !== false
+    id: customer._id ? customer._id.toString() : (customer.id || ''),
+    name: customer.name || '',
+    phone: customer.phone || '',
+    email: customer.email || '',
+    role: customer.role || 'customer',
+    status: customer.status || 'active',
+    emailVerified: customer.emailVerified !== false,
+    gender: customer.gender || '',
+    birthday: customer.birthday || '',
+    company: customer.company || '',
+    avatar: customer.avatar || '',
+    bio: customer.bio || '',
+    addresses: Array.isArray(customer.addresses) ? customer.addresses : [],
+    defaultAddressId: customer.defaultAddressId || null,
+    createdAt: customer.createdAt || null,
+    orderCount: customer.orderCount || 0,
+    spent: customer.spent || 0
   };
 }
 
@@ -669,6 +699,398 @@ app.post('/api/customers/reset-password', async (req, res) => {
       return res.status(503).json({ message: 'Không kết nối được MongoDB: ' + error.message });
     }
     res.status(500).json({ message: 'Không thể đổi mật khẩu lúc này: ' + error.message });
+  }
+});
+
+// ============== PROFILE & ADDRESS MANAGEMENT ==============
+
+// Lấy thông tin chi tiết hồ sơ khách hàng
+app.get('/api/customers/profile', async (req, res) => {
+  try {
+    await connectDatabase();
+    const { id, email } = req.query;
+    const identifier = id || email;
+    if (!identifier) {
+      return res.status(400).json({ ok: false, message: 'Thiếu thông tin nhận diện tài khoản.' });
+    }
+    const query = findCustomerQuery(identifier);
+    const customer = await customers.findOne(query);
+    if (!customer) {
+      return res.status(404).json({ ok: false, message: 'Không tìm thấy tài khoản khách hàng.' });
+    }
+    res.json({ ok: true, customer: publicCustomer(customer) });
+  } catch (error) {
+    console.error('Customer profile fetch error:', error);
+    res.status(500).json({ ok: false, message: 'Lỗi tải hồ sơ khách hàng: ' + error.message });
+  }
+});
+
+// Cập nhật thông tin cá nhân khách hàng
+app.put('/api/customers/profile', async (req, res) => {
+  try {
+    await connectDatabase();
+    const { id, email, name, phone, gender, birthday, company, bio, avatar } = req.body || {};
+    const identifier = id || email;
+    if (!identifier) {
+      return res.status(400).json({ ok: false, message: 'Thiếu thông tin nhận diện tài khoản.' });
+    }
+    const query = findCustomerQuery(identifier);
+    const customer = await customers.findOne(query);
+    if (!customer) {
+      return res.status(404).json({ ok: false, message: 'Không tìm thấy tài khoản khách hàng.' });
+    }
+
+    const updateFields = { updatedAt: new Date() };
+    if (name !== undefined) updateFields.name = String(name).trim();
+    if (phone !== undefined) updateFields.phone = String(phone).trim();
+    if (gender !== undefined) updateFields.gender = String(gender).trim();
+    if (birthday !== undefined) updateFields.birthday = String(birthday).trim();
+    if (company !== undefined) updateFields.company = String(company).trim();
+    if (bio !== undefined) updateFields.bio = String(bio).trim();
+    if (avatar !== undefined) updateFields.avatar = String(avatar).trim();
+
+    await customers.updateOne({ _id: customer._id }, { $set: updateFields });
+    const updated = await customers.findOne({ _id: customer._id });
+
+    // Cập nhật tên/sđt vào danh sách users trong store_data nếu có
+    try {
+      const sData = await readStoreData();
+      let changed = false;
+      const uList = (sData.users || []).map((u) => {
+        if (String(u.id) === customer._id.toString() || (u.email && u.email.toLowerCase() === customer.email.toLowerCase())) {
+          changed = true;
+          return {
+            ...u,
+            name: updateFields.name || u.name,
+            phone: updateFields.phone || u.phone
+          };
+        }
+        return u;
+      });
+      if (changed) {
+        await storeData.updateOne({ key: 'users' }, { $set: { value: uList } });
+      }
+    } catch (e) {
+      console.warn('Sync store users warning:', e.message);
+    }
+
+    res.json({ ok: true, message: 'Cập nhật thông tin thành công.', customer: publicCustomer(updated) });
+  } catch (error) {
+    console.error('Update profile error:', error);
+    res.status(500).json({ ok: false, message: 'Không thể cập nhật hồ sơ: ' + error.message });
+  }
+});
+
+// Đổi mật khẩu trong trang thông tin tài khoản
+app.post('/api/customers/change-password', async (req, res) => {
+  try {
+    await connectDatabase();
+    const { id, email, currentPassword, newPassword } = req.body || {};
+    const identifier = id || email;
+    if (!identifier || !currentPassword || !newPassword) {
+      return res.status(400).json({ ok: false, message: 'Vui lòng nhập mật khẩu hiện tại và mật khẩu mới.' });
+    }
+    if (String(newPassword).length < 6) {
+      return res.status(400).json({ ok: false, message: 'Mật khẩu mới phải có ít nhất 6 ký tự.' });
+    }
+
+    const query = findCustomerQuery(identifier);
+    const customer = await customers.findOne(query);
+    if (!customer) {
+      return res.status(404).json({ ok: false, message: 'Không tìm thấy tài khoản.' });
+    }
+
+    const isValid = await bcrypt.compare(String(currentPassword), customer.passwordHash);
+    if (!isValid) {
+      return res.status(400).json({ ok: false, message: 'Mật khẩu hiện tại không chính xác.' });
+    }
+
+    const passwordHash = await bcrypt.hash(String(newPassword), 12);
+    await customers.updateOne({ _id: customer._id }, { $set: { passwordHash, updatedAt: new Date() } });
+
+    res.json({ ok: true, message: 'Đổi mật khẩu thành công.' });
+  } catch (error) {
+    console.error('Change password error:', error);
+    res.status(500).json({ ok: false, message: 'Không thể đổi mật khẩu: ' + error.message });
+  }
+});
+
+// Lấy danh sách địa chỉ nhận hàng của khách
+app.get('/api/customers/:id/addresses', async (req, res) => {
+  try {
+    await connectDatabase();
+    const { id } = req.params;
+    const query = findCustomerQuery(id);
+    const customer = await customers.findOne(query);
+    if (!customer) {
+      return res.status(404).json({ ok: false, message: 'Không tìm thấy tài khoản khách hàng.' });
+    }
+    res.json({
+      ok: true,
+      addresses: Array.isArray(customer.addresses) ? customer.addresses : [],
+      defaultAddressId: customer.defaultAddressId || null
+    });
+  } catch (error) {
+    console.error('Get addresses error:', error);
+    res.status(500).json({ ok: false, message: 'Không thể tải danh sách địa chỉ.' });
+  }
+});
+
+// Thêm địa chỉ mới cho khách hàng
+app.post('/api/customers/:id/addresses', async (req, res) => {
+  try {
+    await connectDatabase();
+    const { id } = req.params;
+    const {
+      recipientName,
+      recipientPhone,
+      province,
+      district,
+      ward,
+      street,
+      type = 'home',
+      isDefault = false,
+      notes = ''
+    } = req.body || {};
+
+    if (!recipientName || !recipientPhone || !street) {
+      return res.status(400).json({ ok: false, message: 'Vui lòng điền đủ tên, số điện thoại và địa chỉ chi tiết.' });
+    }
+
+    const query = findCustomerQuery(id);
+    const customer = await customers.findOne(query);
+    if (!customer) {
+      return res.status(404).json({ ok: false, message: 'Không tìm thấy tài khoản khách hàng.' });
+    }
+
+    const currentAddresses = Array.isArray(customer.addresses) ? customer.addresses : [];
+    const addressId = 'addr_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+
+    const parts = [street, ward, district, province].map((p) => String(p || '').trim()).filter(Boolean);
+    const fullAddress = parts.join(', ');
+
+    const newAddress = {
+      id: addressId,
+      recipientName: String(recipientName).trim(),
+      recipientPhone: String(recipientPhone).trim(),
+      province: String(province || '').trim(),
+      district: String(district || '').trim(),
+      ward: String(ward || '').trim(),
+      street: String(street || '').trim(),
+      fullAddress,
+      type: ['home', 'office', 'school'].includes(type) ? type : 'home',
+      notes: String(notes || '').trim(),
+      createdAt: Date.now()
+    };
+
+    const shouldBeDefault = Boolean(isDefault) || currentAddresses.length === 0;
+    const update = {
+      $push: { addresses: newAddress },
+      $set: { updatedAt: new Date() }
+    };
+    if (shouldBeDefault) {
+      update.$set.defaultAddressId = addressId;
+    }
+
+    await customers.updateOne({ _id: customer._id }, update);
+    const updated = await customers.findOne({ _id: customer._id });
+
+    res.status(201).json({
+      ok: true,
+      message: 'Đã thêm địa chỉ thành công.',
+      address: newAddress,
+      defaultAddressId: updated.defaultAddressId,
+      addresses: updated.addresses || []
+    });
+  } catch (error) {
+    console.error('Add address error:', error);
+    res.status(500).json({ ok: false, message: 'Không thể thêm địa chỉ: ' + error.message });
+  }
+});
+
+// Cập nhật địa chỉ nhận hàng
+app.put('/api/customers/:id/addresses/:addressId', async (req, res) => {
+  try {
+    await connectDatabase();
+    const { id, addressId } = req.params;
+    const {
+      recipientName,
+      recipientPhone,
+      province,
+      district,
+      ward,
+      street,
+      type,
+      isDefault,
+      notes
+    } = req.body || {};
+
+    const query = findCustomerQuery(id);
+    const customer = await customers.findOne(query);
+    if (!customer) {
+      return res.status(404).json({ ok: false, message: 'Không tìm thấy tài khoản khách hàng.' });
+    }
+
+    const currentAddresses = Array.isArray(customer.addresses) ? customer.addresses : [];
+    const idx = currentAddresses.findIndex((a) => a.id === addressId);
+    if (idx < 0) {
+      return res.status(404).json({ ok: false, message: 'Không tìm thấy địa chỉ cần sửa.' });
+    }
+
+    const current = currentAddresses[idx];
+    const uStreet = street !== undefined ? String(street).trim() : current.street;
+    const uWard = ward !== undefined ? String(ward).trim() : current.ward;
+    const uDistrict = district !== undefined ? String(district).trim() : current.district;
+    const uProvince = province !== undefined ? String(province).trim() : current.province;
+    const fullAddress = [uStreet, uWard, uDistrict, uProvince].filter(Boolean).join(', ');
+
+    currentAddresses[idx] = {
+      ...current,
+      recipientName: recipientName !== undefined ? String(recipientName).trim() : current.recipientName,
+      recipientPhone: recipientPhone !== undefined ? String(recipientPhone).trim() : current.recipientPhone,
+      province: uProvince,
+      district: uDistrict,
+      ward: uWard,
+      street: uStreet,
+      fullAddress,
+      type: type !== undefined ? type : current.type,
+      notes: notes !== undefined ? String(notes).trim() : current.notes,
+      updatedAt: Date.now()
+    };
+
+    const update = {
+      $set: {
+        addresses: currentAddresses,
+        updatedAt: new Date()
+      }
+    };
+
+    if (isDefault) {
+      update.$set.defaultAddressId = addressId;
+    }
+
+    await customers.updateOne({ _id: customer._id }, update);
+    const updated = await customers.findOne({ _id: customer._id });
+
+    res.json({
+      ok: true,
+      message: 'Đã cập nhật địa chỉ.',
+      address: currentAddresses[idx],
+      defaultAddressId: updated.defaultAddressId,
+      addresses: updated.addresses || []
+    });
+  } catch (error) {
+    console.error('Update address error:', error);
+    res.status(500).json({ ok: false, message: 'Không thể cập nhật địa chỉ: ' + error.message });
+  }
+});
+
+// Xóa địa chỉ nhận hàng
+app.delete('/api/customers/:id/addresses/:addressId', async (req, res) => {
+  try {
+    await connectDatabase();
+    const { id, addressId } = req.params;
+    const query = findCustomerQuery(id);
+    const customer = await customers.findOne(query);
+    if (!customer) {
+      return res.status(404).json({ ok: false, message: 'Không tìm thấy tài khoản khách hàng.' });
+    }
+
+    const currentAddresses = Array.isArray(customer.addresses) ? customer.addresses : [];
+    const newAddresses = currentAddresses.filter((a) => a.id !== addressId);
+    let newDefault = customer.defaultAddressId;
+    if (newDefault === addressId) {
+      newDefault = newAddresses.length > 0 ? newAddresses[0].id : null;
+    }
+
+    await customers.updateOne(
+      { _id: customer._id },
+      {
+        $set: {
+          addresses: newAddresses,
+          defaultAddressId: newDefault,
+          updatedAt: new Date()
+        }
+      }
+    );
+
+    res.json({
+      ok: true,
+      message: 'Đã xóa địa chỉ thành công.',
+      defaultAddressId: newDefault,
+      addresses: newAddresses
+    });
+  } catch (error) {
+    console.error('Delete address error:', error);
+    res.status(500).json({ ok: false, message: 'Không thể xóa địa chỉ: ' + error.message });
+  }
+});
+
+// Đặt một địa chỉ làm mặc định
+app.put('/api/customers/:id/addresses/:addressId/default', async (req, res) => {
+  try {
+    await connectDatabase();
+    const { id, addressId } = req.params;
+    const query = findCustomerQuery(id);
+    const customer = await customers.findOne(query);
+    if (!customer) {
+      return res.status(404).json({ ok: false, message: 'Không tìm thấy tài khoản khách hàng.' });
+    }
+
+    const addresses = Array.isArray(customer.addresses) ? customer.addresses : [];
+    const found = addresses.some((a) => a.id === addressId);
+    if (!found) {
+      return res.status(404).json({ ok: false, message: 'Địa chỉ không tồn tại trong danh sách.' });
+    }
+
+    await customers.updateOne(
+      { _id: customer._id },
+      {
+        $set: {
+          defaultAddressId: addressId,
+          updatedAt: new Date()
+        }
+      }
+    );
+
+    res.json({
+      ok: true,
+      message: 'Đã đặt làm địa chỉ giao hàng mặc định thành công!',
+      defaultAddressId: addressId,
+      addresses
+    });
+  } catch (error) {
+    console.error('Set default address error:', error);
+    res.status(500).json({ ok: false, message: 'Không thể đặt địa chỉ mặc định: ' + error.message });
+  }
+});
+
+// Lấy danh sách đơn hàng của khách hàng
+app.get('/api/customers/:id/orders', async (req, res) => {
+  try {
+    await connectDatabase();
+    const { id } = req.params;
+    const query = findCustomerQuery(id);
+    const customer = await customers.findOne(query);
+    if (!customer) {
+      return res.status(404).json({ ok: false, message: 'Không tìm thấy tài khoản khách hàng.' });
+    }
+
+    const sData = await readStoreData();
+    const allOrders = Array.isArray(sData.orders) ? sData.orders : [];
+    const cId = customer._id.toString();
+    const cEmail = String(customer.email || '').toLowerCase().trim();
+
+    const myOrders = allOrders.filter((o) => {
+      if (o.customerId && String(o.customerId) === cId) return true;
+      if (cEmail && o.email && String(o.email).toLowerCase().trim() === cEmail) return true;
+      return false;
+    }).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+    res.json({ ok: true, orders: myOrders });
+  } catch (error) {
+    console.error('Customer orders error:', error);
+    res.status(500).json({ ok: false, message: 'Không thể tải lịch sử đơn hàng: ' + error.message });
   }
 });
 

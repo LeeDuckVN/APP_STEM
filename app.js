@@ -454,11 +454,19 @@ function getCustomerSession() {
 
 function setCustomerSession(user) {
   if (user) {
+    const existing = getCustomerSession() || {};
     writeJSON(customerSessionKey, {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      phone: user.phone || ""
+      id: user.id || existing.id,
+      name: user.name || existing.name,
+      email: user.email || existing.email,
+      phone: user.phone !== undefined ? user.phone : (existing.phone || ""),
+      role: user.role || existing.role || "customer",
+      gender: user.gender || existing.gender || "",
+      birthday: user.birthday || existing.birthday || "",
+      company: user.company || existing.company || "",
+      avatar: user.avatar || existing.avatar || "",
+      addresses: Array.isArray(user.addresses) ? user.addresses : (existing.addresses || []),
+      defaultAddressId: user.defaultAddressId !== undefined ? user.defaultAddressId : existing.defaultAddressId
     });
   } else {
     localStorage.removeItem(customerSessionKey);
@@ -472,26 +480,91 @@ function autoFillCheckoutCustomer() {
   const nameInput = $("#checkoutName");
   const phoneInput = $("#checkoutPhone");
   const emailInput = $("#checkoutEmail");
+  const addressInput = $("#checkoutAddress");
+  const selectWrap = $("#checkoutAddressSelectWrap");
+  const addrSelect = $("#checkoutAddressSelect");
 
   if (session) {
     if (noticeEl && nameNotice) {
       nameNotice.textContent = session.name || session.email;
       noticeEl.hidden = false;
     }
+
+    // Lấy danh sách địa chỉ từ session hoặc localStorage fallback
+    let addresses = Array.isArray(session.addresses) ? session.addresses : [];
+    if (addresses.length === 0 && session.id) {
+      try {
+        const raw = localStorage.getItem(`stem_customer_addresses_${session.id}`);
+        if (raw) addresses = JSON.parse(raw);
+      } catch (_) {}
+    }
+    const defId = session.defaultAddressId || (session.id ? localStorage.getItem(`stem_customer_def_addr_${session.id}`) : null);
+    const defaultAddr = addresses.find((a) => a.id === defId) || addresses[0] || null;
+
     if (nameInput && (!nameInput.value || nameInput.dataset.autofilled === "true")) {
-      nameInput.value = session.name || "";
+      nameInput.value = (defaultAddr && defaultAddr.recipientName) ? defaultAddr.recipientName : (session.name || "");
       nameInput.dataset.autofilled = "true";
     }
     if (phoneInput && (!phoneInput.value || phoneInput.dataset.autofilled === "true")) {
-      phoneInput.value = session.phone || "";
+      phoneInput.value = (defaultAddr && defaultAddr.recipientPhone) ? defaultAddr.recipientPhone : (session.phone || "");
       phoneInput.dataset.autofilled = "true";
     }
     if (emailInput && (!emailInput.value || emailInput.dataset.autofilled === "true")) {
       emailInput.value = session.email || "";
       emailInput.dataset.autofilled = "true";
     }
+
+    // Tự động điền ĐỊA CHỈ MẶC ĐỊNH vào ô địa chỉ nhận hàng
+    if (addressInput && (!addressInput.value || addressInput.dataset.autofilled === "true")) {
+      if (defaultAddr) {
+        addressInput.value = defaultAddr.fullAddress || [defaultAddr.street, defaultAddr.ward, defaultAddr.district, defaultAddr.province].filter(Boolean).join(", ");
+        addressInput.dataset.autofilled = "true";
+      }
+    }
+
+    // Hiển thị bộ chọn địa chỉ nếu khách đã có địa chỉ trong sổ
+    if (selectWrap && addrSelect) {
+      if (addresses.length > 0) {
+        selectWrap.hidden = false;
+        addrSelect.innerHTML = addresses.map((a) => {
+          const isDef = a.id === defId;
+          const label = `${isDef ? '⭐ [Mặc định] ' : ''}${a.recipientName} - ${a.fullAddress || a.street}`;
+          return `<option value="${escapeHtml(a.id)}" ${isDef ? 'selected' : ''}>${escapeHtml(label)}</option>`;
+        }).join("") + `<option value="__custom__">➕ Nhập địa chỉ khác...</option>`;
+
+        addrSelect.onchange = () => {
+          const val = addrSelect.value;
+          if (val === "__custom__") {
+            if (addressInput) {
+              addressInput.value = "";
+              addressInput.focus();
+              delete addressInput.dataset.autofilled;
+            }
+          } else {
+            const picked = addresses.find((a) => a.id === val);
+            if (picked) {
+              if (nameInput) {
+                nameInput.value = picked.recipientName || session.name || "";
+                nameInput.dataset.autofilled = "true";
+              }
+              if (phoneInput) {
+                phoneInput.value = picked.recipientPhone || session.phone || "";
+                phoneInput.dataset.autofilled = "true";
+              }
+              if (addressInput) {
+                addressInput.value = picked.fullAddress || [picked.street, picked.ward, picked.district, picked.province].filter(Boolean).join(", ");
+                addressInput.dataset.autofilled = "true";
+              }
+            }
+          }
+        };
+      } else {
+        selectWrap.hidden = true;
+      }
+    }
   } else {
     if (noticeEl) noticeEl.hidden = true;
+    if (selectWrap) selectWrap.hidden = true;
     if (nameInput && nameInput.dataset.autofilled === "true") {
       nameInput.value = "";
       delete nameInput.dataset.autofilled;
@@ -503,6 +576,10 @@ function autoFillCheckoutCustomer() {
     if (emailInput && emailInput.dataset.autofilled === "true") {
       emailInput.value = "";
       delete emailInput.dataset.autofilled;
+    }
+    if (addressInput && addressInput.dataset.autofilled === "true") {
+      addressInput.value = "";
+      delete addressInput.dataset.autofilled;
     }
   }
 }
@@ -640,9 +717,11 @@ function renderCustomerOrders(session, query = "") {
           <span>Đặt lúc: ${dateStr}</span>
           <span style="font-size: 13.5px;">Tổng tiền: <strong style="color: var(--primary); font-size: 16px; font-weight: 800;">${formatMoney(o.total)}</strong></span>
         </div>
-        ${o.status === "pending" ? `
+        ${o.status === "pending" || o.status === "processing" ? `
           <div style="margin-top: 10px; text-align: right; border-top: 1px solid #f1f5f9; padding-top: 8px;">
-            <button type="button" class="order-cancel-btn" data-cancel-order="${escapeHtml(o.id)}" style="font-size: 12px; color: #dc2626; background: #fef2f2; border: 1px solid rgba(220,38,38,0.25); border-radius: 4px; padding: 4px 10px; cursor: pointer; font-weight: 600;">Hủy đơn hàng</button>
+            <button type="button" class="order-cancel-btn" data-cancel-order="${escapeHtml(o.id)}" style="font-size: 12px; color: #0068ff; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 4px; padding: 4px 10px; cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
+              💬 Liên hệ người bán để hủy đơn
+            </button>
           </div>
         ` : ''}
       </div>
@@ -652,25 +731,15 @@ function renderCustomerOrders(session, query = "") {
   customerOrdersList.querySelectorAll("[data-cancel-order]").forEach((btn) => {
     btn.addEventListener("click", () => {
       const orderId = btn.dataset.cancelOrder;
-      // Kiểm tra xác thực quyền sở hữu đơn hàng
-      const order = allOrders.find((o) => o.id === orderId);
-      const isMine = order && (
-        (order.customerId && String(order.customerId) === sId) ||
-        (!order.customerId && sEmail && String(order.email).toLowerCase().trim() === sEmail)
-      );
-      if (!isMine) {
-        showToast("Bạn không có quyền thao tác trên đơn hàng này.", "error");
-        return;
+      const sampleText = `Chào shop STEM IoT, tôi muốn hủy đơn hàng #${orderId}. Nhờ shop hỗ trợ hủy giúp tôi với ạ!`;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(sampleText).catch(() => {});
       }
-      if (!confirm(`Bạn có chắc chắn muốn hủy đơn hàng #${orderId}?`)) return;
-      if (typeof cancelStoreOrder === "function") {
-        const res = cancelStoreOrder(orderId);
-        if (res.ok) {
-          showToast(`Đã hủy đơn hàng #${orderId}`, "info");
-          renderCustomerOrders(session, $("#orderLookupInput")?.value || "");
-        } else {
-          showToast(res.message || "Không thể hủy đơn hàng", "error");
-        }
+      if (typeof window.openQrModal === "function") {
+        window.openQrModal("zalo");
+        showToast(`Đã sao chép tin nhắn mẫu đơn #${orderId}! Quét mã Zalo để gửi cho người bán.`, "info");
+      } else {
+        window.open("https://zalo.me/0937511617", "_blank");
       }
     });
   });
@@ -781,9 +850,13 @@ function refreshCustomerAccount() {
   if (customerAccountLabel) {
     customerAccountLabel.textContent = session?.name || "Khách hàng";
   }
+  const menuLink = $("#menuLinkProfile");
+  if (menuLink) {
+    menuLink.style.display = session ? "flex" : "none";
+  }
   accountActions.forEach((action) => {
     const act = action.dataset?.accountAction;
-    if (act === "logout" || act === "history" || act === "quotes" || act === "orders") {
+    if (act === "logout") {
       action.hidden = !session;
     }
     if (act === "login" || act === "register") {
@@ -2305,6 +2378,7 @@ if (carouselTrack && carouselDots) {
     qrModal.classList.add("is-open");
     document.body.style.overflow = "hidden";
   }
+  window.openQrModal = openQrModal;
 
   function closeQrModal() {
     qrBackdrop.classList.remove("is-open");

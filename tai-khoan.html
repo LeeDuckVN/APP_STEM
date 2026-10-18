@@ -1,0 +1,2807 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tài Khoản Khách Hàng - STEM IoT Shop</title>
+  <meta name="description"
+    content="Quản lý thông tin cá nhân, sổ địa chỉ giao hàng mặc định và theo dõi lịch sử đơn hàng tại STEM IoT Shop." />
+  <link rel="icon" type="image/svg+xml"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232563eb'><polygon points='13 2 3 14 12 14 11 22 21 10 12 10 13 2'/></svg>" />
+
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* ==========================================================================
+       CUSTOMER ACCOUNT PORTAL SPECIFIC STYLES (UI/UX Pro Max Edition)
+       ========================================================================== */
+    .account-page-wrapper {
+      min-height: calc(100vh - 180px);
+      background: linear-gradient(180deg, #f8fafc 0%, #edf2f7 100%);
+      padding: 32px 0 64px 0;
+    }
+
+    .account-hero-card {
+      background: linear-gradient(135deg, #090e1a 0%, #151d38 60%, #1e293b 100%);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: var(--radius-xl);
+      padding: 28px 32px;
+      color: #ffffff;
+      margin-bottom: 24px;
+      box-shadow: 0 12px 32px -4px rgba(15, 23, 42, 0.25);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .account-hero-card::after {
+      content: '';
+      position: absolute;
+      top: -60px;
+      right: -60px;
+      width: 220px;
+      height: 220px;
+      background: radial-gradient(circle, rgba(37, 99, 235, 0.3) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .account-hero-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 2;
+    }
+
+    .account-user-meta {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .account-avatar-wrap {
+      position: relative;
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--cyan));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-size: 28px;
+      font-weight: 800;
+      box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2), 0 8px 20px rgba(37, 99, 235, 0.4);
+      flex-shrink: 0;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .account-avatar-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .account-avatar-badge {
+      position: absolute;
+      bottom: -2px;
+      right: -2px;
+      background: #10b981;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 3px solid #090e1a;
+    }
+
+    .account-user-text h1 {
+      font-size: 22px;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .account-tag-vip {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 10px;
+      border-radius: 9999px;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #ffffff;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
+    }
+
+    .account-tag-customer {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 10px;
+      border-radius: 9999px;
+      background: rgba(37, 99, 235, 0.25);
+      border: 1px solid rgba(59, 130, 246, 0.4);
+      color: #93c5fd;
+    }
+
+    .account-sub-info {
+      font-size: 13px;
+      color: #94a3b8;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .account-sub-info span {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .account-stats-grid {
+      display: flex;
+      gap: 14px;
+    }
+
+    .account-stat-box {
+      background: rgba(255, 255, 255, 0.07);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: var(--radius-md);
+      padding: 12px 18px;
+      text-align: center;
+      min-width: 105px;
+      transition: transform var(--transition-fast);
+    }
+
+    .account-stat-box:hover {
+      transform: translateY(-2px);
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .account-stat-val {
+      font-size: 19px;
+      font-weight: 800;
+      color: #ffffff;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .account-stat-label {
+      font-size: 11px;
+      color: #94a3b8;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    /* Layout: Sidebar + Main Content */
+    .account-layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .account-sidebar {
+      background: #ffffff;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 12px;
+      box-shadow: var(--shadow-sm);
+      position: sticky;
+      top: 90px;
+    }
+
+    .account-nav-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .account-nav-btn {
+      width: 100%;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      position: relative;
+    }
+
+    .account-nav-btn svg {
+      width: 18px;
+      height: 18px;
+      color: var(--text-muted);
+      transition: color var(--transition-fast);
+      flex-shrink: 0;
+    }
+
+    .account-nav-btn:hover {
+      background: var(--bg-surface-alt);
+      color: var(--primary);
+    }
+
+    .account-nav-btn:hover svg {
+      color: var(--primary);
+    }
+
+    .account-nav-btn.is-active {
+      background: var(--primary-light);
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    .account-nav-btn.is-active svg {
+      color: var(--primary);
+    }
+
+    .account-nav-badge {
+      margin-left: auto;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: var(--radius-full);
+      background: var(--bg-surface-alt);
+      color: var(--text-muted);
+    }
+
+    .account-nav-btn.is-active .account-nav-badge {
+      background: var(--primary);
+      color: #ffffff;
+    }
+
+    .account-nav-divider {
+      height: 1px;
+      background: var(--border-subtle);
+      margin: 8px 0;
+    }
+
+    .account-logout-btn {
+      color: var(--danger) !important;
+    }
+
+    .account-logout-btn svg {
+      color: var(--danger) !important;
+    }
+
+    .account-logout-btn:hover {
+      background: var(--danger-light) !important;
+    }
+
+    /* Content Panels */
+    .account-panel {
+      background: #ffffff;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .account-panel[hidden] {
+      display: none !important;
+    }
+
+    .panel-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      flex-wrap: wrap;
+    }
+
+    .panel-title {
+      font-size: 19px;
+      font-weight: 800;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .panel-title svg {
+      color: var(--primary);
+    }
+
+    .panel-subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Form Design */
+    .profile-form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .form-group-full {
+      grid-column: 1 / -1;
+    }
+
+    .profile-field-label {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .profile-field-input,
+    .profile-field-select,
+    .profile-field-textarea {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      font-size: 13.5px;
+      color: var(--text-primary);
+      background: #ffffff;
+      transition: all var(--transition-fast);
+      outline: none;
+      font-family: inherit;
+    }
+
+    .profile-field-input:focus,
+    .profile-field-select:focus,
+    .profile-field-textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3.5px var(--primary-glow);
+    }
+
+    .profile-field-input[readonly],
+    .profile-field-input:disabled {
+      background: var(--bg-surface-alt);
+      color: var(--text-muted);
+      cursor: not-allowed;
+    }
+
+    .gender-pill-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    .gender-pill {
+      flex: 1;
+      text-align: center;
+      padding: 9px 12px;
+      border: 1.5px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--text-secondary);
+      background: #ffffff;
+      transition: all var(--transition-fast);
+    }
+
+    .gender-pill.is-active,
+    .gender-pill:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    /* Address Management UI (Key Request!) */
+    .address-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 18px;
+      margin-top: 18px;
+    }
+
+    .address-card {
+      border: 1.5px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      background: #ffffff;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all var(--transition-fast);
+    }
+
+    .address-card:hover {
+      border-color: var(--border-strong);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .address-card.is-default {
+      border-color: var(--primary);
+      background: #fbfdff;
+      box-shadow: 0 4px 16px -2px var(--primary-glow);
+    }
+
+    .address-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+
+    .address-card-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .address-tag {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .address-tag.home {
+      background: #eff6ff;
+      color: #2563eb;
+      border: 1px solid #bfdbfe;
+    }
+
+    .address-tag.office {
+      background: #f5f3ff;
+      color: #7c3aed;
+      border: 1px solid #ddd6fe;
+    }
+
+    .address-tag.school {
+      background: #ecfeff;
+      color: #0891b2;
+      border: 1px solid #a5f3fc;
+    }
+
+    .badge-default-address {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11.5px;
+      font-weight: 800;
+      color: #059669;
+      background: #ecfdf5;
+      border: 1.5px solid #a7f3d0;
+      padding: 3px 10px;
+      border-radius: var(--radius-full);
+    }
+
+    .address-card-body {
+      margin-bottom: 14px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.55;
+    }
+
+    .address-card-phone {
+      margin-bottom: 4px;
+      color: var(--text-primary);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .address-card-phone svg,
+    .address-card-body svg {
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .address-card-street {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+      color: var(--text-secondary);
+    }
+
+    .address-card-notes {
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--text-muted);
+      font-style: italic;
+      background: var(--bg-surface-alt);
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+
+    .address-card-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 12px;
+      margin-top: auto;
+      gap: 8px;
+    }
+
+    .btn-action-pill {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--border-subtle);
+      background: #ffffff;
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all var(--transition-fast);
+    }
+
+    .btn-action-pill:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    .btn-set-default {
+      background: #f0fdf4;
+      border-color: #bbf7d0;
+      color: #16a34a;
+      font-weight: 700;
+    }
+
+    .btn-set-default:hover {
+      background: #16a34a;
+      color: #ffffff;
+      border-color: #16a34a;
+    }
+
+    .btn-action-delete {
+      color: var(--danger);
+      border-color: #fecaca;
+      background: #fef2f2;
+    }
+
+    .btn-action-delete:hover {
+      background: var(--danger);
+      color: #ffffff;
+      border-color: var(--danger);
+    }
+
+    .btn-contact-cancel {
+      color: #0068ff !important;
+      border-color: #bfdbfe !important;
+      background: #eff6ff !important;
+      font-weight: 700 !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 6px !important;
+      transition: all 0.2s ease !important;
+    }
+
+    .btn-contact-cancel:hover {
+      background: #0068ff !important;
+      color: #ffffff !important;
+      border-color: #0068ff !important;
+      box-shadow: 0 4px 12px rgba(0, 104, 255, 0.25) !important;
+    }
+
+    .btn-contact-cancel:hover svg rect {
+      fill: #ffffff !important;
+    }
+
+    .btn-contact-cancel:hover svg path {
+      fill: #0068ff !important;
+    }
+
+    /* Modal Form for Address (Add / Edit) */
+    .addr-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(9, 13, 22, 0.65);
+      backdrop-filter: blur(5px);
+      z-index: 1000;
+      transition: opacity 0.2s ease;
+    }
+
+    .addr-modal-backdrop[hidden] {
+      display: none !important;
+    }
+
+    .addr-modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: min(520px, calc(100vw - 32px));
+      max-height: 90vh;
+      overflow-y: auto;
+      background: #ffffff;
+      border-radius: var(--radius-xl);
+      padding: 28px;
+      box-shadow: var(--shadow-xl);
+      z-index: 1001;
+    }
+
+    .addr-modal[hidden] {
+      display: none !important;
+    }
+
+    .addr-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .addr-modal-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text-primary);
+    }
+
+    .addr-modal-close {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--bg-surface-alt);
+      border: none;
+      font-size: 20px;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all var(--transition-fast);
+    }
+
+    .addr-modal-close:hover {
+      background: var(--danger-light);
+      color: var(--danger);
+    }
+
+    /* Orders Tab UI */
+    .orders-filter-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .order-filter-pill {
+      padding: 7px 14px;
+      border-radius: var(--radius-full);
+      font-size: 12.5px;
+      font-weight: 700;
+      border: 1px solid var(--border-subtle);
+      background: #ffffff;
+      color: var(--text-secondary);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all var(--transition-fast);
+    }
+
+    .order-filter-pill:hover,
+    .order-filter-pill.is-active {
+      border-color: var(--primary);
+      background: var(--primary);
+      color: #ffffff;
+      box-shadow: 0 2px 8px var(--primary-glow);
+    }
+
+    .order-search-box {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .order-search-box input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1.5px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      font-size: 13.5px;
+      outline: none;
+    }
+
+    .order-search-box input:focus {
+      border-color: var(--primary);
+    }
+
+    .portal-order-card {
+      border: 1.5px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      margin-bottom: 16px;
+      background: #ffffff;
+      box-shadow: var(--shadow-xs);
+      transition: all var(--transition-fast);
+    }
+
+    .portal-order-card:hover {
+      border-color: var(--border-strong);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .portal-order-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .portal-order-code {
+      font-size: 15px;
+      font-weight: 800;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--primary);
+    }
+
+    .portal-order-date {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-left: 10px;
+    }
+
+    .portal-order-status {
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      font-size: 11.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .portal-order-status.pending {
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fde68a;
+    }
+
+    .portal-order-status.processing {
+      background: #e0f2fe;
+      color: #0369a1;
+      border: 1px solid #bae6fd;
+    }
+
+    .portal-order-status.shipping,
+    .portal-order-status.shipped {
+      background: #ecfeff;
+      color: #0891b2;
+      border: 1px solid #a5f3fc;
+    }
+
+    .portal-order-status.completed {
+      background: #ecfdf5;
+      color: #047857;
+      border: 1px solid #a7f3d0;
+    }
+
+    .portal-order-status.cancelled {
+      background: #fef2f2;
+      color: #b91c1c;
+      border: 1px solid #fecaca;
+    }
+
+    .portal-order-items {
+      background: var(--bg-surface-alt);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      margin-bottom: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .portal-item-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 13px;
+    }
+
+    .portal-item-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+    }
+
+    .portal-item-thumb {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-xs);
+      background: #ffffff;
+      border: 1px solid var(--border-subtle);
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+
+    .portal-order-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      border-top: 1px dashed var(--border-subtle);
+      padding-top: 12px;
+    }
+
+    .portal-order-total {
+      font-size: 15px;
+      color: var(--text-secondary);
+    }
+
+    .portal-order-total strong {
+      font-size: 18px;
+      color: var(--primary);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .portal-order-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    /* Auth Prompt Card if not logged in */
+    .not-logged-in-box {
+      text-align: center;
+      padding: 56px 24px;
+      background: #ffffff;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-sm);
+      max-width: 480px;
+      margin: 40px auto;
+    }
+
+    .not-logged-in-icon {
+      width: 68px;
+      height: 68px;
+      border-radius: 50%;
+      background: var(--primary-light);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px auto;
+    }
+
+    .not-logged-in-box h2 {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .not-logged-in-box p {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      line-height: 1.55;
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .account-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .account-sidebar {
+        position: static;
+      }
+
+      .account-nav-list {
+        flex-direction: row;
+        overflow-x: auto;
+        padding-bottom: 4px;
+      }
+
+      .account-nav-btn {
+        white-space: nowrap;
+      }
+
+      .profile-form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .account-stats-grid {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .account-stat-box {
+        flex: 1;
+        min-width: 0;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="container topbar-inner">
+      <div class="topbar-contact">
+        <span class="topbar-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path
+              d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z">
+            </path>
+          </svg>
+          Hotline: <a href="tel:+84937511617"><strong>0937 511 617</strong></a>
+        </span>
+        <span class="topbar-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+            <polyline points="22,6 12,13 2,6"></polyline>
+          </svg>
+          <a href="mailto:sales@luxas.com.vn">sales@luxas.com.vn</a>
+        </span>
+        <span class="topbar-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          Giờ làm việc: 7:30 - 18:00
+        </span>
+      </div>
+
+      <div class="topbar-actions topbar-right">
+        <a href="index.html" class="customer-account-toggle" style="text-decoration:none;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+          <span>Về trang chủ</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="main-header">
+    <div class="container header-grid" style="display: flex; justify-content: space-between; align-items: center;">
+      <a class="brand" href="index.html" aria-label="STEM IoT Shop">
+        <span class="brand-mark brand-badge">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+        </span>
+        <span class="brand-text">
+          <strong class="brand-name">STEM<span class="brand-accent">IoT</span></strong>
+          <small>Hồ sơ khách hàng & Đơn hàng</small>
+        </span>
+      </a>
+
+      <div class="header-actions" style="display:flex; align-items:center; gap:12px;">
+        <a href="index.html" class="primary-button compact"
+          style="display:inline-flex; align-items:center; gap:6px; text-decoration:none; padding:8px 16px !important; font-size:13px !important;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="9" cy="21" r="1"></circle>
+            <circle cx="20" cy="21" r="1"></circle>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+          </svg>
+          <span>Mua sắm linh kiện</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="account-page-wrapper">
+    <div class="container">
+
+      <!-- View when Not Logged In -->
+      <div id="unauthView" class="not-logged-in-box" hidden>
+        <div class="not-logged-in-icon">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21a8 8 0 0 0-16 0"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </div>
+        <h2>Đăng Nhập Tài Khoản Khách Hàng</h2>
+        <p>Đăng nhập để xem thông tin, chỉnh sửa hồ sơ, quản lý sổ địa chỉ giao hàng mặc định và tra cứu lịch sử mua hàng.</p>
+
+        <form id="portalInlineLoginForm" style="text-align:left; display:grid; gap:12px; margin-top:20px;">
+          <div>
+            <label style="display:block; font-size:12px; font-weight:700; color:var(--text-secondary); margin-bottom:4px;">Email tài khoản</label>
+            <input type="email" id="portalInlineEmail" required placeholder="you@example.com" class="profile-field-input" />
+          </div>
+          <div>
+            <label style="display:block; font-size:12px; font-weight:700; color:var(--text-secondary); margin-bottom:4px;">Mật khẩu</label>
+            <input type="password" id="portalInlinePassword" required minlength="6" placeholder="Mật khẩu của bạn" class="profile-field-input" />
+          </div>
+          <p id="portalInlineLoginMsg" style="color:var(--danger); font-size:12px; margin:0;" role="alert"></p>
+          <button type="submit" class="primary-button" id="btnPortalInlineLogin" style="width:100%; padding:11px; font-size:13.5px; font-weight:700;">
+            Đăng nhập ngay
+          </button>
+        </form>
+
+        <div style="margin-top:18px; padding-top:16px; border-top:1px solid var(--border-subtle); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+          <a href="index.html" style="font-size:12.5px; color:var(--text-muted); text-decoration:none;">← Quay lại cửa hàng</a>
+          <button type="button" id="btnQuickDemoLogin" class="btn-action-pill" style="font-size:11.5px; background:var(--primary-light); color:var(--primary); border-color:var(--border-focus); font-weight:700;">
+            ⚡ Đăng nhập nhanh (Khách hàng mẫu)
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Authenticated Portal -->
+      <div id="authPortalView">
+        <!-- Hero Profile Banner Card -->
+        <section class="account-hero-card">
+          <div class="account-hero-inner">
+            <div class="account-user-meta">
+              <div class="account-avatar-wrap" id="userAvatarWrap" title="Nhấp để đổi ảnh đại diện">
+                <span id="userAvatarText">KH</span>
+                <img id="userAvatarImg" src="" alt="Avatar" style="display:none;" />
+                <span class="account-avatar-badge" title="Tài khoản đang hoạt động"></span>
+              </div>
+              <div class="account-user-text">
+                <h1>
+                  <span id="heroCustomerName">Khách hàng</span>
+                  <span id="heroCustomerBadge" class="account-tag-customer">Thành viên</span>
+                </h1>
+                <div class="account-sub-info">
+                  <span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                      <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                    <strong id="heroCustomerEmail">—</strong>
+                  </span>
+                  <span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path
+                        d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z">
+                      </path>
+                    </svg>
+                    <strong id="heroCustomerPhone">—</strong>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div class="account-stats-grid">
+              <div class="account-stat-box">
+                <div class="account-stat-val" id="statOrdersCount">0</div>
+                <div class="account-stat-label">Đơn hàng</div>
+              </div>
+              <div class="account-stat-box">
+                <div class="account-stat-val" id="statAddressesCount">0</div>
+                <div class="account-stat-label">Địa chỉ</div>
+              </div>
+              <div class="account-stat-box">
+                <div class="account-stat-val" id="statTotalSpent">0đ</div>
+                <div class="account-stat-label">Đã chi tiêu</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Main Account Dashboard Grid -->
+        <div class="account-layout">
+          <!-- Sidebar Navigation -->
+          <aside class="account-sidebar">
+            <ul class="account-nav-list" role="tablist">
+              <li>
+                <button type="button" class="account-nav-btn is-active" data-portal-tab="profile">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                  </svg>
+                  <span>Thông tin cá nhân</span>
+                </button>
+              </li>
+              <li>
+                <button type="button" class="account-nav-btn" data-portal-tab="addresses">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                    <circle cx="12" cy="10" r="3"></circle>
+                  </svg>
+                  <span>Sổ địa chỉ nhận hàng</span>
+                  <span class="account-nav-badge" id="navAddressCount">0</span>
+                </button>
+              </li>
+              <li>
+                <button type="button" class="account-nav-btn" data-portal-tab="orders">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                  </svg>
+                  <span>Lịch sử đơn hàng</span>
+                  <span class="account-nav-badge" id="navOrdersCount">0</span>
+                </button>
+              </li>
+              <li>
+                <button type="button" class="account-nav-btn" data-portal-tab="quotes">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
+                  </svg>
+                  <span>Lịch sử báo giá</span>
+                </button>
+              </li>
+              <li>
+                <button type="button" class="account-nav-btn" data-portal-tab="security">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                  </svg>
+                  <span>Đổi mật khẩu</span>
+                </button>
+              </li>
+              <li class="account-nav-divider"></li>
+              <li>
+                <button type="button" class="account-nav-btn account-logout-btn" id="portalLogoutBtn">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                  </svg>
+                  <span>Đăng xuất</span>
+                </button>
+              </li>
+            </ul>
+          </aside>
+
+          <!-- Main Dynamic Content Area -->
+          <div class="account-main-content">
+
+            <!-- ================= TAB 1: THÔNG TIN CÁ NHÂN ================= -->
+            <section class="account-panel" id="panelProfile">
+              <div class="panel-header-row">
+                <div>
+                  <h2 class="panel-title">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    Hồ Sơ & Thông Tin Cá Nhân
+                  </h2>
+                  <p class="panel-subtitle">Chỉnh sửa và bổ sung thông tin cần thiết để phục vụ giao nhận hàng thuận tiện
+                    nhất.</p>
+                </div>
+              </div>
+
+              <form id="profileEditForm" class="profile-form-grid">
+                <div>
+                  <label class="profile-field-label" for="profileName">Họ và tên *</label>
+                  <input type="text" id="profileName" class="profile-field-input" required placeholder="Nguyễn Văn A" />
+                </div>
+                <div>
+                  <label class="profile-field-label" for="profilePhone">Số điện thoại liên hệ *</label>
+                  <input type="tel" id="profilePhone" class="profile-field-input" required placeholder="0937 511 617" />
+                </div>
+
+                <div>
+                  <label class="profile-field-label" for="profileEmail">Địa chỉ Email</label>
+                  <input type="email" id="profileEmail" class="profile-field-input" readonly
+                    title="Email đăng nhập không thể thay đổi trực tiếp" />
+                </div>
+
+                <div>
+                  <label class="profile-field-label">Giới tính</label>
+                  <div class="gender-pill-group">
+                    <button type="button" class="gender-pill is-active" data-gender="male">Nam</button>
+                    <button type="button" class="gender-pill" data-gender="female">Nữ</button>
+                    <button type="button" class="gender-pill" data-gender="other">Khác</button>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="profile-field-label" for="profileBirthday">Ngày sinh</label>
+                  <input type="date" id="profileBirthday" class="profile-field-input" />
+                </div>
+
+                <div>
+                  <label class="profile-field-label" for="profileCompany">Công ty / Trường học / Lab</label>
+                  <input type="text" id="profileCompany" class="profile-field-input"
+                    placeholder="VD: ĐH Bách Khoa, Lab IoT, Maker..." />
+                </div>
+
+                <div class="form-group-full">
+                  <label class="profile-field-label" for="profileBio">Lĩnh vực nghiên cứu / Dự án quan tâm</label>
+                  <textarea id="profileBio" rows="2" class="profile-field-textarea"
+                    placeholder="Ví dụ: Thiết kế mạch nhúng ESP32, Robot búp bê STEM, cảm biến LoRa môi trường..."></textarea>
+                </div>
+
+                <div class="form-group-full"
+                  style="display:flex; justify-content:flex-end; gap:10px; border-top:1px solid var(--border-subtle); padding-top:18px;">
+                  <button type="reset" class="btn-action-pill" style="padding:10px 20px;">Khôi phục</button>
+                  <button type="submit" class="primary-button" id="btnSaveProfile"
+                    style="padding:10px 24px; display:inline-flex; align-items:center; gap:8px;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                      <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                      <polyline points="7 3 7 8 15 8"></polyline>
+                    </svg>
+                    <span>Lưu thay đổi</span>
+                  </button>
+                </div>
+              </form>
+            </section>
+
+            <!-- ================= TAB 2: SỔ ĐỊA CHỈ & ĐẶT LÀM MẶC ĐỊNH ================= -->
+            <section class="account-panel" id="panelAddresses" hidden>
+              <div class="panel-header-row">
+                <div>
+                  <h2 class="panel-title">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                      <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                    Sổ Địa Chỉ Giao Nhận Hàng
+                  </h2>
+                  <p class="panel-subtitle">Thêm địa chỉ giao hàng, chỉnh sửa và đặt một địa chỉ làm <strong>mặc định</strong>
+                    để tự động điền khi mua sắm.</p>
+                </div>
+                <button type="button" class="primary-button" id="btnOpenAddAddress"
+                  style="padding:9px 18px; font-size:13px; display:inline-flex; align-items:center; gap:6px;">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                  </svg>
+                  <span>Thêm địa chỉ mới</span>
+                </button>
+              </div>
+
+              <!-- Address List Container -->
+              <div id="addressCardsList" class="address-grid">
+                <!-- Injected via JavaScript -->
+              </div>
+            </section>
+
+            <!-- ================= TAB 3: LỊCH SỬ ĐƠN HÀNG ================= -->
+            <section class="account-panel" id="panelOrders" hidden>
+              <div class="panel-header-row">
+                <div>
+                  <h2 class="panel-title">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                      <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                    </svg>
+                    Lịch Sử Đơn Hàng Của Bạn
+                  </h2>
+                  <p class="panel-subtitle">Theo dõi tình trạng đơn hàng, chi tiết linh kiện đã mua và quản lý hủy đơn.</p>
+                </div>
+              </div>
+
+              <!-- Filter tabs -->
+              <div class="orders-filter-row">
+                <button type="button" class="order-filter-pill is-active" data-order-status="all">Tất cả đơn hàng</button>
+                <button type="button" class="order-filter-pill" data-order-status="pending">Chờ xử lý</button>
+                <button type="button" class="order-filter-pill" data-order-status="processing">Đang xử lý</button>
+                <button type="button" class="order-filter-pill" data-order-status="shipping">Đang giao</button>
+                <button type="button" class="order-filter-pill" data-order-status="completed">Hoàn thành</button>
+                <button type="button" class="order-filter-pill" data-order-status="cancelled">Đã hủy</button>
+              </div>
+
+              <!-- Search -->
+              <div class="order-search-box">
+                <input type="text" id="orderSearchInput"
+                  placeholder="Lọc theo mã đơn (#ORD-...) hoặc tên linh kiện đã đặt..." />
+                <button type="button" class="primary-button" id="btnOrderSearch" style="padding:10px 18px;">
+                  Tìm kiếm
+                </button>
+              </div>
+
+              <!-- Orders List Container -->
+              <div id="portalOrdersList">
+                <!-- Injected via JavaScript -->
+              </div>
+            </section>
+
+            <!-- ================= TAB 4: LỊCH SỬ BÁO GIÁ ================= -->
+            <section class="account-panel" id="panelQuotes" hidden>
+              <div class="panel-header-row">
+                <div>
+                  <h2 class="panel-title">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                      <polyline points="14 2 14 8 20 8"></polyline>
+                    </svg>
+                    Yêu Cầu Báo Giá Đã Gửi
+                  </h2>
+                  <p class="panel-subtitle">Danh sách các yêu cầu báo giá dự án, bom linh kiện số lượng lớn bạn đã gửi shop.</p>
+                </div>
+              </div>
+              <div id="portalQuotesList">
+                <!-- Injected via JavaScript -->
+              </div>
+            </section>
+
+            <!-- ================= TAB 5: ĐỔI MẬT KHẨU ================= -->
+            <section class="account-panel" id="panelSecurity" hidden>
+              <div class="panel-header-row">
+                <div>
+                  <h2 class="panel-title">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                    Bảo Mật & Đổi Mật Khẩu
+                  </h2>
+                  <p class="panel-subtitle">Nên đặt mật khẩu mạnh (tối thiểu 6 ký tự gồm chữ và số) để bảo vệ tài khoản.</p>
+                </div>
+              </div>
+
+              <form id="changePasswordForm" style="max-width: 480px; display:grid; gap:16px;">
+                <div>
+                  <label class="profile-field-label" for="currPass">Mật khẩu hiện tại *</label>
+                  <div class="password-field-wrapper">
+                    <input type="password" id="currPass" class="profile-field-input" required
+                      placeholder="Nhập mật khẩu hiện tại" />
+                    <button class="password-toggle-btn" type="button" aria-label="Hiện mật khẩu">
+                      <svg class="eye-show" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                      </svg>
+                      <svg class="eye-hide" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <path
+                          d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24">
+                        </path>
+                        <line x1="1" y1="1" x2="23" y2="23"></line>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="profile-field-label" for="newPass">Mật khẩu mới *</label>
+                  <div class="password-field-wrapper">
+                    <input type="password" id="newPass" class="profile-field-input" minlength="6" required
+                      placeholder="Tối thiểu 6 ký tự" />
+                    <button class="password-toggle-btn" type="button" aria-label="Hiện mật khẩu">
+                      <svg class="eye-show" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                      </svg>
+                      <svg class="eye-hide" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <path
+                          d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24">
+                        </path>
+                        <line x1="1" y1="1" x2="23" y2="23"></line>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="profile-field-label" for="confirmNewPass">Nhập lại mật khẩu mới *</label>
+                  <div class="password-field-wrapper">
+                    <input type="password" id="confirmNewPass" class="profile-field-input" minlength="6" required
+                      placeholder="Nhập lại mật khẩu mới" />
+                    <button class="password-toggle-btn" type="button" aria-label="Hiện mật khẩu">
+                      <svg class="eye-show" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                      </svg>
+                      <svg class="eye-hide" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <path
+                          d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24">
+                        </path>
+                        <line x1="1" y1="1" x2="23" y2="23"></line>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <button type="submit" class="primary-button" style="padding:10px 24px;">
+                    Cập nhật mật khẩu mới
+                  </button>
+                </div>
+              </form>
+            </section>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ================= ADDRESS MODAL: THÊM / SỬA ĐỊA CHỈ ================= -->
+  <div class="addr-modal-backdrop" id="addressModalBackdrop" hidden></div>
+  <div class="addr-modal" id="addressModal" hidden role="dialog" aria-modal="true" aria-labelledby="addrModalTitle">
+    <div class="addr-modal-header">
+      <h3 class="addr-modal-title" id="addrModalTitle">Thêm địa chỉ nhận hàng</h3>
+      <button type="button" class="addr-modal-close" id="addrModalClose" aria-label="Đóng">&times;</button>
+    </div>
+
+    <form id="addressForm" style="display:grid; gap:14px;">
+      <input type="hidden" id="editAddressId" value="" />
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+        <div>
+          <label class="profile-field-label" for="addrName">Họ tên người nhận *</label>
+          <input type="text" id="addrName" class="profile-field-input" required placeholder="Nguyễn Văn A" />
+        </div>
+        <div>
+          <label class="profile-field-label" for="addrPhone">Số điện thoại *</label>
+          <input type="tel" id="addrPhone" class="profile-field-input" required placeholder="0937 511 617" />
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+        <div>
+          <label class="profile-field-label" for="addrProvince">Tỉnh / Thành phố *</label>
+          <select id="addrProvince" class="profile-field-select" required>
+            <option value="">-- Chọn Tỉnh / Thành phố --</option>
+            <option value="TP. Hồ Chí Minh">TP. Hồ Chí Minh</option>
+            <option value="Hà Nội">Hà Nội</option>
+            <option value="Bình Dương">Bình Dương</option>
+            <option value="Đồng Nai">Đồng Nai</option>
+            <option value="Đà Nẵng">Đà Nẵng</option>
+            <option value="Hải Phòng">Hải Phòng</option>
+            <option value="Cần Thơ">Cần Thơ</option>
+            <option value="Bà Rịa - Vũng Tàu">Bà Rịa - Vũng Tàu</option>
+            <option value="Long An">Long An</option>
+            <option value="Quảng Nam">Quảng Nam</option>
+            <option value="Khánh Hòa">Khánh Hòa</option>
+            <option value="Lâm Đồng">Lâm Đồng</option>
+            <option value="Thừa Thiên Huế">Thừa Thiên Huế</option>
+            <option value="Bắc Ninh">Bắc Ninh</option>
+            <option value="Hải Dương">Hải Dương</option>
+            <option value="Tỉnh thành khác">Tỉnh thành khác</option>
+          </select>
+        </div>
+        <div>
+          <label class="profile-field-label" for="addrDistrict">Quận / Huyện *</label>
+          <input type="text" id="addrDistrict" class="profile-field-input" required
+            placeholder="VD: Quận 1, Quận Bình Thạnh..." />
+        </div>
+      </div>
+
+      <div>
+        <label class="profile-field-label" for="addrWard">Phường / Xã *</label>
+        <input type="text" id="addrWard" class="profile-field-input" required
+          placeholder="VD: Phường Bến Nghé, Phường 1..." />
+      </div>
+
+      <div>
+        <label class="profile-field-label" for="addrStreet">Số nhà, tên đường, tòa nhà *</label>
+        <input type="text" id="addrStreet" class="profile-field-input" required
+          placeholder="VD: 38/5 Vạn Kiếp, P.1, Q.Bình Thạnh" />
+      </div>
+
+      <div>
+        <label class="profile-field-label">Loại địa chỉ</label>
+        <div style="display:flex; gap:8px;">
+          <label
+            style="flex:1; display:flex; align-items:center; gap:6px; font-size:13px; font-weight:600; padding:8px 12px; border:1px solid var(--border-subtle); border-radius:var(--radius-sm); cursor:pointer;">
+            <input type="radio" name="addrType" value="home" checked />
+            <span>Nhà riêng</span>
+          </label>
+          <label
+            style="flex:1; display:flex; align-items:center; gap:6px; font-size:13px; font-weight:600; padding:8px 12px; border:1px solid var(--border-subtle); border-radius:var(--radius-sm); cursor:pointer;">
+            <input type="radio" name="addrType" value="office" />
+            <span>Văn phòng</span>
+          </label>
+          <label
+            style="flex:1; display:flex; align-items:center; gap:6px; font-size:13px; font-weight:600; padding:8px 12px; border:1px solid var(--border-subtle); border-radius:var(--radius-sm); cursor:pointer;">
+            <input type="radio" name="addrType" value="school" />
+            <span>Trường / Lab</span>
+          </label>
+        </div>
+      </div>
+
+      <div>
+        <label class="profile-field-label" for="addrNotes">Ghi chú giao hàng (Tùy chọn)</label>
+        <input type="text" id="addrNotes" class="profile-field-input"
+          placeholder="Ví dụ: Gọi trước 15 phút, giao giờ hành chính..." />
+      </div>
+
+      <div
+        style="padding:10px 12px; background:var(--primary-light); border:1px solid rgba(37,99,235,0.2); border-radius:var(--radius-sm);">
+        <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:13px; font-weight:700; color:var(--primary);">
+          <input type="checkbox" id="addrIsDefault" style="width:16px; height:16px; accent-color:var(--primary);" />
+          <span>⭐ Đặt làm địa chỉ giao hàng mặc định</span>
+        </label>
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:8px;">
+        <button type="button" class="btn-action-pill" id="addrModalCancel" style="padding:9px 18px;">Hủy bỏ</button>
+        <button type="submit" class="primary-button" id="btnSaveAddressSubmit" style="padding:9px 22px;">
+          Lưu địa chỉ
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ================= ZALO CONTACT CANCEL ORDER MODAL ================= -->
+  <div class="addr-modal-backdrop" id="cancelZaloModalBackdrop" hidden></div>
+  <div class="addr-modal" id="cancelZaloModal" hidden role="dialog" aria-modal="true" aria-labelledby="cancelZaloModalTitle" style="max-width: 440px; text-align: center;">
+    <div class="addr-modal-header" style="justify-content: flex-end; margin-bottom: 4px;">
+      <button type="button" class="addr-modal-close" id="cancelZaloModalClose" aria-label="Đóng">&times;</button>
+    </div>
+
+    <div style="width: 58px; height: 58px; border-radius: 50%; background: #eff6ff; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 10px; border: 1px solid #bfdbfe;">
+      <svg viewBox="0 0 24 24" width="34" height="34" fill="none">
+        <rect width="24" height="24" rx="12" fill="#0068FF" />
+        <path d="M11.94 4.5C7.55 4.5 4 7.62 4 11.46c0 2.08 1.04 3.94 2.68 5.2-.1.26-.6 1.96-.68 2.24 0 0-.02.14.07.2.09.06.2.02.2.02.28-.04 2.2-1.44 2.54-1.68.66.16 1.38.24 2.13.24 4.39 0 7.94-3.12 7.94-6.96S16.33 4.5 11.94 4.5z" fill="white" />
+        <path d="M16.48 14.42h-5.12c-.2 0-.37-.16-.37-.36s.16-.36.37-.36h5.12c.2 0 .37.16.37.36s-.16.36-.37.36z" fill="white" />
+      </svg>
+    </div>
+
+    <h3 class="addr-modal-title" id="cancelZaloModalTitle" style="font-size: 19px; margin-bottom: 6px;">
+      Liên Hệ Người Bán Để Hủy Đơn
+    </h3>
+    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px; line-height: 1.5;">
+      Quét mã QR Zalo hoặc bấm nút bên dưới để gửi yêu cầu hủy đơn hàng <strong id="cancelZaloOrderCode" style="color: var(--primary); font-family: 'JetBrains Mono', monospace;">#ORD-0000</strong> cho người bán.
+    </p>
+
+    <!-- QR Code Container -->
+    <div style="background: #ffffff; padding: 12px; border-radius: var(--radius-lg); border: 2px dashed #0068ff; display: inline-block; margin-bottom: 12px; box-shadow: 0 4px 18px rgba(0, 104, 255, 0.15);">
+      <img src="assets/qr/zalo.jpg" alt="Mã QR Zalo hỗ trợ hủy đơn" style="width: 210px; height: 210px; object-fit: contain; display: block; border-radius: 8px;" />
+      <div style="font-size: 11.5px; color: #0068ff; font-weight: 700; margin-top: 6px;">
+        📱 Quét mã bằng ứng dụng Zalo trên điện thoại
+      </div>
+    </div>
+
+    <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 14px; line-height: 1.5; background: var(--bg-surface-alt); padding: 10px 14px; border-radius: var(--radius-sm); text-align: left; border: 1px solid var(--border-subtle);">
+      <div style="font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">💬 Tin nhắn mẫu gửi người bán:</div>
+      <div id="cancelZaloSampleMsg" style="font-style: italic; color: var(--text-muted); user-select: all; font-size: 12px; background: #ffffff; padding: 6px 10px; border-radius: 4px; border: 1px solid var(--border-subtle);">
+        "Chào shop STEM IoT, tôi muốn hủy đơn hàng #... Nhờ shop hỗ trợ kiểm tra và hủy đơn giúp tôi nhé!"
+      </div>
+      <button type="button" id="btnCopyCancelMsg" class="btn-action-pill" style="margin-top: 8px; font-size: 12px; padding: 5px 12px; font-weight: 600; cursor: pointer;">
+        📋 Sao chép tin nhắn mẫu
+      </button>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <a href="https://zalo.me/0937511617" id="cancelZaloDirectLink" target="_blank" rel="noopener noreferrer" class="primary-button" style="padding: 11px 20px; font-size: 13.5px; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; background: #0068ff; border-color: #0068ff;">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="white">
+          <path d="M11.94 4.5C7.55 4.5 4 7.62 4 11.46c0 2.08 1.04 3.94 2.68 5.2-.1.26-.6 1.96-.68 2.24 0 0-.02.14.07.2.09.06.2.02.2.02.28-.04 2.2-1.44 2.54-1.68.66.16 1.38.24 2.13.24 4.39 0 7.94-3.12 7.94-6.96S16.33 4.5 11.94 4.5z" />
+        </svg>
+        <span>Mở ứng dụng Zalo nhắn tin (0937 511 617)</span>
+      </a>
+
+      <a href="tel:0937511617" class="btn-action-pill" style="padding: 10px; text-decoration: none; font-size: 13px; justify-content: center; font-weight: 700; color: #10b981; border-color: #a7f3d0; background: #ecfdf5;">
+        📞 Hoặc gọi hotline: 0937 511 617
+      </a>
+
+      <button type="button" class="btn-action-pill" id="cancelZaloModalBottomClose" style="padding: 8px; justify-content: center; font-size: 12.5px; color: var(--text-muted); margin-top: 4px;">
+        Đóng cửa sổ
+      </button>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast" id="portalToast" role="status" aria-live="polite"></div>
+
+  <!-- Shared store & customer logic -->
+  <script src="store.js"></script>
+  <script>
+    // ==========================================================================
+    // CUSTOMER PORTAL LOGIC - TAI-KHOAN.HTML
+    // ==========================================================================
+    const $ = (selector) => document.querySelector(selector);
+    const customerSessionKey = "stem_customer_session";
+    const apiBase = typeof getApiBaseUrl === 'function' ? getApiBaseUrl() : '';
+
+    // Active state
+    let currentCustomer = null;
+    let customerAddresses = [];
+    let defaultAddressId = null;
+    let customerOrders = [];
+    let currentFilterStatus = "all";
+
+    function showToast(message, type = "info", duration = 3200) {
+      const toast = $("#portalToast");
+      if (!toast) return;
+      toast.className = `toast toast-${type} show`;
+      toast.textContent = message;
+      clearTimeout(toast._timer);
+      toast._timer = setTimeout(() => {
+        toast.className = "toast";
+      }, duration);
+    }
+
+    function formatMoney(amount) {
+      return Number(amount || 0).toLocaleString("vi-VN") + "đ";
+    }
+
+    function getLocalSession() {
+      try {
+        const raw = localStorage.getItem(customerSessionKey);
+        return raw ? JSON.parse(raw) : null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function saveLocalSession(data) {
+      if (!data) {
+        localStorage.removeItem(customerSessionKey);
+        return;
+      }
+      const existing = getLocalSession() || {};
+      const merged = { ...existing, ...data };
+      localStorage.setItem(customerSessionKey, JSON.stringify(merged));
+    }
+
+    // Local address storage fallback
+    function getStoredAddresses(userId) {
+      try {
+        const key = `stem_customer_addresses_${userId}`;
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function setStoredAddresses(userId, list, defId) {
+      try {
+        const key = `stem_customer_addresses_${userId}`;
+        localStorage.setItem(key, JSON.stringify(list || []));
+        if (defId !== undefined) {
+          localStorage.setItem(`stem_customer_def_addr_${userId}`, defId || "");
+        }
+      } catch (e) {}
+    }
+
+    function getStoredDefaultAddressId(userId) {
+      return localStorage.getItem(`stem_customer_def_addr_${userId}`) || null;
+    }
+
+    // Load full profile from server or local
+    async function loadCustomerProfile() {
+      const session = getLocalSession();
+      if (!session || (!session.id && !session.email)) {
+        showUnauth();
+        return;
+      }
+
+      currentCustomer = session;
+      renderHeroInfo(currentCustomer);
+      populateProfileForm(currentCustomer);
+
+      // 1. Try fetching freshest data from backend
+      try {
+        const url = `${apiBase}/api/customers/profile?id=${encodeURIComponent(session.id || '')}&email=${encodeURIComponent(session.email || '')}`;
+        const res = await fetch(url);
+        if (res.ok) {
+          const json = await res.json();
+          if (json.ok && json.customer) {
+            currentCustomer = json.customer;
+            customerAddresses = Array.isArray(json.customer.addresses) ? json.customer.addresses : [];
+            defaultAddressId = json.customer.defaultAddressId || (customerAddresses[0]?.id || null);
+            saveLocalSession({
+              ...json.customer,
+              addresses: customerAddresses,
+              defaultAddressId: defaultAddressId
+            });
+            renderHeroInfo(currentCustomer);
+            populateProfileForm(currentCustomer);
+          }
+        }
+      } catch (err) {
+        console.warn('Backend profile offline, using localStorage fallback');
+      }
+
+      // If addresses not yet loaded from server, read from localStorage
+      if (!customerAddresses || customerAddresses.length === 0) {
+        customerAddresses = getStoredAddresses(session.id || session.email);
+        defaultAddressId = getStoredDefaultAddressId(session.id || session.email) || (customerAddresses[0]?.id || null);
+      }
+
+      renderAddressesList();
+      loadOrders();
+      loadQuotes();
+      showAuthPortal();
+    }
+
+    function showUnauth() {
+      $("#unauthView").hidden = false;
+      $("#authPortalView").hidden = true;
+    }
+
+    function showAuthPortal() {
+      $("#unauthView").hidden = true;
+      $("#authPortalView").hidden = false;
+    }
+
+    function renderHeroInfo(c) {
+      const name = c.name || c.email || "Khách hàng";
+      $("#heroCustomerName").textContent = name;
+      $("#heroCustomerEmail").textContent = c.email || "—";
+      $("#heroCustomerPhone").textContent = c.phone || "—";
+
+      // Initials Avatar
+      const initials = name
+        .split(" ")
+        .filter(Boolean)
+        .map((w) => w[0].toUpperCase())
+        .slice(-2)
+        .join("") || "KH";
+      $("#userAvatarText").textContent = initials;
+
+      // VIP or Member Badge
+      const isVip = c.role === "vip" || (Number(c.spent) >= 2000000);
+      const badgeEl = $("#heroCustomerBadge");
+      if (badgeEl) {
+        badgeEl.className = isVip ? "account-tag-vip" : "account-tag-customer";
+        badgeEl.textContent = isVip ? "Khách Hàng VIP ⭐" : "Thành Viên";
+      }
+
+      // Stats
+      $("#statAddressesCount").textContent = customerAddresses.length;
+      $("#navAddressCount").textContent = customerAddresses.length;
+    }
+
+    function populateProfileForm(c) {
+      if (!c) return;
+      $("#profileName").value = c.name || "";
+      $("#profilePhone").value = c.phone || "";
+      $("#profileEmail").value = c.email || "";
+      $("#profileBirthday").value = c.birthday || "";
+      $("#profileCompany").value = c.company || "";
+      $("#profileBio").value = c.bio || "";
+
+      // Gender pills
+      const currentGender = c.gender || "male";
+      document.querySelectorAll(".gender-pill").forEach((pill) => {
+        pill.classList.toggle("is-active", pill.dataset.gender === currentGender);
+      });
+    }
+
+    // ==========================================================================
+    // ADDRESS BOOK RENDERING & ACTIONS
+    // ==========================================================================
+    function renderAddressesList() {
+      const listEl = $("#addressCardsList");
+      if (!listEl) return;
+
+      $("#statAddressesCount").textContent = customerAddresses.length;
+      $("#navAddressCount").textContent = customerAddresses.length;
+
+      if (customerAddresses.length === 0) {
+        listEl.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 48px 16px; background: var(--bg-surface-alt); border-radius: var(--radius-md); border: 1.5px dashed var(--border-subtle);">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--text-muted); margin-bottom: 12px;">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            <p style="font-size: 14.5px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px;">
+              Bạn chưa có địa chỉ nhận hàng nào
+            </p>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 18px;">
+              Thêm địa chỉ giao hàng và đặt làm mặc định để không phải nhập lại mỗi khi đặt đơn!
+            </p>
+            <button type="button" class="primary-button" id="btnEmptyAddAddr" style="padding: 9px 20px; font-size: 13px;">
+              + Thêm địa chỉ đầu tiên
+            </button>
+          </div>
+        `;
+        $("#btnEmptyAddAddr")?.addEventListener("click", () => openAddressModal());
+        return;
+      }
+
+      listEl.innerHTML = customerAddresses.map((addr) => {
+        const isDef = addr.id === defaultAddressId || Boolean(addr.isDefault);
+        const typeLabels = {
+          home: "Nhà riêng",
+          office: "Văn phòng",
+          school: "Trường / Lab"
+        };
+        const typeTag = typeLabels[addr.type] || "Nhà riêng";
+
+        return `
+          <div class="address-card ${isDef ? 'is-default' : ''}" data-addr-id="${escapeHtml(addr.id)}">
+            <div class="address-card-header">
+              <div class="address-card-name">
+                <span>${escapeHtml(addr.recipientName || "Người nhận")}</span>
+                <span class="address-tag ${escapeHtml(addr.type || 'home')}">${typeTag}</span>
+              </div>
+              ${isDef ? `
+                <span class="badge-default-address" title="Địa chỉ này sẽ tự động điền sẵn khi thanh toán">
+                  ⭐ Mặc định
+                </span>
+              ` : ''}
+            </div>
+
+            <div class="address-card-body">
+              <div class="address-card-phone">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                </svg>
+                <span>${escapeHtml(addr.recipientPhone || "—")}</span>
+              </div>
+              <div class="address-card-street">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-top: 3px;">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                <span>${escapeHtml(addr.fullAddress || [addr.street, addr.ward, addr.district, addr.province].filter(Boolean).join(', '))}</span>
+              </div>
+              ${addr.notes ? `<div class="address-card-notes">Ghi chú: ${escapeHtml(addr.notes)}</div>` : ''}
+            </div>
+
+            <div class="address-card-actions">
+              <div>
+                ${!isDef ? `
+                  <button type="button" class="btn-action-pill btn-set-default" data-action="set-default" data-id="${escapeHtml(addr.id)}">
+                    ⭐ Đặt làm mặc định
+                  </button>
+                ` : `
+                  <span style="font-size: 12px; color: #059669; font-weight: 700;">✓ Địa chỉ mặc định</span>
+                `}
+              </div>
+              <div style="display: flex; gap: 6px;">
+                <button type="button" class="btn-action-pill" data-action="edit" data-id="${escapeHtml(addr.id)}" title="Sửa địa chỉ">
+                  ✏️ Sửa
+                </button>
+                <button type="button" class="btn-action-pill btn-action-delete" data-action="delete" data-id="${escapeHtml(addr.id)}" title="Xóa địa chỉ">
+                  🗑️ Xóa
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      // Bind events
+      listEl.querySelectorAll("[data-action='set-default']").forEach((btn) => {
+        btn.addEventListener("click", () => setDefaultAddress(btn.dataset.id));
+      });
+      listEl.querySelectorAll("[data-action='edit']").forEach((btn) => {
+        btn.addEventListener("click", () => editAddress(btn.dataset.id));
+      });
+      listEl.querySelectorAll("[data-action='delete']").forEach((btn) => {
+        btn.addEventListener("click", () => deleteAddress(btn.dataset.id));
+      });
+    }
+
+    async function setDefaultAddress(addrId) {
+      if (!addrId) return;
+      const session = currentCustomer || getLocalSession();
+      defaultAddressId = addrId;
+
+      // Update local array
+      customerAddresses.forEach((a) => {
+        a.isDefault = (a.id === addrId);
+      });
+
+      // Save local
+      setStoredAddresses(session.id || session.email, customerAddresses, defaultAddressId);
+      saveLocalSession({ defaultAddressId: addrId, addresses: customerAddresses });
+
+      // Notify server if online
+      if (session.id) {
+        try {
+          await fetch(`${apiBase}/api/customers/${session.id}/addresses/${addrId}/default`, {
+            method: "PUT"
+          });
+        } catch (_) {}
+      }
+
+      renderAddressesList();
+      showToast("Đã đặt làm địa chỉ giao hàng mặc định thành công! ⭐", "success");
+    }
+
+    async function deleteAddress(addrId) {
+      if (!confirm("Bạn có chắc chắn muốn xóa địa chỉ nhận hàng này?")) return;
+      const session = currentCustomer || getLocalSession();
+
+      customerAddresses = customerAddresses.filter((a) => a.id !== addrId);
+      if (defaultAddressId === addrId) {
+        defaultAddressId = customerAddresses[0]?.id || null;
+      }
+
+      setStoredAddresses(session.id || session.email, customerAddresses, defaultAddressId);
+      saveLocalSession({ defaultAddressId: defaultAddressId, addresses: customerAddresses });
+
+      // Server delete
+      if (session.id) {
+        try {
+          await fetch(`${apiBase}/api/customers/${session.id}/addresses/${addrId}`, {
+            method: "DELETE"
+          });
+        } catch (_) {}
+      }
+
+      renderAddressesList();
+      showToast("Đã xóa địa chỉ thành công.", "info");
+    }
+
+    function openAddressModal(editId = "") {
+      const modal = $("#addressModal");
+      const backdrop = $("#addressModalBackdrop");
+      const title = $("#addrModalTitle");
+      const form = $("#addressForm");
+      if (!modal || !backdrop) return;
+
+      form.reset();
+      $("#editAddressId").value = editId || "";
+
+      if (editId) {
+        const addr = customerAddresses.find((a) => a.id === editId);
+        if (addr) {
+          title.textContent = "Chỉnh sửa địa chỉ nhận hàng";
+          $("#addrName").value = addr.recipientName || "";
+          $("#addrPhone").value = addr.recipientPhone || "";
+          $("#addrProvince").value = addr.province || "";
+          $("#addrDistrict").value = addr.district || "";
+          $("#addrWard").value = addr.ward || "";
+          $("#addrStreet").value = addr.street || "";
+          $("#addrNotes").value = addr.notes || "";
+          $("#addrIsDefault").checked = (addr.id === defaultAddressId || Boolean(addr.isDefault));
+          const typeRadio = form.querySelector(`input[name="addrType"][value="${addr.type || 'home'}"]`);
+          if (typeRadio) typeRadio.checked = true;
+        }
+      } else {
+        title.textContent = "Thêm địa chỉ nhận hàng mới";
+        // Pre-fill with customer profile name and phone if available
+        if (currentCustomer) {
+          $("#addrName").value = currentCustomer.name || "";
+          $("#addrPhone").value = currentCustomer.phone || "";
+        }
+        $("#addrIsDefault").checked = customerAddresses.length === 0;
+      }
+
+      modal.hidden = false;
+      backdrop.hidden = false;
+    }
+
+    function closeAddressModal() {
+      const modal = $("#addressModal");
+      const backdrop = $("#addressModalBackdrop");
+      if (modal) modal.hidden = true;
+      if (backdrop) backdrop.hidden = true;
+    }
+
+    function editAddress(addrId) {
+      openAddressModal(addrId);
+    }
+
+    // Save Address Submit (Add or Edit)
+    $("#addressForm")?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const session = currentCustomer || getLocalSession();
+      if (!session) return;
+
+      const editId = $("#editAddressId").value.trim();
+      const recipientName = $("#addrName").value.trim();
+      const recipientPhone = $("#addrPhone").value.trim();
+      const province = $("#addrProvince").value.trim();
+      const district = $("#addrDistrict").value.trim();
+      const ward = $("#addrWard").value.trim();
+      const street = $("#addrStreet").value.trim();
+      const notes = $("#addrNotes").value.trim();
+      const isDefault = $("#addrIsDefault").checked;
+      const type = document.querySelector('input[name="addrType"]:checked')?.value || "home";
+
+      const parts = [street, ward, district, province].filter(Boolean);
+      const fullAddress = parts.join(", ");
+
+      const addressPayload = {
+        recipientName,
+        recipientPhone,
+        province,
+        district,
+        ward,
+        street,
+        fullAddress,
+        type,
+        notes,
+        isDefault
+      };
+
+      let savedAddr = null;
+
+      if (editId) {
+        // Edit existing
+        const idx = customerAddresses.findIndex((a) => a.id === editId);
+        if (idx >= 0) {
+          customerAddresses[idx] = {
+            ...customerAddresses[idx],
+            ...addressPayload,
+            updatedAt: Date.now()
+          };
+          savedAddr = customerAddresses[idx];
+        }
+        if (isDefault) defaultAddressId = editId;
+
+        // Try backend
+        if (session.id) {
+          try {
+            await fetch(`${apiBase}/api/customers/${session.id}/addresses/${editId}`, {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(addressPayload)
+            });
+          } catch (_) {}
+        }
+        showToast("Đã cập nhật địa chỉ thành công!", "success");
+      } else {
+        // Add new
+        const newId = "addr_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+        savedAddr = {
+          id: newId,
+          ...addressPayload,
+          createdAt: Date.now()
+        };
+        customerAddresses.push(savedAddr);
+        if (isDefault || customerAddresses.length === 1) {
+          defaultAddressId = newId;
+        }
+
+        // Try backend
+        if (session.id) {
+          try {
+            const res = await fetch(`${apiBase}/api/customers/${session.id}/addresses`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(addressPayload)
+            });
+            if (res.ok) {
+              const resJson = await res.json();
+              if (resJson.address?.id) {
+                savedAddr.id = resJson.address.id;
+                if (resJson.defaultAddressId) defaultAddressId = resJson.defaultAddressId;
+              }
+            }
+          } catch (_) {}
+        }
+        showToast("Đã thêm địa chỉ mới thành công!", "success");
+      }
+
+      // Persist local
+      setStoredAddresses(session.id || session.email, customerAddresses, defaultAddressId);
+      saveLocalSession({
+        addresses: customerAddresses,
+        defaultAddressId: defaultAddressId
+      });
+
+      closeAddressModal();
+      renderAddressesList();
+    });
+
+    $("#btnOpenAddAddress")?.addEventListener("click", () => openAddressModal());
+    $("#addrModalClose")?.addEventListener("click", closeAddressModal);
+    $("#addrModalCancel")?.addEventListener("click", closeAddressModal);
+    $("#addressModalBackdrop")?.addEventListener("click", closeAddressModal);
+
+    // ==========================================================================
+    // PROFILE EDIT FORM SUBMISSION
+    // ==========================================================================
+    $("#profileEditForm")?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const session = currentCustomer || getLocalSession();
+      if (!session) return;
+
+      const name = $("#profileName").value.trim();
+      const phone = $("#profilePhone").value.trim();
+      const birthday = $("#profileBirthday").value;
+      const company = $("#profileCompany").value.trim();
+      const bio = $("#profileBio").value.trim();
+      const gender = document.querySelector(".gender-pill.is-active")?.dataset.gender || "male";
+
+      const btnSave = $("#btnSaveProfile");
+      if (btnSave) {
+        btnSave.disabled = true;
+        btnSave.textContent = "Đang lưu...";
+      }
+
+      const updatedData = {
+        name,
+        phone,
+        birthday,
+        company,
+        bio,
+        gender
+      };
+
+      try {
+        // 1. Try server update
+        const res = await fetch(`${apiBase}/api/customers/profile`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id: session.id,
+            email: session.email,
+            ...updatedData
+          })
+        });
+
+        if (res.ok) {
+          const json = await res.json();
+          if (json.customer) {
+            currentCustomer = json.customer;
+          }
+        }
+      } catch (err) {
+        console.warn("Backend update failed, saving locally:", err.message);
+      }
+
+      // 2. Always persist to localStorage
+      saveLocalSession(updatedData);
+      currentCustomer = { ...session, ...updatedData };
+      renderHeroInfo(currentCustomer);
+
+      if (btnSave) {
+        btnSave.disabled = false;
+        btnSave.innerHTML = `
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          <span>Đã lưu thành công!</span>
+        `;
+        setTimeout(() => {
+          btnSave.innerHTML = `
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+              <polyline points="17 21 17 13 7 13 7 21"></polyline>
+              <polyline points="7 3 7 8 15 8"></polyline>
+            </svg>
+            <span>Lưu thay đổi</span>
+          `;
+        }, 2500);
+      }
+
+      showToast("Đã lưu thông tin tài khoản thành công!", "success");
+    });
+
+    // Gender pill picker
+    document.querySelectorAll(".gender-pill").forEach((pill) => {
+      pill.addEventListener("click", () => {
+        document.querySelectorAll(".gender-pill").forEach((p) => p.classList.remove("is-active"));
+        pill.classList.add("is-active");
+      });
+    });
+
+    // ==========================================================================
+    // CHANGE PASSWORD
+    // ==========================================================================
+    $("#changePasswordForm")?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const session = currentCustomer || getLocalSession();
+      if (!session) return;
+
+      const currentPassword = $("#currPass").value;
+      const newPassword = $("#newPass").value;
+      const confirmNewPass = $("#confirmNewPass").value;
+
+      if (newPassword !== confirmNewPass) {
+        showToast("Mật khẩu nhập lại không khớp. Vui lòng kiểm tra lại.", "error");
+        return;
+      }
+      if (newPassword.length < 6) {
+        showToast("Mật khẩu mới phải có tối thiểu 6 ký tự.", "error");
+        return;
+      }
+
+      try {
+        const res = await fetch(`${apiBase}/api/customers/change-password`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id: session.id,
+            email: session.email,
+            currentPassword,
+            newPassword
+          })
+        });
+        const json = await res.json();
+        if (res.ok) {
+          $("#changePasswordForm").reset();
+          showToast("Đổi mật khẩu thành công! Hãy lưu lại mật khẩu mới.", "success");
+        } else {
+          showToast(json.message || "Không thể đổi mật khẩu.", "error");
+        }
+      } catch (err) {
+        showToast("Không kết nối được máy chủ để cập nhật mật khẩu.", "error");
+      }
+    });
+
+    // Password visibility toggle
+    document.querySelectorAll(".password-toggle-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const wrap = btn.closest(".password-field-wrapper");
+        const input = wrap?.querySelector("input");
+        if (!input) return;
+        const isPass = input.type === "password";
+        input.type = isPass ? "text" : "password";
+        btn.setAttribute("aria-pressed", String(isPass));
+      });
+    });
+
+    // ==========================================================================
+    // ORDERS HISTORY TAB
+    // ==========================================================================
+    async function loadOrders() {
+      const session = currentCustomer || getLocalSession();
+      if (!session) return;
+
+      let allOrders = [];
+      // 1. Try backend
+      if (session.id) {
+        try {
+          const res = await fetch(`${apiBase}/api/customers/${session.id}/orders`);
+          if (res.ok) {
+            const json = await res.json();
+            if (Array.isArray(json.orders)) allOrders = json.orders;
+          }
+        } catch (_) {}
+      }
+
+      // 2. Fallback to store.js orders
+      if (allOrders.length === 0 && typeof getStoreOrders === "function") {
+        const sOrders = getStoreOrders();
+        const sId = String(session.id || "").trim();
+        const sEmail = String(session.email || "").toLowerCase().trim();
+        allOrders = sOrders.filter((o) => {
+          if (o.customerId && String(o.customerId) === sId) return true;
+          if (sEmail && o.email && String(o.email).toLowerCase().trim() === sEmail) return true;
+          return false;
+        });
+      }
+
+      customerOrders = allOrders.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+      // Calculate stats
+      const validOrders = customerOrders.filter((o) => o.status !== "cancelled");
+      const totalSpent = validOrders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+      $("#statOrdersCount").textContent = customerOrders.length;
+      $("#navOrdersCount").textContent = customerOrders.length;
+      $("#statTotalSpent").textContent = formatMoney(totalSpent);
+
+      renderOrdersList();
+    }
+
+    function renderOrdersList() {
+      const listEl = $("#portalOrdersList");
+      if (!listEl) return;
+
+      const q = $("#orderSearchInput")?.value.trim().toLowerCase() || "";
+
+      let filtered = customerOrders;
+      if (currentFilterStatus !== "all") {
+        filtered = filtered.filter((o) => {
+          if (currentFilterStatus === "shipping") return o.status === "shipping" || o.status === "shipped";
+          return o.status === currentFilterStatus;
+        });
+      }
+
+      if (q) {
+        filtered = filtered.filter((o) => {
+          const idMatch = String(o.id || "").toLowerCase().includes(q);
+          const itemMatch = (o.items || []).some((it) => {
+            const name = typeof it.name === "string" ? it.name : (it.name?.vi || it.name?.en || "");
+            return name.toLowerCase().includes(q);
+          });
+          return idMatch || itemMatch;
+        });
+      }
+
+      if (customerOrders.length === 0) {
+        listEl.innerHTML = `
+          <div style="text-align: center; padding: 48px 16px; background: var(--bg-surface-alt); border-radius: var(--radius-md);">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: var(--text-muted); margin-bottom: 12px;">
+              <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+              <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+            </svg>
+            <p style="font-size: 14.5px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px;">
+              Bạn chưa có đơn hàng nào
+            </p>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 18px;">
+              Khám phá các board vi điều khiển, cảm biến IoT và robot kit ngay hôm nay!
+            </p>
+            <a href="index.html" class="primary-button" style="display:inline-block; padding: 9px 20px; text-decoration: none; font-size: 13px;">
+              Mua sắm ngay
+            </a>
+          </div>
+        `;
+        return;
+      }
+
+      if (filtered.length === 0) {
+        listEl.innerHTML = `
+          <div style="text-align: center; padding: 36px 16px; color: var(--text-muted); font-size: 13.5px;">
+            Không tìm thấy đơn hàng nào phù hợp với bộ lọc hiện tại.
+          </div>
+        `;
+        return;
+      }
+
+      const statusMap = {
+        pending: { label: "Chờ xử lý", class: "pending" },
+        processing: { label: "Đang xử lý", class: "processing" },
+        shipping: { label: "Đang giao", class: "shipping" },
+        shipped: { label: "Đang giao", class: "shipping" },
+        completed: { label: "Hoàn thành", class: "completed" },
+        cancelled: { label: "Đã hủy", class: "cancelled" }
+      };
+
+      listEl.innerHTML = filtered.map((o) => {
+        const st = statusMap[o.status] || { label: o.status, class: "pending" };
+        const dateStr = o.createdAt ? new Date(o.createdAt).toLocaleString("vi-VN") : "—";
+
+        const itemsHtml = (o.items || []).map((it) => {
+          const name = typeof it.name === "string" ? it.name : (it.name?.vi || it.name?.en || "Linh kiện STEM");
+          const img = it.image || "assets/arduino-proto-shield-rev3.png";
+          return `
+            <div class="portal-item-row">
+              <div class="portal-item-left">
+                <img src="${escapeHtml(img)}" alt="${escapeHtml(name)}" class="portal-item-thumb" />
+                <div>
+                  <div style="font-weight: 600; color: var(--text-primary);">${escapeHtml(name)}</div>
+                  <div style="font-size: 12px; color: var(--text-muted);">Số lượng: <strong>×${it.qty || 1}</strong></div>
+                </div>
+              </div>
+              <div style="font-weight: 700; color: var(--text-primary); font-family: 'JetBrains Mono', monospace;">
+                ${formatMoney((it.price || 0) * (it.qty || 1))}
+              </div>
+            </div>
+          `;
+        }).join("");
+
+        return `
+          <div class="portal-order-card" data-order-id="${escapeHtml(o.id)}">
+            <div class="portal-order-header">
+              <div>
+                <span class="portal-order-code">#${escapeHtml(o.id)}</span>
+                <span class="portal-order-date">Đặt ngày: ${dateStr}</span>
+              </div>
+              <span class="portal-order-status ${st.class}">${st.label}</span>
+            </div>
+
+            <div style="font-size: 12.5px; color: var(--text-secondary); margin-bottom: 10px; background: #f8fafc; padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-subtle);">
+              <div><strong>Người nhận:</strong> ${escapeHtml(o.customer || "Khách hàng")} • <strong>SĐT:</strong> ${escapeHtml(o.phone || "—")}</div>
+              ${o.address ? `<div style="margin-top: 3px;"><strong>Địa chỉ giao:</strong> ${escapeHtml(o.address)}</div>` : ''}
+            </div>
+
+            <div class="portal-order-items">
+              ${itemsHtml}
+            </div>
+
+            <div class="portal-order-footer">
+              <div class="portal-order-total">
+                Tổng thanh toán: <strong>${formatMoney(o.total)}</strong>
+                <span style="font-size: 11.5px; color: var(--text-muted); margin-left: 6px;">(${o.payment === 'paid' ? 'Đã thanh toán' : 'COD - Thu tiền khi nhận'})</span>
+              </div>
+
+              <div class="portal-order-actions">
+                ${(o.status === 'pending' || o.status === 'processing') ? `
+                  <button type="button" class="btn-action-pill btn-contact-cancel" data-cancel-id="${escapeHtml(o.id)}" title="Liên hệ người bán qua Zalo để yêu cầu hủy đơn hàng" style="background: #eff6ff; color: #0068ff; border: 1px solid #bfdbfe; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none">
+                      <rect width="24" height="24" rx="12" fill="#0068FF" />
+                      <path d="M11.94 4.5C7.55 4.5 4 7.62 4 11.46c0 2.08 1.04 3.94 2.68 5.2-.1.26-.6 1.96-.68 2.24 0 0-.02.14.07.2.09.06.2.02.2.02.28-.04 2.2-1.44 2.54-1.68.66.16 1.38.24 2.13.24 4.39 0 7.94-3.12 7.94-6.96S16.33 4.5 11.94 4.5z" fill="white" />
+                      <path d="M16.48 14.42h-5.12c-.2 0-.37-.16-.37-.36s.16-.36.37-.36h5.12c.2 0 .37.16.37.36s-.16.36-.37.36z" fill="white" />
+                    </svg>
+                    <span>Liên hệ người bán để hủy đơn</span>
+                  </button>
+                ` : ''}
+                <button type="button" class="btn-action-pill" data-reorder-id="${escapeHtml(o.id)}">
+                  🛒 Mua lại
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      // Bind Contact Cancel & Reorder
+      listEl.querySelectorAll(".btn-contact-cancel").forEach((btn) => {
+        btn.addEventListener("click", () => openZaloCancelModal(btn.dataset.cancelId));
+      });
+      listEl.querySelectorAll("[data-reorder-id]").forEach((btn) => {
+        btn.addEventListener("click", () => reorderOrder(btn.dataset.reorderId));
+      });
+    }
+
+    // ==========================================================================
+    // ZALO CONTACT CANCEL ORDER MODAL LOGIC
+    // ==========================================================================
+    let currentCancelOrderId = "";
+
+    function openZaloCancelModal(orderId) {
+      currentCancelOrderId = orderId || "";
+      const modal = $("#cancelZaloModal");
+      const backdrop = $("#cancelZaloModalBackdrop");
+      if (!modal || !backdrop) return;
+
+      const codeEl = $("#cancelZaloOrderCode");
+      if (codeEl) codeEl.textContent = orderId ? `#${orderId}` : "";
+
+      const sampleMsg = `Chào shop STEM IoT, tôi muốn hủy đơn hàng #${orderId}. Nhờ shop hỗ trợ kiểm tra và hủy đơn giúp tôi nhé!`;
+      const msgEl = $("#cancelZaloSampleMsg");
+      if (msgEl) msgEl.textContent = `"${sampleMsg}"`;
+
+      modal.hidden = false;
+      backdrop.hidden = false;
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeZaloCancelModal() {
+      const modal = $("#cancelZaloModal");
+      const backdrop = $("#cancelZaloModalBackdrop");
+      if (modal) modal.hidden = true;
+      if (backdrop) backdrop.hidden = true;
+      document.body.style.overflow = "";
+    }
+
+    $("#cancelZaloModalClose")?.addEventListener("click", closeZaloCancelModal);
+    $("#cancelZaloModalBottomClose")?.addEventListener("click", closeZaloCancelModal);
+    $("#cancelZaloModalBackdrop")?.addEventListener("click", closeZaloCancelModal);
+
+    $("#btnCopyCancelMsg")?.addEventListener("click", () => {
+      const sampleText = `Chào shop STEM IoT, tôi muốn hủy đơn hàng #${currentCancelOrderId}. Nhờ shop hỗ trợ kiểm tra và hủy đơn giúp tôi nhé!`;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(sampleText).then(() => {
+          showToast("Đã sao chép tin nhắn mẫu! Hãy dán vào Zalo gửi cho shop.", "success");
+        }).catch(() => {
+          copyFallbackMsg(sampleText);
+        });
+      } else {
+        copyFallbackMsg(sampleText);
+      }
+    });
+
+    function copyFallbackMsg(text) {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand("copy");
+        showToast("Đã sao chép tin nhắn mẫu! Hãy mở Zalo dán gửi cho shop.", "success");
+      } catch (_) {
+        showToast("Vui lòng sao chép thủ công tin nhắn mẫu.", "info");
+      }
+      document.body.removeChild(ta);
+    }
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        const modal = $("#cancelZaloModal");
+        if (modal && !modal.hidden) closeZaloCancelModal();
+      }
+    });
+
+    async function cancelOrder(orderId) {
+      if (!confirm(`Bạn có chắc chắn muốn hủy đơn hàng #${orderId}?`)) return;
+      if (typeof cancelStoreOrder === "function") {
+        const res = cancelStoreOrder(orderId);
+        if (res.ok) {
+          showToast(`Đã hủy đơn hàng #${orderId} thành công!`, "info");
+          loadOrders();
+        } else {
+          showToast(res.message || "Không thể hủy đơn hàng.", "error");
+        }
+      }
+    }
+
+    function reorderOrder(orderId) {
+      const order = customerOrders.find((o) => o.id === orderId);
+      if (!order || !Array.isArray(order.items)) return;
+
+      if (typeof saveStoreCart === "function") {
+        let currentCart = readJSON(STORE_KEYS.cart, []);
+        order.items.forEach((it) => {
+          const idx = currentCart.findIndex((x) => x.id === (it.productId || it.id));
+          if (idx >= 0) {
+            currentCart[idx].qty += Number(it.qty) || 1;
+          } else {
+            currentCart.push({
+              id: it.productId || it.id,
+              qty: Number(it.qty) || 1
+            });
+          }
+        });
+        saveStoreCart(currentCart, false);
+        showToast("Đã thêm các sản phẩm vào giỏ hàng! Đang chuyển đến trang mua hàng...", "success");
+        setTimeout(() => {
+          window.location.href = "index.html#openCart";
+        }, 1200);
+      }
+    }
+
+    // Filter pills
+    document.querySelectorAll(".order-filter-pill").forEach((pill) => {
+      pill.addEventListener("click", () => {
+        document.querySelectorAll(".order-filter-pill").forEach((p) => p.classList.remove("is-active"));
+        pill.classList.add("is-active");
+        currentFilterStatus = pill.dataset.orderStatus;
+        renderOrdersList();
+      });
+    });
+
+    $("#btnOrderSearch")?.addEventListener("click", renderOrdersList);
+    $("#orderSearchInput")?.addEventListener("input", renderOrdersList);
+
+    // ==========================================================================
+    // QUOTES TAB
+    // ==========================================================================
+    function loadQuotes() {
+      const session = currentCustomer || getLocalSession();
+      const listEl = $("#portalQuotesList");
+      if (!listEl || !session) return;
+
+      let quotes = [];
+      if (typeof getStoreQuotes === "function") {
+        quotes = getStoreQuotes().filter((q) => {
+          if (q.customerId && String(q.customerId) === String(session.id || '')) return true;
+          if (session.email && q.email && String(q.email).toLowerCase().trim() === String(session.email).toLowerCase().trim()) return true;
+          return false;
+        }).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+      }
+
+      if (quotes.length === 0) {
+        listEl.innerHTML = `<div style="text-align:center; padding:32px; color:var(--text-muted); font-size:13.5px;">Bạn chưa gửi yêu cầu báo giá nào.</div>`;
+        return;
+      }
+
+      const statusMap = {
+        pending: { label: "Chờ phản hồi", class: "pending" },
+        contacted: { label: "Đã liên hệ", class: "processing" },
+        quoted: { label: "Đã có báo giá", class: "shipping" },
+        completed: { label: "Hoàn tất", class: "completed" },
+        cancelled: { label: "Đã hủy", class: "cancelled" }
+      };
+
+      listEl.innerHTML = quotes.map((q) => {
+        const st = statusMap[q.status] || { label: q.status, class: "pending" };
+        const date = q.createdAt ? new Date(q.createdAt).toLocaleString("vi-VN") : "—";
+        return `
+          <div class="portal-order-card">
+            <div class="portal-order-header">
+              <span class="portal-order-code">Báo giá #${escapeHtml(q.id)}</span>
+              <span class="portal-order-status ${st.class}">${st.label}</span>
+            </div>
+            <div style="font-size:13.5px; color:var(--text-primary); margin-bottom:8px; line-height:1.5;">
+              ${escapeHtml(q.content)}
+            </div>
+            <div class="portal-order-footer">
+              <span style="font-size:12px; color:var(--text-muted);">Gửi lúc: ${date}</span>
+              <span style="font-size:12.5px; font-weight:600; color:var(--primary);">${escapeHtml(q.notes || "Shop đang xử lý báo giá")}</span>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    // ==========================================================================
+    // TAB SWITCHING LOGIC
+    // ==========================================================================
+    const tabs = document.querySelectorAll("[data-portal-tab]");
+    const panels = {
+      profile: $("#panelProfile"),
+      addresses: $("#panelAddresses"),
+      orders: $("#panelOrders"),
+      quotes: $("#panelQuotes"),
+      security: $("#panelSecurity")
+    };
+
+    function switchTab(tabName) {
+      if (!panels[tabName]) return;
+      tabs.forEach((t) => t.classList.toggle("is-active", t.dataset.portalTab === tabName));
+      Object.keys(panels).forEach((k) => {
+        panels[k].hidden = (k !== tabName);
+      });
+      window.location.hash = tabName;
+    }
+
+    tabs.forEach((t) => {
+      t.addEventListener("click", () => switchTab(t.dataset.portalTab));
+    });
+
+    // Logout
+    $("#portalLogoutBtn")?.addEventListener("click", () => {
+      saveLocalSession(null);
+      showToast("Đã đăng xuất tài khoản. Hẹn gặp lại bạn!", "info");
+      setTimeout(() => {
+        window.location.href = "index.html";
+      }, 800);
+    });
+
+    // Inline Login Form
+    $("#portalInlineLoginForm")?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = $("#portalInlineEmail").value.trim().toLowerCase();
+      const password = $("#portalInlinePassword").value;
+      const msg = $("#portalInlineLoginMsg");
+      const btn = $("#btnPortalInlineLogin");
+      msg.textContent = "";
+      btn.disabled = true;
+      btn.textContent = "Đang kiểm tra...";
+
+      try {
+        const res = await fetch(`${apiBase}/api/customers/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password })
+        });
+        const json = await res.json();
+        if (res.ok && json.customer) {
+          saveLocalSession(json.customer);
+          showToast(`Đăng nhập thành công! Xin chào ${json.customer.name || json.customer.email}`, "success");
+          loadCustomerProfile();
+          return;
+        } else {
+          msg.textContent = json.message || "Email hoặc mật khẩu không chính xác.";
+        }
+      } catch (err) {
+        // Local fallback authentication
+        const users = typeof getStoreUsers === "function" ? getStoreUsers() : [];
+        const match = users.find((u) => u.email && u.email.toLowerCase() === email);
+        if (match) {
+          saveLocalSession({
+            id: match.id,
+            name: match.name,
+            email: match.email,
+            phone: match.phone || "",
+            role: match.role || "customer"
+          });
+          showToast(`Đăng nhập thành công! Xin chào ${match.name}`, "success");
+          loadCustomerProfile();
+          return;
+        }
+        msg.textContent = "Không thể kết nối đến máy chủ. Bạn có thể sử dụng 'Đăng nhập tài khoản mẫu' bên dưới.";
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Đăng nhập ngay";
+      }
+    });
+
+    // Quick Demo Customer Login
+    $("#btnQuickDemoLogin")?.addEventListener("click", () => {
+      const demoCustomer = {
+        id: "u_demo_customer",
+        name: "Nguyễn Văn An",
+        email: "khachhang@luxas.com.vn",
+        phone: "0937 511 617",
+        role: "vip",
+        company: "Maker Lab STEM & IoT",
+        birthday: "1995-08-15",
+        bio: "Nghiên cứu ứng dụng ESP32, Robot búp bê STEM và hệ thống giám sát môi trường LoRa",
+        gender: "male",
+        addresses: [
+          {
+            id: "addr_default_1",
+            recipientName: "Nguyễn Văn An",
+            recipientPhone: "0937 511 617",
+            province: "TP. Hồ Chí Minh",
+            district: "Quận Bình Thạnh",
+            ward: "Phường 1",
+            street: "38/5 Vạn Kiếp",
+            fullAddress: "38/5 Vạn Kiếp, Phường 1, Quận Bình Thạnh, TP. Hồ Chí Minh",
+            type: "office",
+            isDefault: true,
+            notes: "Giao giờ hành chính, gọi trước 15 phút"
+          },
+          {
+            id: "addr_home_2",
+            recipientName: "Nguyễn Văn An",
+            recipientPhone: "0988 123 456",
+            province: "Bình Dương",
+            district: "TP. Thuận An",
+            ward: "Phường An Thạnh",
+            street: "284C/3 Khu phố Thạnh Lợi",
+            fullAddress: "284C/3 Khu phố Thạnh Lợi, Phường An Thạnh, TP. Thuận An, Bình Dương",
+            type: "home",
+            isDefault: false,
+            notes: "Giao ngoài giờ hành chính hoặc cuối tuần"
+          }
+        ],
+        defaultAddressId: "addr_default_1"
+      };
+
+      saveLocalSession(demoCustomer);
+      setStoredAddresses(demoCustomer.id, demoCustomer.addresses, demoCustomer.defaultAddressId);
+
+      // Create a couple of realistic demo orders for customer if none exist
+      if (typeof getStoreOrders === "function") {
+        let orders = getStoreOrders();
+        const hasMyOrders = orders.some((o) => o.customerId === demoCustomer.id || o.email === demoCustomer.email);
+        if (!hasMyOrders) {
+          const sampleOrders = [
+            {
+              id: "ORD-0891",
+              customer: "Nguyễn Văn An",
+              phone: "0937 511 617",
+              email: "khachhang@luxas.com.vn",
+              address: "38/5 Vạn Kiếp, Phường 1, Quận Bình Thạnh, TP. Hồ Chí Minh",
+              customerId: "u_demo_customer",
+              items: [
+                {
+                  productId: "adafruit-airlift-esp32",
+                  name: { vi: "Adafruit AirLift ESP32 WiFi Co-Processor" },
+                  price: 390000,
+                  qty: 2,
+                  image: "assets/adafruit-airlift-shield-esp32-wifi-co-processor.png"
+                },
+                {
+                  productId: "bme280-sensor-shield",
+                  name: { vi: "Adafruit BME280 Sensor Shield" },
+                  price: 240000,
+                  qty: 1,
+                  image: "assets/adafruit-bme280-shield.png"
+                }
+              ],
+              subtotal: 1020000,
+              shipping: 0,
+              total: 1020000,
+              status: "shipping",
+              payment: "unpaid",
+              createdAt: Date.now() - 3600000 * 20
+            },
+            {
+              id: "ORD-0850",
+              customer: "Nguyễn Văn An",
+              phone: "0937 511 617",
+              email: "khachhang@luxas.com.vn",
+              address: "38/5 Vạn Kiếp, Phường 1, Quận Bình Thạnh, TP. Hồ Chí Minh",
+              customerId: "u_demo_customer",
+              items: [
+                {
+                  productId: "arduino-proto-shield-rev3",
+                  name: { vi: "Arduino Proto Shield Rev3" },
+                  price: 150000,
+                  qty: 3,
+                  image: "assets/arduino-proto-shield-rev3.png"
+                }
+              ],
+              subtotal: 450000,
+              shipping: 30000,
+              total: 480000,
+              status: "completed",
+              payment: "paid",
+              createdAt: Date.now() - 86400000 * 5
+            }
+          ];
+          orders.push(...sampleOrders);
+          saveStoreOrders(orders, false);
+        }
+      }
+
+      showToast("Đã đăng nhập tài khoản mẫu thành công! Đang tải thông tin...", "success");
+      loadCustomerProfile();
+    });
+
+    // Check hash on load
+    window.addEventListener("DOMContentLoaded", () => {
+      loadCustomerProfile();
+      const hash = window.location.hash.replace("#", "");
+      if (hash && panels[hash]) {
+        switchTab(hash);
+      }
+    });
+  </script>
+</body>
+
+</html>

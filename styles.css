@@ -167,7 +167,7 @@ img {
   padding: 6px;
   background: #1f1f21;
   border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 0 0 18px 18px;
+  border-radius: var(--radius-md);
   box-shadow: var(--shadow-lg);
 }
 
@@ -175,22 +175,55 @@ img {
   display: none !important;
 }
 
-.customer-account-menu button {
-  display: block;
+.customer-account-menu button,
+.customer-account-menu a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   width: 100%;
-  padding: 8px 12px;
+  padding: 9px 12px;
   color: #ffffff;
   text-align: left;
-  font-size: 12px;
+  font-size: 12.5px;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: var(--radius-xs);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: all var(--transition-fast);
 }
 
-.customer-account-menu button[hidden] {
+.customer-account-menu button[hidden],
+.customer-account-menu a[hidden] {
   display: none !important;
 }
 
-.customer-account-menu button:hover {
+.customer-account-menu button:hover,
+.customer-account-menu a:hover {
   color: #67e8f9;
   background: rgba(255, 255, 255, 0.08);
+}
+
+.customer-account-menu .customer-menu-link {
+  background: rgba(37, 99, 235, 0.22) !important;
+  color: #93c5fd !important;
+  font-weight: 700 !important;
+  margin-bottom: 4px;
+}
+
+.customer-account-menu .customer-menu-link:hover {
+  background: var(--primary) !important;
+  color: #ffffff !important;
+}
+
+.customer-account-menu .customer-logout-btn {
+  color: #f87171 !important;
+}
+
+.customer-account-menu .customer-logout-btn:hover {
+  background: rgba(239, 68, 68, 0.15) !important;
+  color: #fca5a5 !important;
 }
 
 .account-modal-backdrop,
