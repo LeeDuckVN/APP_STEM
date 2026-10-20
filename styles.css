@@ -3871,3 +3871,261 @@ img {
 .contact-popup {
   display: none !important;
 }
+
+/* ==========================================================================
+   CHECKOUT ADDRESS MANAGEMENT & MODAL (UI/UX Pro Max Edition)
+   ========================================================================== */
+.checkout-address-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.checkout-no-address-wrap {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border: 1.5px dashed #f59e0b;
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.12);
+  transition: all var(--transition-fast);
+}
+
+.checkout-no-address-wrap[hidden] {
+  display: none !important;
+}
+
+.checkout-no-address-alert {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #b45309;
+}
+
+.checkout-no-address-alert svg {
+  flex-shrink: 0;
+  color: #d97706;
+}
+
+.btn-checkout-add-address {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px 16px;
+  background: linear-gradient(135deg, var(--primary), var(--cyan));
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px var(--primary-glow);
+  transition: all var(--transition-fast);
+}
+
+.btn-checkout-add-address:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px var(--primary-glow);
+  filter: brightness(1.05);
+}
+
+.btn-checkout-add-address svg {
+  flex-shrink: 0;
+}
+
+.checkout-no-address-hint {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  color: var(--text-muted);
+  padding-top: 6px;
+  border-top: 1px dashed rgba(245, 158, 11, 0.3);
+}
+
+.checkout-no-address-hint a {
+  color: var(--primary);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.checkout-no-address-hint a:hover {
+  text-decoration: underline;
+}
+
+.checkout-address-select-wrap {
+  background: var(--bg-surface-alt);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.checkout-address-select-wrap[hidden] {
+  display: none !important;
+}
+
+.checkout-address-select-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.checkout-address-select {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-xs);
+  font-size: 12.5px;
+  outline: none;
+  background: #ffffff;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.checkout-address-select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--primary-glow);
+}
+
+.checkout-link-btn {
+  background: none;
+  border: none;
+  font-size: 11px;
+  color: var(--primary);
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.checkout-link-btn:hover {
+  text-decoration: underline;
+}
+
+/* Modal Address Form in Index */
+.addr-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(9, 13, 22, 0.65);
+  backdrop-filter: blur(5px);
+  z-index: 1100;
+  transition: opacity 0.2s ease;
+}
+
+.addr-modal-backdrop[hidden] {
+  display: none !important;
+}
+
+.addr-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(520px, calc(100vw - 32px));
+  max-height: 90vh;
+  overflow-y: auto;
+  background: #ffffff;
+  border-radius: var(--radius-xl);
+  padding: 26px;
+  box-shadow: var(--shadow-xl);
+  z-index: 1101;
+}
+
+.addr-modal[hidden] {
+  display: none !important;
+}
+
+.addr-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.addr-modal-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.addr-modal-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--bg-surface-alt);
+  border: none;
+  font-size: 20px;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+
+.addr-modal-close:hover {
+  background: var(--danger-light);
+  color: var(--danger);
+}
+
+.profile-field-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  margin-bottom: 5px;
+}
+
+.profile-field-input,
+.profile-field-select {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1.5px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--text-primary);
+  background: #ffffff;
+  transition: all var(--transition-fast);
+  outline: none;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.profile-field-input:focus,
+.profile-field-select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-glow);
+}
+
+.btn-action-pill {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-subtle);
+  background: #ffffff;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all var(--transition-fast);
+}
+
+.btn-action-pill:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-light);
+}

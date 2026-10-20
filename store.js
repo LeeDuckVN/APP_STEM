@@ -1248,3 +1248,573 @@ function resetStore() {
   saveStoreCart([], false);
   notifyStoreChanged('reset');
 }
+
+// ============== XUẤT HÓA ĐƠN ĐƠN HÀNG RA PDF / IN ==============
+function numberToVietnameseWords(total) {
+  if (!total || isNaN(total) || total <= 0) return 'Không đồng';
+  const units = ['', 'một', 'hai', 'ba', 'bốn', 'năm', 'sáu', 'bảy', 'tám', 'chín'];
+  function readGroup(group) {
+    const a = Math.floor(group / 100);
+    const b = Math.floor((group % 100) / 10);
+    const c = group % 10;
+    let res = '';
+    if (a > 0 || group >= 100) {
+      res += units[a] + ' trăm ';
+      if (b === 0 && c > 0) res += 'lẻ ';
+    }
+    if (b === 1) {
+      res += 'mười ';
+    } else if (b > 1) {
+      res += units[b] + ' mươi ';
+    }
+    if (b > 0 && c === 1 && b !== 1) {
+      res += 'mốt ';
+    } else if (b > 0 && c === 5) {
+      res += 'lăm ';
+    } else if (c > 0) {
+      res += units[c] + ' ';
+    }
+    return res.trim();
+  }
+
+  const scales = ['', 'nghìn', 'triệu', 'tỷ', 'nghìn tỷ'];
+  let numStr = Math.round(total).toString();
+  let groups = [];
+  while (numStr.length > 0) {
+    groups.unshift(parseInt(numStr.slice(-3), 10));
+    numStr = numStr.slice(0, -3);
+  }
+
+  let words = [];
+  for (let i = 0; i < groups.length; i++) {
+    const g = groups[i];
+    if (g > 0) {
+      const scale = scales[groups.length - 1 - i];
+      words.push(readGroup(g) + (scale ? ' ' + scale : ''));
+    }
+  }
+  let str = words.join(' ').trim();
+  if (str) {
+    str = str.charAt(0).toUpperCase() + str.slice(1) + ' đồng chẵn.';
+  }
+  return str || (total.toLocaleString('vi-VN') + 'đ');
+}
+
+function exportOrderPDF(orderId) {
+  let order = null;
+  if (typeof allOrders !== 'undefined' && Array.isArray(allOrders)) {
+    order = allOrders.find(o => String(o.id) === String(orderId));
+  }
+  if (!order && typeof customerOrders !== 'undefined' && Array.isArray(customerOrders)) {
+    order = customerOrders.find(o => String(o.id) === String(orderId));
+  }
+  if (!order && typeof getStoreOrders === 'function') {
+    order = getStoreOrders().find(o => String(o.id) === String(orderId));
+  }
+  if (!order) {
+    alert('Không tìm thấy thông tin đơn hàng ' + orderId);
+    return;
+  }
+
+  const items = Array.isArray(order.items) ? order.items : [];
+  const subtotal = items.reduce((s, it) => s + (Number(it.price || 0) * Number(it.qty || 1)), 0);
+  const total = Number(order.total || subtotal);
+  const dateStr = order.createdAt ? new Date(order.createdAt).toLocaleString('vi-VN', {
+    day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+  }) : new Date().toLocaleString('vi-VN');
+
+  const paymentText = order.payment === 'paid' ? 'Đã thanh toán' : 'Thu tiền khi nhận hàng (COD)';
+  const paymentBadgeColor = order.payment === 'paid' ? '#059669' : '#d97706';
+  const paymentBadgeBg = order.payment === 'paid' ? '#ecfdf5' : '#fffbeb';
+
+  const statusLabels = {
+    pending: 'Chờ xử lý',
+    processing: 'Đang xử lý',
+    shipping: 'Đang giao hàng',
+    shipped: 'Đang giao hàng',
+    completed: 'Đã hoàn thành',
+    cancelled: 'Đã hủy'
+  };
+  const statusText = statusLabels[order.status] || order.status || 'Chờ xử lý';
+
+  const printWindow = window.open('', '_blank', 'width=950,height=960,menubar=no,toolbar=no,location=no,status=no');
+  if (!printWindow) {
+    alert('Trình duyệt đang chặn cửa sổ bật lên. Vui lòng cho phép mở popup trên trình duyệt để xuất hóa đơn PDF.');
+    return;
+  }
+
+  const rowsHtml = items.map((it, idx) => {
+    const name = typeof it.name === 'string' ? it.name : (it.name?.vi || it.name?.en || it.productId || 'Sản phẩm STEM IoT');
+    const price = Number(it.price || 0);
+    const qty = Number(it.qty || 1);
+    const lineTotal = price * qty;
+    return '<tr>' +
+      '<td style="text-align: center; color: #64748b; font-weight: 600;">' + (idx + 1) + '</td>' +
+      '<td>' +
+        '<div style="font-weight: 700; color: #0f172a; font-size: 13.5px;">' + escapeHtml(name) + '</div>' +
+        (it.productId ? '<div style="font-size: 11px; color: #94a3b8; font-family: monospace;">Mã SP: ' + escapeHtml(it.productId) + '</div>' : '') +
+      '</td>' +
+      '<td style="text-align: right; font-weight: 600; font-family: monospace; color: #334155;">' + price.toLocaleString('vi-VN') + 'đ</td>' +
+      '<td style="text-align: center; font-weight: 700; color: #0f172a;">' + qty + '</td>' +
+      '<td style="text-align: right; font-weight: 700; font-family: monospace; color: #0f172a;">' + lineTotal.toLocaleString('vi-VN') + 'đ</td>' +
+    '</tr>';
+  }).join('');
+
+  const words = numberToVietnameseWords(total);
+
+  const clientScript = '<script>' +
+    'function downloadPdf() {' +
+    '  var element = document.getElementById("invoiceSheet");' +
+    '  if (typeof html2pdf !== "undefined") {' +
+    '    html2pdf().set({' +
+    '      margin: [8, 10, 8, 10],' +
+    '      filename: "Hoa-don-' + escapeHtml(order.id) + '.pdf",' +
+    '      image: { type: "jpeg", quality: 0.98 },' +
+    '      html2canvas: { scale: 2, useCORS: true },' +
+    '      jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }' +
+    '    }).from(element).save();' +
+    '  } else {' +
+    '    window.print();' +
+    '  }' +
+    '}' +
+    '<\/script>';
+
+  const invoiceHtml = '<!DOCTYPE html>' +
+'<html lang="vi">' +
+'<head>' +
+'  <meta charset="UTF-8">' +
+'  <title>Hóa đơn ' + escapeHtml(order.id) + ' - STEM IoT Shop</title>' +
+'  <link rel="preconnect" href="https://fonts.googleapis.com">' +
+'  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' +
+'  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">' +
+'  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>' +
+'  <style>' +
+'    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }' +
+'    body {' +
+'      background: #e2e8f0;' +
+'      font-family: "Plus Jakarta Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;' +
+'      color: #1e293b;' +
+'      padding: 24px 16px;' +
+'      line-height: 1.5;' +
+'      -webkit-font-smoothing: antialiased;' +
+'    }' +
+'    .toolbar {' +
+'      max-width: 840px;' +
+'      margin: 0 auto 18px;' +
+'      display: flex;' +
+'      align-items: center;' +
+'      justify-content: space-between;' +
+'      gap: 12px;' +
+'      background: #ffffff;' +
+'      padding: 12px 20px;' +
+'      border-radius: 12px;' +
+'      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);' +
+'      border: 1px solid #cbd5e1;' +
+'    }' +
+'    .toolbar-left {' +
+'      display: flex;' +
+'      align-items: center;' +
+'      gap: 10px;' +
+'    }' +
+'    .btn {' +
+'      display: inline-flex;' +
+'      align-items: center;' +
+'      gap: 6px;' +
+'      padding: 9px 18px;' +
+'      border-radius: 8px;' +
+'      font-size: 13.5px;' +
+'      font-weight: 700;' +
+'      cursor: pointer;' +
+'      border: none;' +
+'      transition: all 0.2s ease;' +
+'      font-family: inherit;' +
+'    }' +
+'    .btn-primary {' +
+'      background: #2563eb;' +
+'      color: #ffffff;' +
+'      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);' +
+'    }' +
+'    .btn-primary:hover { background: #1d4ed8; transform: translateY(-1px); }' +
+'    .btn-success {' +
+'      background: #059669;' +
+'      color: #ffffff;' +
+'      box-shadow: 0 2px 6px rgba(5, 150, 105, 0.25);' +
+'    }' +
+'    .btn-success:hover { background: #047857; transform: translateY(-1px); }' +
+'    .btn-close {' +
+'      background: #f1f5f9;' +
+'      color: #475569;' +
+'      border: 1px solid #cbd5e1;' +
+'    }' +
+'    .btn-close:hover { background: #e2e8f0; color: #0f172a; }' +
+'    .toolbar-hint {' +
+'      font-size: 12.5px;' +
+'      color: #64748b;' +
+'    }' +
+'    .invoice-card {' +
+'      max-width: 840px;' +
+'      margin: 0 auto;' +
+'      background: #ffffff;' +
+'      padding: 40px 48px;' +
+'      border-radius: 12px;' +
+'      box-shadow: 0 6px 24px rgba(15, 23, 42, 0.08);' +
+'      border: 1px solid #e2e8f0;' +
+'      position: relative;' +
+'    }' +
+'    .invoice-header {' +
+'      display: flex;' +
+'      justify-content: space-between;' +
+'      align-items: flex-start;' +
+'      border-bottom: 2px solid #0f172a;' +
+'      padding-bottom: 24px;' +
+'      margin-bottom: 24px;' +
+'      gap: 20px;' +
+'    }' +
+'    .brand-title {' +
+'      font-size: 24px;' +
+'      font-weight: 800;' +
+'      color: #0f172a;' +
+'      letter-spacing: -0.02em;' +
+'      display: flex;' +
+'      align-items: center;' +
+'      gap: 8px;' +
+'    }' +
+'    .brand-title span { color: #2563eb; }' +
+'    .brand-sub {' +
+'      font-size: 12.5px;' +
+'      color: #64748b;' +
+'      margin-top: 4px;' +
+'      line-height: 1.5;' +
+'    }' +
+'    .invoice-title-block {' +
+'      text-align: right;' +
+'    }' +
+'    .invoice-heading {' +
+'      font-size: 22px;' +
+'      font-weight: 800;' +
+'      color: #0f172a;' +
+'      text-transform: uppercase;' +
+'      letter-spacing: 0.03em;' +
+'    }' +
+'    .invoice-code {' +
+'      font-family: "JetBrains Mono", monospace;' +
+'      font-size: 15px;' +
+'      font-weight: 700;' +
+'      color: #2563eb;' +
+'      margin-top: 4px;' +
+'    }' +
+'    .invoice-date {' +
+'      font-size: 12.5px;' +
+'      color: #64748b;' +
+'      margin-top: 2px;' +
+'    }' +
+'    .info-grid {' +
+'      display: grid;' +
+'      grid-template-columns: 1.1fr 1fr;' +
+'      gap: 24px;' +
+'      margin-bottom: 28px;' +
+'      padding: 16px 20px;' +
+'      background: #f8fafc;' +
+'      border-radius: 10px;' +
+'      border: 1px solid #e2e8f0;' +
+'    }' +
+'    .info-col-title {' +
+'      font-size: 11px;' +
+'      font-weight: 800;' +
+'      text-transform: uppercase;' +
+'      letter-spacing: 0.06em;' +
+'      color: #64748b;' +
+'      margin-bottom: 8px;' +
+'      border-bottom: 1px solid #e2e8f0;' +
+'      padding-bottom: 4px;' +
+'    }' +
+'    .info-row {' +
+'      font-size: 13px;' +
+'      margin-bottom: 4px;' +
+'      display: flex;' +
+'    }' +
+'    .info-label {' +
+'      width: 105px;' +
+'      color: #64748b;' +
+'      flex-shrink: 0;' +
+'    }' +
+'    .info-value {' +
+'      color: #0f172a;' +
+'      font-weight: 600;' +
+'      flex: 1;' +
+'    }' +
+'    .status-badge {' +
+'      display: inline-block;' +
+'      padding: 2px 8px;' +
+'      border-radius: 999px;' +
+'      font-size: 11.5px;' +
+'      font-weight: 700;' +
+'      background: ' + paymentBadgeBg + ';' +
+'      color: ' + paymentBadgeColor + ';' +
+'      border: 1px solid rgba(0,0,0,0.06);' +
+'    }' +
+'    .items-table {' +
+'      width: 100%;' +
+'      border-collapse: collapse;' +
+'      margin-bottom: 24px;' +
+'      font-size: 13px;' +
+'    }' +
+'    .items-table th {' +
+'      background: #0f172a;' +
+'      color: #ffffff;' +
+'      padding: 10px 14px;' +
+'      font-size: 11.5px;' +
+'      font-weight: 700;' +
+'      text-transform: uppercase;' +
+'      letter-spacing: 0.04em;' +
+'    }' +
+'    .items-table td {' +
+'      padding: 12px 14px;' +
+'      border-bottom: 1px solid #e2e8f0;' +
+'    }' +
+'    .items-table tbody tr:nth-child(even) {' +
+'      background: #f8fafc;' +
+'    }' +
+'    .summary-wrap {' +
+'      display: flex;' +
+'      justify-content: space-between;' +
+'      align-items: flex-start;' +
+'      margin-top: 10px;' +
+'      margin-bottom: 30px;' +
+'      gap: 24px;' +
+'    }' +
+'    .in-words-box {' +
+'      flex: 1;' +
+'      background: #f8fafc;' +
+'      padding: 14px 18px;' +
+'      border-radius: 8px;' +
+'      border: 1px dashed #cbd5e1;' +
+'      font-size: 12.5px;' +
+'      color: #475569;' +
+'    }' +
+'    .in-words-box strong { color: #0f172a; }' +
+'    .totals-box {' +
+'      width: 320px;' +
+'      flex-shrink: 0;' +
+'    }' +
+'    .total-line {' +
+'      display: flex;' +
+'      justify-content: space-between;' +
+'      font-size: 13px;' +
+'      padding: 5px 0;' +
+'      color: #64748b;' +
+'    }' +
+'    .total-line.grand {' +
+'      font-size: 17px;' +
+'      font-weight: 800;' +
+'      color: #0f172a;' +
+'      border-top: 2px solid #0f172a;' +
+'      margin-top: 6px;' +
+'      padding-top: 10px;' +
+'    }' +
+'    .total-line.grand .val {' +
+'      color: #059669;' +
+'      font-family: "JetBrains Mono", monospace;' +
+'    }' +
+'    .signatures-block {' +
+'      display: grid;' +
+'      grid-template-columns: repeat(3, 1fr);' +
+'      gap: 16px;' +
+'      text-align: center;' +
+'      margin-top: 36px;' +
+'      margin-bottom: 30px;' +
+'      padding-top: 20px;' +
+'      border-top: 1px solid #e2e8f0;' +
+'    }' +
+'    .sig-col .sig-title {' +
+'      font-size: 12.5px;' +
+'      font-weight: 700;' +
+'      color: #0f172a;' +
+'      text-transform: uppercase;' +
+'    }' +
+'    .sig-col .sig-sub {' +
+'      font-size: 11px;' +
+'      color: #94a3b8;' +
+'      font-style: italic;' +
+'      margin-top: 2px;' +
+'    }' +
+'    .sig-space {' +
+'      height: 70px;' +
+'    }' +
+'    .sig-name {' +
+'      font-size: 12.5px;' +
+'      font-weight: 600;' +
+'      color: #475569;' +
+'    }' +
+'    .invoice-footer {' +
+'      border-top: 1px dashed #cbd5e1;' +
+'      padding-top: 16px;' +
+'      font-size: 11.5px;' +
+'      color: #64748b;' +
+'      text-align: center;' +
+'      line-height: 1.6;' +
+'    }' +
+'    @media print {' +
+'      @page {' +
+'        size: A4 portrait;' +
+'        margin: 10mm 12mm;' +
+'      }' +
+'      body {' +
+'        background: #ffffff !important;' +
+'        padding: 0 !important;' +
+'      }' +
+'      .no-print {' +
+'        display: none !important;' +
+'      }' +
+'      .invoice-card {' +
+'        box-shadow: none !important;' +
+'        border: none !important;' +
+'        padding: 0 !important;' +
+'        max-width: 100% !important;' +
+'      }' +
+'    }' +
+'  </style>' +
+'</head>' +
+'<body>' +
+'  <div class="toolbar no-print">' +
+'    <div class="toolbar-left">' +
+'      <button class="btn btn-primary" onclick="window.print()">' +
+'        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>' +
+'        <span>In hóa đơn / Lưu file PDF</span>' +
+'      </button>' +
+'      <button class="btn btn-success" onclick="downloadPdf()">' +
+'        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>' +
+'        <span>Tải PDF trực tiếp</span>' +
+'      </button>' +
+'      <button class="btn btn-close" onclick="window.close()">✕ Đóng</button>' +
+'    </div>' +
+'    <div class="toolbar-hint">' +
+'      💡 Chọn <strong>"Save as PDF"</strong> trong mục Máy in để lưu file PDF về máy' +
+'    </div>' +
+'  </div>' +
+'  <div class="invoice-card" id="invoiceSheet">' +
+'    <div class="invoice-header">' +
+'      <div>' +
+'        <div class="brand-title">STEM IoT <span>SHOP</span></div>' +
+'        <div class="brand-sub">' +
+'          Chuyên linh kiện vi điều khiển STEM, cảm biến IoT & Robot giáo dục<br>' +
+'          📍 Tòa nhà Công Nghệ, Khu Công Nghệ Cao, TP. Thủ Đức, TP. Hồ Chí Minh<br>' +
+'          📞 Hotline: 0937 511 617 · ✉️ Email: contact@stemiot.vn · 🌐 stemiot.vn' +
+'        </div>' +
+'      </div>' +
+'      <div class="invoice-title-block">' +
+'        <div class="invoice-heading">HÓA ĐƠN BÁN HÀNG</div>' +
+'        <div class="invoice-code">#' + escapeHtml(order.id) + '</div>' +
+'        <div class="invoice-date">Ngày lập: ' + dateStr + '</div>' +
+'      </div>' +
+'    </div>' +
+'    <div class="info-grid">' +
+'      <div>' +
+'        <div class="info-col-title">THÔNG TIN KHÁCH HÀNG & GIAO HÀNG</div>' +
+'        <div class="info-row">' +
+'          <span class="info-label">Người nhận:</span>' +
+'          <span class="info-value">' + escapeHtml(order.customer || 'Khách hàng') + '</span>' +
+'        </div>' +
+'        <div class="info-row">' +
+'          <span class="info-label">Điện thoại:</span>' +
+'          <span class="info-value">' + escapeHtml(order.phone || '—') + '</span>' +
+'        </div>' +
+'        <div class="info-row">' +
+'          <span class="info-label">Email:</span>' +
+'          <span class="info-value">' + escapeHtml(order.email || '—') + '</span>' +
+'        </div>' +
+'        <div class="info-row">' +
+'          <span class="info-label">Địa chỉ:</span>' +
+'          <span class="info-value">' + escapeHtml(order.address || 'Tại cửa hàng') + '</span>' +
+'        </div>' +
+'      </div>' +
+'      <div>' +
+'        <div class="info-col-title">THÔNG TIN ĐƠN HÀNG</div>' +
+'        <div class="info-row">' +
+'          <span class="info-label">Mã đơn:</span>' +
+'          <span class="info-value" style="font-family: monospace;">#' + escapeHtml(order.id) + '</span>' +
+'        </div>' +
+'        <div class="info-row">' +
+'          <span class="info-label">Trạng thái đơn:</span>' +
+'          <span class="info-value">' + escapeHtml(statusText) + '</span>' +
+'        </div>' +
+'        <div class="info-row">' +
+'          <span class="info-label">Thanh toán:</span>' +
+'          <span class="info-value"><span class="status-badge">' + escapeHtml(paymentText) + '</span></span>' +
+'        </div>' +
+'        <div class="info-row">' +
+'          <span class="info-label">Hình thức:</span>' +
+'          <span class="info-value">' + escapeHtml(order.paymentMethod || (order.payment === 'paid' ? 'Chuyển khoản' : 'COD')) + '</span>' +
+'        </div>' +
+'      </div>' +
+'    </div>' +
+'    <table class="items-table">' +
+'      <thead>' +
+'        <tr>' +
+'          <th style="width: 44px; text-align: center;">STT</th>' +
+'          <th>Tên sản phẩm / Linh kiện</th>' +
+'          <th style="width: 110px; text-align: right;">Đơn giá</th>' +
+'          <th style="width: 70px; text-align: center;">SL</th>' +
+'          <th style="width: 130px; text-align: right;">Thành tiền</th>' +
+'        </tr>' +
+'      </thead>' +
+'      <tbody>' +
+'        ' + rowsHtml +
+'      </tbody>' +
+'    </table>' +
+'    <div class="summary-wrap">' +
+'      <div class="in-words-box">' +
+'        <div><strong>Số tiền viết bằng chữ:</strong></div>' +
+'        <div style="margin-top: 4px; font-style: italic; color: #1e293b;">' + escapeHtml(words) + '</div>' +
+'        ' + (order.notes ? '<div style="margin-top: 8px;"><strong>Ghi chú đơn hàng:</strong> ' + escapeHtml(order.notes) + '</div>' : '') +
+'      </div>' +
+'      <div class="totals-box">' +
+'        <div class="total-line">' +
+'          <span>Tạm tính hàng hóa:</span>' +
+'          <span style="font-family: monospace; font-weight: 600;">' + subtotal.toLocaleString('vi-VN') + 'đ</span>' +
+'        </div>' +
+'        <div class="total-line">' +
+'          <span>Phí vận chuyển:</span>' +
+'          <span style="font-family: monospace; font-weight: 600; color: #059669;">Miễn phí</span>' +
+'        </div>' +
+'        <div class="total-line grand">' +
+'          <span>TỔNG THANH TOÁN:</span>' +
+'          <span class="val">' + total.toLocaleString('vi-VN') + 'đ</span>' +
+'        </div>' +
+'      </div>' +
+'    </div>' +
+'    <div class="signatures-block">' +
+'      <div class="sig-col">' +
+'        <div class="sig-title">Người mua hàng</div>' +
+'        <div class="sig-sub">(Ký & ghi rõ họ tên)</div>' +
+'        <div class="sig-space"></div>' +
+'        <div class="sig-name">' + escapeHtml(order.customer || '') + '</div>' +
+'      </div>' +
+'      <div class="sig-col">' +
+'        <div class="sig-title">Người giao hàng</div>' +
+'        <div class="sig-sub">(Ký & ghi rõ họ tên)</div>' +
+'        <div class="sig-space"></div>' +
+'        <div class="sig-name">Đơn vị vận chuyển</div>' +
+'      </div>' +
+'      <div class="sig-col">' +
+'        <div class="sig-title">Người lập phiếu</div>' +
+'        <div class="sig-sub">(Ký & đóng dấu)</div>' +
+'        <div class="sig-space"></div>' +
+'        <div class="sig-name">STEM IoT Shop</div>' +
+'      </div>' +
+'    </div>' +
+'    <div class="invoice-footer">' +
+'      ❤️ Cảm ơn Quý khách đã mua sắm và đồng hành cùng <strong>STEM IoT Shop</strong>!<br>' +
+'      Quý khách vui lòng kiểm tra kỹ sản phẩm khi nhận hàng và lưu giữ hóa đơn này để được hỗ trợ kỹ thuật và bảo hành chu đáo.' +
+'    </div>' +
+'  </div>' +
+'  ' + clientScript +
+'</body>' +
+'</html>';
+
+  printWindow.document.open();
+  printWindow.document.write(invoiceHtml);
+  printWindow.document.close();
+}
+
+window.exportOrderPDF = exportOrderPDF;

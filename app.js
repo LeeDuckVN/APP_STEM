@@ -483,6 +483,8 @@ function autoFillCheckoutCustomer() {
   const addressInput = $("#checkoutAddress");
   const selectWrap = $("#checkoutAddressSelectWrap");
   const addrSelect = $("#checkoutAddressSelect");
+  const noAddressWrap = $("#checkoutNoAddressWrap");
+  const noAddressMsg = $("#noAddressAlertText");
 
   if (session) {
     if (noticeEl && nameNotice) {
@@ -490,16 +492,22 @@ function autoFillCheckoutCustomer() {
       noticeEl.hidden = false;
     }
 
-    // Lấy danh sách địa chỉ từ session hoặc localStorage fallback
-    let addresses = Array.isArray(session.addresses) ? session.addresses : [];
-    if (addresses.length === 0 && session.id) {
-      try {
-        const raw = localStorage.getItem(`stem_customer_addresses_${session.id}`);
-        if (raw) addresses = JSON.parse(raw);
-      } catch (_) {}
+    // 1. Lấy danh sách địa chỉ từ session hoặc localStorage fallback
+    let addresses = [];
+    const storageKey = `stem_customer_addresses_${session.id || session.email}`;
+    try {
+      const raw = localStorage.getItem(storageKey);
+      if (raw) addresses = JSON.parse(raw);
+    } catch (_) {}
+
+    if ((!addresses || addresses.length === 0) && Array.isArray(session.addresses)) {
+      addresses = session.addresses;
     }
-    const defId = session.defaultAddressId || (session.id ? localStorage.getItem(`stem_customer_def_addr_${session.id}`) : null);
-    const defaultAddr = addresses.find((a) => a.id === defId) || addresses[0] || null;
+
+    const defId = session.defaultAddressId || (session.id ? localStorage.getItem(`stem_customer_def_addr_${session.id}`) : null) || (addresses[0]?.id || null);
+    const defaultAddr = (addresses && addresses.length > 0)
+      ? (addresses.find((a) => a.id === defId) || addresses[0])
+      : null;
 
     if (nameInput && (!nameInput.value || nameInput.dataset.autofilled === "true")) {
       nameInput.value = (defaultAddr && defaultAddr.recipientName) ? defaultAddr.recipientName : (session.name || "");
@@ -514,32 +522,40 @@ function autoFillCheckoutCustomer() {
       emailInput.dataset.autofilled = "true";
     }
 
-    // Tự động điền ĐỊA CHỈ MẶC ĐỊNH vào ô địa chỉ nhận hàng
-    if (addressInput && (!addressInput.value || addressInput.dataset.autofilled === "true")) {
-      if (defaultAddr) {
+    // 2. Xử lý hiển thị địa chỉ chi tiết theo yêu cầu:
+    // Nếu CHƯA CÓ lưu địa chỉ trong trang thông tin cá nhân:
+    if (!addresses || addresses.length === 0) {
+      if (selectWrap) selectWrap.hidden = true;
+      if (noAddressWrap) {
+        noAddressWrap.hidden = false;
+        if (noAddressMsg) noAddressMsg.textContent = "Chưa có địa chỉ lưu trong trang thông tin cá nhân";
+      }
+      if (addressInput) {
+        addressInput.value = "";
+        delete addressInput.dataset.autofilled;
+      }
+    } else {
+      // ĐÃ CÓ địa chỉ lưu trong trang thông tin cá nhân:
+      if (noAddressWrap) noAddressWrap.hidden = true;
+      if (selectWrap) selectWrap.hidden = false;
+
+      if (addressInput && defaultAddr) {
         addressInput.value = defaultAddr.fullAddress || [defaultAddr.street, defaultAddr.ward, defaultAddr.district, defaultAddr.province].filter(Boolean).join(", ");
         addressInput.dataset.autofilled = "true";
       }
-    }
 
-    // Hiển thị bộ chọn địa chỉ nếu khách đã có địa chỉ trong sổ
-    if (selectWrap && addrSelect) {
-      if (addresses.length > 0) {
-        selectWrap.hidden = false;
+      if (addrSelect) {
         addrSelect.innerHTML = addresses.map((a) => {
           const isDef = a.id === defId;
           const label = `${isDef ? '⭐ [Mặc định] ' : ''}${a.recipientName} - ${a.fullAddress || a.street}`;
           return `<option value="${escapeHtml(a.id)}" ${isDef ? 'selected' : ''}>${escapeHtml(label)}</option>`;
-        }).join("") + `<option value="__custom__">➕ Nhập địa chỉ khác...</option>`;
+        }).join("") + `<option value="__add_new__">➕ Thêm địa chỉ mới...</option>`;
 
         addrSelect.onchange = () => {
           const val = addrSelect.value;
-          if (val === "__custom__") {
-            if (addressInput) {
-              addressInput.value = "";
-              addressInput.focus();
-              delete addressInput.dataset.autofilled;
-            }
+          if (val === "__add_new__") {
+            openCheckoutAddressModal();
+            if (defId) addrSelect.value = defId;
           } else {
             const picked = addresses.find((a) => a.id === val);
             if (picked) {
@@ -558,13 +574,20 @@ function autoFillCheckoutCustomer() {
             }
           }
         };
-      } else {
-        selectWrap.hidden = true;
       }
     }
   } else {
+    // Chưa đăng nhập
     if (noticeEl) noticeEl.hidden = true;
     if (selectWrap) selectWrap.hidden = true;
+    if (noAddressWrap) {
+      noAddressWrap.hidden = false;
+      if (noAddressMsg) noAddressMsg.textContent = "Vui lòng đăng nhập để lưu và chọn địa chỉ nhận hàng";
+    }
+    if (addressInput) {
+      addressInput.value = "";
+      delete addressInput.dataset.autofilled;
+    }
     if (nameInput && nameInput.dataset.autofilled === "true") {
       nameInput.value = "";
       delete nameInput.dataset.autofilled;
@@ -577,11 +600,124 @@ function autoFillCheckoutCustomer() {
       emailInput.value = "";
       delete emailInput.dataset.autofilled;
     }
-    if (addressInput && addressInput.dataset.autofilled === "true") {
-      addressInput.value = "";
-      delete addressInput.dataset.autofilled;
-    }
   }
+}
+
+// ===================== Checkout Address Modal & Sync =====================
+function openCheckoutAddressModal() {
+  const session = getCustomerSession();
+  if (!session) {
+    closeCart();
+    openAccountModal("login");
+    const msg = $("#customerLoginMessage");
+    if (msg) msg.textContent = "Vui lòng đăng nhập để lưu địa chỉ nhận hàng vào tài khoản.";
+    return;
+  }
+  const modal = $("#addressModal");
+  const backdrop = $("#addressModalBackdrop");
+  const form = $("#addressForm");
+  if (!modal || !backdrop) return;
+
+  if (form) form.reset();
+  const nameEl = $("#addrName");
+  const phoneEl = $("#addrPhone");
+  if (nameEl) nameEl.value = session.name || "";
+  if (phoneEl) phoneEl.value = session.phone || "";
+  const isDefEl = $("#addrIsDefault");
+  if (isDefEl) isDefEl.checked = true;
+
+  modal.hidden = false;
+  backdrop.hidden = false;
+}
+
+function closeCheckoutAddressModal() {
+  const modal = $("#addressModal");
+  const backdrop = $("#addressModalBackdrop");
+  if (modal) modal.hidden = true;
+  if (backdrop) backdrop.hidden = true;
+}
+
+function initCheckoutAddressEvents() {
+  $("#btnCheckoutAddAddress")?.addEventListener("click", openCheckoutAddressModal);
+  $("#btnCheckoutAddNewAddr")?.addEventListener("click", openCheckoutAddressModal);
+  $("#addrModalClose")?.addEventListener("click", closeCheckoutAddressModal);
+  $("#addrModalCancel")?.addEventListener("click", closeCheckoutAddressModal);
+  $("#addressModalBackdrop")?.addEventListener("click", closeCheckoutAddressModal);
+
+  $("#addressForm")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const session = getCustomerSession();
+    if (!session) return;
+
+    const recipientName = $("#addrName") ? $("#addrName").value.trim() : "";
+    const recipientPhone = $("#addrPhone") ? $("#addrPhone").value.trim() : "";
+    const province = $("#addrProvince") ? $("#addrProvince").value.trim() : "";
+    const district = $("#addrDistrict") ? $("#addrDistrict").value.trim() : "";
+    const ward = $("#addrWard") ? $("#addrWard").value.trim() : "";
+    const street = $("#addrStreet") ? $("#addrStreet").value.trim() : "";
+    const notes = $("#addrNotes") ? $("#addrNotes").value.trim() : "";
+    const isDefault = $("#addrIsDefault") ? $("#addrIsDefault").checked : true;
+    const type = document.querySelector('input[name="addrType"]:checked')?.value || "home";
+
+    if (!recipientName || !recipientPhone || !street) {
+      showToast("Vui lòng điền đầy đủ họ tên, số điện thoại và số nhà tên đường.", "warning");
+      return;
+    }
+
+    const parts = [street, ward, district, province].filter(Boolean);
+    const fullAddress = parts.join(", ");
+    const newId = "addr_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+
+    const addressPayload = {
+      id: newId,
+      recipientName,
+      recipientPhone,
+      province,
+      district,
+      ward,
+      street,
+      fullAddress,
+      type,
+      notes,
+      isDefault
+    };
+
+    // 1. Lưu vào localStorage
+    const storageKey = `stem_customer_addresses_${session.id || session.email}`;
+    let currentAddrs = [];
+    try {
+      const raw = localStorage.getItem(storageKey);
+      if (raw) currentAddrs = JSON.parse(raw);
+    } catch (_) {}
+    if (!Array.isArray(currentAddrs)) currentAddrs = [];
+
+    if (isDefault || currentAddrs.length === 0) {
+      currentAddrs.forEach((a) => { a.isDefault = false; });
+      localStorage.setItem(`stem_customer_def_addr_${session.id || session.email}`, newId);
+      session.defaultAddressId = newId;
+    }
+
+    currentAddrs.push(addressPayload);
+    localStorage.setItem(storageKey, JSON.stringify(currentAddrs));
+
+    session.addresses = currentAddrs;
+    setCustomerSession(session);
+
+    // 2. Đồng bộ lên MongoDB server nếu có backend
+    if (session.id) {
+      try {
+        await fetch(`${customerApiBase}/${session.id}/addresses`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(addressPayload)
+        });
+      } catch (_) {}
+    }
+
+    closeCheckoutAddressModal();
+    autoFillCheckoutCustomer();
+    showToast("Đã thêm địa chỉ vào trang thông tin cá nhân và áp dụng cho đơn hàng! ⭐", "success");
+  });
 }
 
 // ===================== Customer Orders Modal =====================
@@ -2161,6 +2297,12 @@ $("#checkoutForm").addEventListener("submit", (event) => {
   const customerEmail = $("#checkoutEmail") ? $("#checkoutEmail").value.trim() : (session?.email || "");
   const customerAddress = $("#checkoutAddress") ? $("#checkoutAddress").value.trim() : "";
 
+  if (!customerAddress) {
+    showToast("Vui lòng thêm địa chỉ nhận hàng trong trang thông tin cá nhân trước khi đặt hàng.", "warning");
+    openCheckoutAddressModal();
+    return;
+  }
+
   const result = placeStoreOrder(
     {
       customer: customerName,
@@ -2218,6 +2360,7 @@ function toggleContactPopup(event) {
 
 applyI18n();
 openSharedProductFromUrl();
+initCheckoutAddressEvents();
 
 floatingContactBtn.addEventListener("click", toggleContactPopup);
 contactPopupBackdrop.addEventListener("click", (event) => {

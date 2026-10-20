@@ -1562,22 +1562,13 @@
     </p>
 
     <!-- QR Code Container -->
-    <div style="background: #ffffff; padding: 12px; border-radius: var(--radius-lg); border: 2px dashed #0068ff; display: inline-block; margin-bottom: 12px; box-shadow: 0 4px 18px rgba(0, 104, 255, 0.15);">
-      <img src="assets/qr/zalo.jpg" alt="Mã QR Zalo hỗ trợ hủy đơn" style="width: 210px; height: 210px; object-fit: contain; display: block; border-radius: 8px;" />
-      <div style="font-size: 11.5px; color: #0068ff; font-weight: 700; margin-top: 6px;">
+    <div style="background: #ffffff; padding: 14px; border-radius: var(--radius-lg); border: 2px dashed #0068ff; display: inline-flex; flex-direction: column; align-items: center; margin-bottom: 14px; box-shadow: 0 4px 18px rgba(0, 104, 255, 0.12);">
+      <img src="assets/qr/zalo.jpg" alt="Mã QR Zalo hỗ trợ hủy đơn" style="width: 220px; height: 220px; object-fit: contain; display: block; border-radius: 8px;" />
+      <div style="font-size: 11.5px; color: #0068ff; font-weight: 700; margin-top: 8px; text-align: center;">
         📱 Quét mã bằng ứng dụng Zalo trên điện thoại
       </div>
     </div>
 
-    <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 14px; line-height: 1.5; background: var(--bg-surface-alt); padding: 10px 14px; border-radius: var(--radius-sm); text-align: left; border: 1px solid var(--border-subtle);">
-      <div style="font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">💬 Tin nhắn mẫu gửi người bán:</div>
-      <div id="cancelZaloSampleMsg" style="font-style: italic; color: var(--text-muted); user-select: all; font-size: 12px; background: #ffffff; padding: 6px 10px; border-radius: 4px; border: 1px solid var(--border-subtle);">
-        "Chào shop STEM IoT, tôi muốn hủy đơn hàng #... Nhờ shop hỗ trợ kiểm tra và hủy đơn giúp tôi nhé!"
-      </div>
-      <button type="button" id="btnCopyCancelMsg" class="btn-action-pill" style="margin-top: 8px; font-size: 12px; padding: 5px 12px; font-weight: 600; cursor: pointer;">
-        📋 Sao chép tin nhắn mẫu
-      </button>
-    </div>
 
     <div style="display: flex; flex-direction: column; gap: 8px;">
       <a href="https://zalo.me/0937511617" id="cancelZaloDirectLink" target="_blank" rel="noopener noreferrer" class="primary-button" style="padding: 11px 20px; font-size: 13.5px; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px; background: #0068ff; border-color: #0068ff;">
@@ -2456,35 +2447,6 @@
     $("#cancelZaloModalClose")?.addEventListener("click", closeZaloCancelModal);
     $("#cancelZaloModalBottomClose")?.addEventListener("click", closeZaloCancelModal);
     $("#cancelZaloModalBackdrop")?.addEventListener("click", closeZaloCancelModal);
-
-    $("#btnCopyCancelMsg")?.addEventListener("click", () => {
-      const sampleText = `Chào shop STEM IoT, tôi muốn hủy đơn hàng #${currentCancelOrderId}. Nhờ shop hỗ trợ kiểm tra và hủy đơn giúp tôi nhé!`;
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(sampleText).then(() => {
-          showToast("Đã sao chép tin nhắn mẫu! Hãy dán vào Zalo gửi cho shop.", "success");
-        }).catch(() => {
-          copyFallbackMsg(sampleText);
-        });
-      } else {
-        copyFallbackMsg(sampleText);
-      }
-    });
-
-    function copyFallbackMsg(text) {
-      const ta = document.createElement("textarea");
-      ta.value = text;
-      ta.style.position = "fixed";
-      ta.style.opacity = "0";
-      document.body.appendChild(ta);
-      ta.select();
-      try {
-        document.execCommand("copy");
-        showToast("Đã sao chép tin nhắn mẫu! Hãy mở Zalo dán gửi cho shop.", "success");
-      } catch (_) {
-        showToast("Vui lòng sao chép thủ công tin nhắn mẫu.", "info");
-      }
-      document.body.removeChild(ta);
-    }
 
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") {

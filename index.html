@@ -674,22 +674,54 @@
         </svg>
         <span>Tài khoản: <strong id="checkoutCustomerName"></strong></span>
       </div>
-      <div id="checkoutAddressSelectWrap" style="margin-bottom: 10px; background: var(--bg-surface-alt); padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);" hidden>
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
-          <label for="checkoutAddressSelect" style="font-size:11.5px; font-weight:700; color:var(--text-secondary);">📍 Sổ địa chỉ giao hàng:</label>
-          <a href="tai-khoan.html#addresses" style="font-size:11px; color:var(--primary); text-decoration:none; font-weight:700;">+ Quản lý</a>
-        </div>
-        <select id="checkoutAddressSelect" style="width:100%; padding:8px 10px; border:1px solid var(--border-strong); border-radius:var(--radius-xs); font-size:12.5px; outline:none; background:#ffffff; color:var(--text-primary); cursor:pointer;">
-        </select>
-      </div>
       <input type="text" id="checkoutName" placeholder="Họ và tên người nhận" data-i18n-placeholder="fullName"
         required />
       <input type="tel" id="checkoutPhone" placeholder="Số điện thoại nhận hàng" data-i18n-placeholder="phoneNumber"
         required />
       <input type="email" id="checkoutEmail" placeholder="Email nhận hóa đơn / theo dõi đơn"
         data-i18n-placeholder="emailPlaceholder" />
-      <input type="text" id="checkoutAddress" placeholder="Địa chỉ chi tiết (Số nhà, đường, phường, quận...)"
-        data-i18n-placeholder="deliveryAddress" required />
+
+      <!-- KHỐI ĐỊA CHỈ NHẬN HÀNG (SỐ NHÀ / ĐỊA CHỈ CHI TIẾT) -->
+      <div id="checkoutAddressBlock" class="checkout-address-block">
+        <!-- Trạng thái 1: Chưa có lưu địa chỉ trong trang thông tin cá nhân -->
+        <div id="checkoutNoAddressWrap" class="checkout-no-address-wrap">
+          <div class="checkout-no-address-alert">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            <span id="noAddressAlertText">Chưa có địa chỉ lưu trong trang thông tin cá nhân</span>
+          </div>
+          <button type="button" id="btnCheckoutAddAddress" class="btn-checkout-add-address">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span>+ Thêm địa chỉ</span>
+          </button>
+          <div class="checkout-no-address-hint">
+            <span>💡 Thêm địa chỉ nhận hàng để lưu vào tài khoản</span>
+            <a href="tai-khoan.html#addresses" target="_blank">Quản lý &rarr;</a>
+          </div>
+        </div>
+
+        <!-- Trạng thái 2: Đã có địa chỉ trong sổ -->
+        <div id="checkoutAddressSelectWrap" class="checkout-address-select-wrap" hidden>
+          <div class="checkout-address-select-header">
+            <label for="checkoutAddressSelect" style="font-size:11.5px; font-weight:700; color:var(--text-secondary); display:flex; align-items:center; gap:5px;">
+              <span>📍 Sổ địa chỉ giao hàng:</span>
+            </label>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <button type="button" id="btnCheckoutAddNewAddr" class="checkout-link-btn" title="Thêm địa chỉ mới">+ Thêm địa chỉ</button>
+              <span style="color:var(--border-subtle); font-size:11px;">|</span>
+              <a href="tai-khoan.html#addresses" target="_blank" style="font-size:11px; color:var(--primary); text-decoration:none; font-weight:700;">Quản lý</a>
+            </div>
+          </div>
+          <select id="checkoutAddressSelect" class="checkout-address-select">
+          </select>
+          <input type="hidden" id="checkoutAddress" />
+        </div>
+      </div>
       <button class="primary-button checkout-submit-btn btn-place-order" type="submit">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
           stroke-linecap="round" stroke-linejoin="round">
@@ -1009,6 +1041,110 @@
     <h2 id="customerQuotesTitle">Lịch sử báo giá</h2>
     <p class="account-modal-subtitle">Các yêu cầu báo giá bạn đã gửi.</p>
     <div id="customerQuotesList" class="customer-orders-list"></div>
+  </div>
+
+  <!-- Address Modal: Thêm Địa Chỉ Nhận Hàng (Đồng bộ với Trang Thông Tin Cá Nhân) -->
+  <div class="addr-modal-backdrop" id="addressModalBackdrop" hidden></div>
+  <div class="addr-modal" id="addressModal" hidden role="dialog" aria-modal="true" aria-labelledby="addrModalTitle">
+    <div class="addr-modal-header">
+      <h3 class="addr-modal-title" id="addrModalTitle">Thêm địa chỉ nhận hàng</h3>
+      <button type="button" class="addr-modal-close" id="addrModalClose" aria-label="Đóng">&times;</button>
+    </div>
+
+    <form id="addressForm" style="display:grid; gap:14px;">
+      <input type="hidden" id="editAddressId" value="" />
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+        <div>
+          <label class="profile-field-label" for="addrName">Họ tên người nhận *</label>
+          <input type="text" id="addrName" class="profile-field-input" required placeholder="Nguyễn Văn A" />
+        </div>
+        <div>
+          <label class="profile-field-label" for="addrPhone">Số điện thoại *</label>
+          <input type="tel" id="addrPhone" class="profile-field-input" required placeholder="0937 511 617" />
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+        <div>
+          <label class="profile-field-label" for="addrProvince">Tỉnh / Thành phố *</label>
+          <select id="addrProvince" class="profile-field-select" required>
+            <option value="">-- Chọn Tỉnh / Thành phố --</option>
+            <option value="TP. Hồ Chí Minh" selected>TP. Hồ Chí Minh</option>
+            <option value="Hà Nội">Hà Nội</option>
+            <option value="Bình Dương">Bình Dương</option>
+            <option value="Đồng Nai">Đồng Nai</option>
+            <option value="Đà Nẵng">Đà Nẵng</option>
+            <option value="Hải Phòng">Hải Phòng</option>
+            <option value="Cần Thơ">Cần Thơ</option>
+            <option value="Bà Rịa - Vũng Tàu">Bà Rịa - Vũng Tàu</option>
+            <option value="Long An">Long An</option>
+            <option value="Quảng Nam">Quảng Nam</option>
+            <option value="Khánh Hòa">Khánh Hòa</option>
+            <option value="Lâm Đồng">Lâm Đồng</option>
+            <option value="Thừa Thiên Huế">Thừa Thiên Huế</option>
+            <option value="Bắc Ninh">Bắc Ninh</option>
+            <option value="Hải Dương">Hải Dương</option>
+            <option value="Tỉnh thành khác">Tỉnh thành khác</option>
+          </select>
+        </div>
+        <div>
+          <label class="profile-field-label" for="addrDistrict">Quận / Huyện *</label>
+          <input type="text" id="addrDistrict" class="profile-field-input" required
+            placeholder="VD: Quận 1, Quận Bình Thạnh..." />
+        </div>
+      </div>
+
+      <div>
+        <label class="profile-field-label" for="addrWard">Phường / Xã *</label>
+        <input type="text" id="addrWard" class="profile-field-input" required
+          placeholder="VD: Phường Bến Nghé, Phường 1..." />
+      </div>
+
+      <div>
+        <label class="profile-field-label" for="addrStreet">Số nhà, tên đường, tòa nhà *</label>
+        <input type="text" id="addrStreet" class="profile-field-input" required
+          placeholder="VD: 38/5 Vạn Kiếp, P.1, Q.Bình Thạnh" />
+      </div>
+
+      <div>
+        <label class="profile-field-label">Loại địa chỉ</label>
+        <div style="display:flex; gap:8px;">
+          <label style="flex:1; display:flex; align-items:center; gap:6px; font-size:13px; font-weight:600; padding:8px 12px; border:1px solid var(--border-subtle); border-radius:var(--radius-sm); cursor:pointer;">
+            <input type="radio" name="addrType" value="home" checked />
+            <span>Nhà riêng</span>
+          </label>
+          <label style="flex:1; display:flex; align-items:center; gap:6px; font-size:13px; font-weight:600; padding:8px 12px; border:1px solid var(--border-subtle); border-radius:var(--radius-sm); cursor:pointer;">
+            <input type="radio" name="addrType" value="office" />
+            <span>Văn phòng</span>
+          </label>
+          <label style="flex:1; display:flex; align-items:center; gap:6px; font-size:13px; font-weight:600; padding:8px 12px; border:1px solid var(--border-subtle); border-radius:var(--radius-sm); cursor:pointer;">
+            <input type="radio" name="addrType" value="school" />
+            <span>Trường / Lab</span>
+          </label>
+        </div>
+      </div>
+
+      <div>
+        <label class="profile-field-label" for="addrNotes">Ghi chú giao hàng (Tùy chọn)</label>
+        <input type="text" id="addrNotes" class="profile-field-input"
+          placeholder="Ví dụ: Gọi trước 15 phút, giao giờ hành chính..." />
+      </div>
+
+      <div style="padding:10px 12px; background:var(--primary-light); border:1px solid rgba(37,99,235,0.2); border-radius:var(--radius-sm);">
+        <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:13px; font-weight:700; color:var(--primary);">
+          <input type="checkbox" id="addrIsDefault" checked style="width:16px; height:16px; accent-color:var(--primary);" />
+          <span>⭐ Đặt làm địa chỉ giao hàng mặc định</span>
+        </label>
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:8px;">
+        <button type="button" class="btn-action-pill" id="addrModalCancel" style="padding:9px 18px;">Hủy bỏ</button>
+        <button type="submit" class="primary-button" id="btnSaveAddressSubmit" style="padding:9px 22px;">
+          Lưu địa chỉ
+        </button>
+      </div>
+    </form>
   </div>
 
   <!-- Floating Social Media Bar -->
