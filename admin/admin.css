@@ -843,7 +843,8 @@ body {
   color: var(--warning-text);
 }
 
-.action-btn.delete:hover {
+.action-btn.delete:hover,
+.action-btn.cancel:hover {
   background: var(--danger-bg);
   border-color: rgba(239, 68, 68, 0.3);
   color: var(--danger-text);
@@ -854,6 +855,31 @@ body {
   background: #ecfdf5;
   border-color: rgba(5, 150, 105, 0.35);
   color: #059669;
+}
+
+.action-btn.check-done {
+  color: #059669;
+  border-color: #a7f3d0;
+  background: #f0fdf4;
+}
+
+.action-btn.check-done:hover {
+  background: #dcfce7;
+  border-color: #059669;
+  color: #047857;
+  transform: scale(1.06);
+}
+
+.action-btn.check-done.active {
+  background: #059669;
+  border-color: #059669;
+  color: #ffffff;
+}
+
+.action-btn.check-done.active:hover {
+  background: #047857;
+  border-color: #047857;
+  color: #ffffff;
 }
 
 /* ==========================================================================

@@ -474,12 +474,16 @@
           data-i18n-placeholder="phoneNumber" required />
         <textarea id="quoteContent" name="content"
           placeholder="Danh sách linh kiện, số lượng, yêu cầu xuất hóa đơn và thời gian giao..."
-          data-i18n-placeholder="quoteDetails" rows="4" required></textarea>
-        <label class="quote-file-input" for="quoteAttachment">
-          <span>Đính kèm file danh sách linh kiện</span>
-          <small>PDF, Excel, Word hoặc ảnh, tối đa 5 MB</small>
+          data-i18n-placeholder="quoteDetails" rows="4"></textarea>
+        <label class="quote-file-input" for="quoteAttachment" id="quoteFileLabel">
+          <span id="quoteFileLabelTitle">Đính kèm file danh sách linh kiện</span>
+          <small id="quoteFileLabelSub">PDF, Excel, Word hoặc ảnh, tối đa 5 MB (không cần nhập tay danh sách nếu đã đính kèm file)</small>
           <input type="file" id="quoteAttachment" accept=".pdf,.xls,.xlsx,.doc,.docx,.csv,.jpg,.jpeg,.png" />
         </label>
+        <div id="quoteFileBadge" style="display: none; align-items: center; justify-content: space-between; padding: 9px 14px; background: #ecfdf5; border: 1.5px dashed #10b981; border-radius: 8px; font-size: 13px; color: #047857; margin-bottom: 10px;">
+          <span id="quoteFileNameDisplay" style="display: flex; align-items: center; gap: 6px; font-weight: 700; word-break: break-all;">📎 Đã chọn: ...</span>
+          <button type="button" id="btnRemoveQuoteFile" style="background: none; border: none; color: #ef4444; font-size: 18px; font-weight: 800; cursor: pointer; padding: 0 4px; line-height: 1;" title="Xóa file đính kèm">&times;</button>
+        </div>
         <button class="primary-button" type="submit">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round">

@@ -51,13 +51,14 @@
       const totalSpent = orders.filter(o => o.status !== 'cancelled').reduce((s, o) => s + o.total, 0);
 
       // ===== Hoạt động gần đây: từ đơn thật & yêu cầu báo giá =====
-      const recentOrders = [...orders].sort((a, b) => b.createdAt - a.createdAt).slice(0, 5);
+      const pendingList = [...orders].filter(o => o.status === 'pending').sort((a, b) => b.createdAt - a.createdAt);
+      const recentOrders = pendingList.slice(0, 5);
       const recentQuotes = [...quotes].sort((a, b) => b.createdAt - a.createdAt).slice(0, 3);
       const stockAlerts = products.filter(p => p.inventory > 0 && p.inventory <= 20).slice(0, 2);
       const activities = [
         ...recentOrders.map(o => ({
           type: 'order',
-          text: `Đơn hàng <strong>${escapeHtml(o.id)}</strong> từ ${escapeHtml(o.customer)} — ${fmtVND(o.total)}`,
+          text: `Đơn chờ xử lý <strong>${escapeHtml(o.id)}</strong> từ ${escapeHtml(o.customer)} — ${fmtVND(o.total)}`,
           time: o.createdAt
         })),
         ...recentQuotes.map(q => ({
@@ -88,14 +89,14 @@
               <div class="stat-trend up">Từ ${orders.filter(o => o.payment === 'paid').length} đơn đã thanh toán</div>
             </div>
           </div>
-          <div class="stat-card stat-card-blue">
+          <div class="stat-card stat-card-blue" style="cursor: pointer;" onclick="window.location.href='orders.html?status=pending'" title="Bấm để xem danh sách đơn hàng chưa xử lý">
             <div class="stat-icon blue">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
             </div>
             <div class="stat-info">
-              <h3>${totalOrders}</h3>
-              <p>Tổng số đơn hàng</p>
-              <div class="stat-trend ${pendingOrders > 0 ? 'down' : 'up'}">${pendingOrders > 0 ? 'Có ' + pendingOrders + ' đơn chờ xử lý' : 'Không có đơn chờ'}</div>
+              <h3>${pendingOrders}</h3>
+              <p>Đơn hàng chưa xử lý</p>
+              <div class="stat-trend ${pendingOrders > 0 ? 'down' : 'up'}">${pendingOrders > 0 ? 'Có ' + pendingOrders + ' đơn chờ xử lý' : 'Đã xử lý xong'}</div>
             </div>
           </div>
           <div class="stat-card stat-card-orange" style="cursor: pointer;" onclick="window.location.href='quotes.html'">
@@ -134,17 +135,20 @@
         <div class="row">
           <div class="card">
             <div class="card-header">
-              <div class="card-title">Đơn hàng mới nhất</div>
-              <a class="btn btn-sm btn-secondary" href="orders.html">Xem tất cả</a>
+              <div class="card-title">
+                Đơn hàng chờ xử lý
+                <span class="badge badge-warning" style="margin-left: 8px;">${pendingOrders}</span>
+              </div>
+              <a class="btn btn-sm btn-secondary" href="orders.html?status=pending">Xem tất cả</a>
             </div>
             <div class="card-body no-padding">
               ${recentOrders.length === 0 ? `
                 <div class="empty-state">
-                  <div class="icon">
-                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                  <div class="icon" style="color: var(--success, #10b981);">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                   </div>
-                  <h3>Chưa có đơn hàng nào</h3>
-                  <p>Khách đặt hàng trên cửa hàng → đơn hiện ở đây ngay lập tức</p>
+                  <h3>Không có đơn hàng nào chờ xử lý</h3>
+                  <p>Tất cả đơn hàng hiện tại đều đã được xử lý xong</p>
                 </div>
               ` : recentOrders.map(o => `
                 <div class="cart-item">

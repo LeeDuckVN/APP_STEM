@@ -24,6 +24,7 @@
   --success: #10b981;
   --success-light: #ecfdf5;
   --success-glow: rgba(16, 185, 129, 0.25);
+  --emerald: #10b981;
 
   --warning: #f59e0b;
   --warning-light: #fffbeb;
@@ -40,6 +41,7 @@
   --border-subtle: #e2e8f0;
   --border-strong: #cbd5e1;
   --border-focus: #93c5fd;
+  --border: #e2e8f0;
 
   --text-primary: #0f172a;
   --text-secondary: #475569;
@@ -451,7 +453,7 @@ img {
 }
 
 .customer-order-card {
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-subtle, #e2e8f0);
   border-radius: var(--radius-sm);
   padding: 14px;
   background: var(--bg-surface-alt);
@@ -515,7 +517,7 @@ img {
   align-items: center;
   font-size: 12px;
   color: var(--text-muted);
-  border-top: 1px dashed var(--border);
+  border-top: 1px dashed var(--border-subtle, #e2e8f0);
   padding-top: 8px;
 }
 
@@ -803,6 +805,7 @@ img {
   letter-spacing: -0.02em;
   background: linear-gradient(135deg, #0f172a 30%, #2563eb);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -1603,6 +1606,7 @@ img {
   font-weight: 800;
   background: linear-gradient(to right, #ffffff, #e0e7ff);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   display: block;
   margin-bottom: 6px;
@@ -2055,6 +2059,7 @@ img {
   margin-bottom: 8px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   transition: color var(--transition-fast);
@@ -2077,6 +2082,7 @@ img {
   margin-bottom: 12px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -2152,6 +2158,7 @@ img {
   font-weight: 700;
   outline: none;
   -moz-appearance: textfield;
+  appearance: textfield;
 }
 
 .qty-pill-input::-webkit-outer-spin-button,
@@ -2334,7 +2341,7 @@ img {
 }
 
 .quote-benefit-item svg {
-  color: var(--emerald);
+  color: var(--success, #10b981);
   flex-shrink: 0;
 }
 
@@ -3004,6 +3011,7 @@ img {
   font-weight: 600;
   display: -webkit-box;
   -webkit-line-clamp: 1;
+  line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -3380,6 +3388,7 @@ img {
   letter-spacing: -0.02em;
   background: linear-gradient(135deg, #0f172a 30%, #2563eb);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 

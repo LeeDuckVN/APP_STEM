@@ -2233,43 +2233,87 @@ function readQuoteAttachment(file) {
   });
 }
 
+// Giao diện chọn file đính kèm báo giá nhanh
+const quoteFileInput = $("#quoteAttachment");
+const quoteFileBadge = $("#quoteFileBadge");
+const quoteFileNameDisplay = $("#quoteFileNameDisplay");
+const btnRemoveQuoteFile = $("#btnRemoveQuoteFile");
+const quoteContentArea = $("#quoteContent");
+
+function updateQuoteFileState() {
+  const file = quoteFileInput?.files?.[0];
+  if (file) {
+    const sizeStr = file.size > 1024 * 1024 
+      ? (file.size / (1024 * 1024)).toFixed(1) + " MB"
+      : Math.round(file.size / 1024) + " KB";
+    if (quoteFileNameDisplay) {
+      quoteFileNameDisplay.textContent = `📎 ${file.name} (${sizeStr})`;
+    }
+    if (quoteFileBadge) quoteFileBadge.style.display = "flex";
+    if (quoteContentArea) {
+      quoteContentArea.placeholder = "(Đã đính kèm file - Bạn có thể để trống hoặc thêm ghi chú nếu cần)";
+    }
+  } else {
+    if (quoteFileBadge) quoteFileBadge.style.display = "none";
+    if (quoteContentArea) {
+      quoteContentArea.placeholder = "Danh sách linh kiện, số lượng, yêu cầu xuất hóa đơn và thời gian giao...";
+    }
+  }
+}
+
+quoteFileInput?.addEventListener("change", updateQuoteFileState);
+btnRemoveQuoteFile?.addEventListener("click", () => {
+  if (quoteFileInput) quoteFileInput.value = "";
+  updateQuoteFileState();
+});
+
 $("#quote")?.addEventListener("submit", async (event) => {
   event.preventDefault();
   const form = event.currentTarget;
   const customer = $("#quoteCustomer") ? $("#quoteCustomer").value.trim() : "";
   const phone = $("#quotePhone") ? $("#quotePhone").value.trim() : "";
-  const content = $("#quoteContent") ? $("#quoteContent").value.trim() : "";
+  let content = $("#quoteContent") ? $("#quoteContent").value.trim() : "";
+  const selectedFile = quoteFileInput?.files?.[0];
 
-  if (!customer || !phone || !content) {
-    showToast("Vui lòng điền đầy đủ tên, số điện thoại và danh sách linh kiện cần báo giá.", "warning");
+  if (!customer || !phone) {
+    showToast("Vui lòng điền họ tên và số điện thoại liên hệ.", "warning");
     return;
+  }
+
+  if (!content && !selectedFile) {
+    showToast("Vui lòng nhập danh sách linh kiện hoặc đính kèm file danh sách.", "warning");
+    return;
+  }
+
+  let attachment = null;
+  if (selectedFile) {
+    try {
+      attachment = await readQuoteAttachment(selectedFile);
+    } catch (error) {
+      showToast(error.message, "warning");
+      return;
+    }
+  }
+
+  // Nếu người dùng đã gửi file và để trống textarea thì tự điền nội dung chú thích file
+  if (!content && attachment) {
+    content = `[File đính kèm danh sách: ${attachment.name}]`;
   }
 
   const session = typeof getCustomerSession === "function" ? getCustomerSession() : null;
-  if (!session) {
-    openAccountModal("login");
-    $("#customerLoginMessage").textContent = "Vui lòng đăng nhập để gửi và theo dõi yêu cầu báo giá.";
-    return;
-  }
-
-  let attachment;
-  try {
-    attachment = await readQuoteAttachment($("#quoteAttachment")?.files?.[0]);
-  } catch (error) {
-    showToast(error.message, "warning");
-    return;
-  }
 
   const newQuote = typeof addStoreQuote === "function" ? addStoreQuote({
     customer,
     phone,
-    email: session.email || "",
-    customerId: session.id || null,
+    email: session?.email || "",
+    customerId: session?.id || null,
     content,
     attachment
   }) : null;
 
   form.reset();
+  updateQuoteFileState();
+
   const msg = currentLang === "en"
     ? `Quote request ${newQuote?.id || ""} received! We will contact you within 15-30 minutes.`
     : currentLang === "ja"

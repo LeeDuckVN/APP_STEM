@@ -28,7 +28,75 @@ function readJSON(key, fallback) {
 }
 
 function writeJSON(key, value) {
-  localStorage.setItem(key, JSON.stringify(value));
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+    return true;
+  } catch (e) {
+    console.warn('writeJSON failed for key "' + key + '":', e.message);
+    // Nếu vượt dung lượng quota do file đính kèm quá lớn trong quotes
+    if (key === STORE_KEYS.quotes && Array.isArray(value)) {
+      try {
+        const lightweight = value.map(q => {
+          if (q.attachment && q.attachment.data && q.attachment.data.length > 25000) {
+            return {
+              ...q,
+              attachment: {
+                name: q.attachment.name,
+                type: q.attachment.type,
+                size: q.attachment.size,
+                data: null,
+                isLarge: true
+              }
+            };
+          }
+          return q;
+        });
+        localStorage.setItem(key, JSON.stringify(lightweight));
+        return true;
+      } catch (err2) {
+        console.error('writeJSON fallback failed:', err2.message);
+      }
+    }
+    return false;
+  }
+}
+
+// Lưu trữ file đính kèm dung lượng lớn vào IndexedDB để client-side không bao giờ bị nghẽn
+function saveQuoteAttachmentToIDB(id, attachment) {
+  if (typeof window === 'undefined' || !window.indexedDB || !attachment || !attachment.data) return;
+  try {
+    const req = indexedDB.open('stem_attachments_db', 1);
+    req.onupgradeneeded = (e) => {
+      e.target.result.createObjectStore('attachments', { keyPath: 'id' });
+    };
+    req.onsuccess = (e) => {
+      const db = e.target.result;
+      const tx = db.transaction('attachments', 'readwrite');
+      tx.objectStore('attachments').put({ id, attachment });
+    };
+  } catch (err) {
+    console.warn('IDB save error:', err);
+  }
+}
+
+function getQuoteAttachmentFromIDB(id, callback) {
+  if (typeof window === 'undefined' || !window.indexedDB) return callback(null);
+  try {
+    const req = indexedDB.open('stem_attachments_db', 1);
+    req.onupgradeneeded = (e) => {
+      e.target.result.createObjectStore('attachments', { keyPath: 'id' });
+    };
+    req.onsuccess = (e) => {
+      const db = e.target.result;
+      const tx = db.transaction('attachments', 'readonly');
+      const getReq = tx.objectStore('attachments').get(id);
+      getReq.onsuccess = () => callback(getReq.result ? getReq.result.attachment : null);
+      getReq.onerror = () => callback(null);
+    };
+    req.onerror = () => callback(null);
+  } catch (err) {
+    callback(null);
+  }
 }
 
 function escapeHtml(v) {
@@ -892,9 +960,9 @@ function saveStoreUsers(list, shouldNotify = true) {
 
 function getStoreQuotes() {
   const list = readJSON(STORE_KEYS.quotes, []);
-  // Tự động dọn dẹp triệt để nếu còn lưu cache dữ liệu mẫu cũ trong LocalStorage trình duyệt
-  if (Array.isArray(list) && list.some(q => q.customer && (q.customer.includes('Nguyễn Văn Nam') || q.customer.includes('Luxas') || q.id === 'RFQ-0001' || q.id === 'RFQ-0002'))) {
-    const cleaned = list.filter(q => !(q.customer && (q.customer.includes('Nguyễn Văn Nam') || q.customer.includes('Luxas') || q.id === 'RFQ-0001' || q.id === 'RFQ-0002')));
+  // Chỉ dọn dẹp nếu còn lưu dữ liệu mẫu dummy cũ từ seed ban đầu
+  if (Array.isArray(list) && list.some(q => q.customer && (q.customer.includes('Nguyễn Văn Nam - ĐH Bách Khoa') || q.email === 'nam.nv@hcmut.edu.vn'))) {
+    const cleaned = list.filter(q => !(q.customer && (q.customer.includes('Nguyễn Văn Nam - ĐH Bách Khoa') || q.email === 'nam.nv@hcmut.edu.vn')));
     writeJSON(STORE_KEYS.quotes, cleaned);
     return cleaned;
   }
@@ -922,6 +990,11 @@ function addStoreQuote(data) {
     createdAt: Date.now(),
     updatedAt: Date.now()
   };
+
+  if (record.attachment && record.attachment.data) {
+    saveQuoteAttachmentToIDB(id, record.attachment);
+  }
+
   quotes.unshift(record);
   saveStoreQuotes(quotes);
   return record;
@@ -1118,10 +1191,10 @@ function cancelStoreOrder(orderId) {
 
   const products = getStoreProducts();
   // Hoàn trả số lượng vào kho cho từng sản phẩm
-  for (const it of order.items) {
+  for (const it of (order.items || [])) {
     const p = products.find((x) => x.id === (it.productId || it.id));
     if (p) {
-      p.inventory += Number(it.qty) || 1;
+      p.inventory = Number(p.inventory || 0) + (Number(it.qty) || 1);
     }
   }
 
@@ -1136,13 +1209,36 @@ function cancelStoreOrder(orderId) {
   syncStoreUsersFromOrders();
 
   notifyStoreChanged('order-cancelled');
-  return { ok: true, order, message: 'Đã hủy đơn hàng và hoàn trả tồn kho thành công.' };
+  return { ok: true, order, message: 'Đã hủy đơn hàng và hoàn trả số lượng tồn kho thành công.' };
 }
 
 function updateStoreOrderStatus(orderId, newStatus) {
   const orders = getStoreOrders();
   const order = orders.find((o) => o.id === orderId);
   if (!order) return { ok: false, message: 'Không tìm thấy đơn hàng' };
+
+  // Nếu đổi sang trạng thái 'cancelled' và đơn chưa bị hủy -> hoàn trả tồn kho
+  if (newStatus === 'cancelled' && order.status !== 'cancelled') {
+    return cancelStoreOrder(orderId);
+  }
+
+  // Nếu đơn đang bị hủy mà admin khôi phục sang trạng thái khác (pending/processing...) -> trừ lại tồn kho
+  if (order.status === 'cancelled' && newStatus !== 'cancelled') {
+    const products = getStoreProducts();
+    for (const it of (order.items || [])) {
+      const p = products.find((x) => x.id === (it.productId || it.id));
+      if (p) {
+        p.inventory = Math.max(0, Number(p.inventory || 0) - (Number(it.qty) || 1));
+      }
+    }
+    order.status = newStatus;
+    recalcStoreSold(products, orders);
+    saveStoreOrders(orders, false);
+    saveStoreProducts(products, false);
+    syncStoreUsersFromOrders();
+    notifyStoreChanged('order-status-updated');
+    return { ok: true, order, message: 'Đã khôi phục đơn hàng và cập nhật lại tồn kho.' };
+  }
 
   order.status = newStatus;
   saveStoreOrders(orders, false);
@@ -1166,8 +1262,18 @@ function deleteStoreOrder(orderId) {
   const order = orders.find((o) => o.id === orderId);
   if (!order) return { ok: false, message: 'Không tìm thấy đơn hàng' };
 
-  orders = orders.filter((o) => o.id !== orderId);
   const products = getStoreProducts();
+  // Nếu đơn hàng chưa bị hủy mà bị xóa trực tiếp -> hoàn trả tồn kho về cửa hàng
+  if (order.status !== 'cancelled') {
+    for (const it of (order.items || [])) {
+      const p = products.find((x) => x.id === (it.productId || it.id));
+      if (p) {
+        p.inventory = Number(p.inventory || 0) + (Number(it.qty) || 1);
+      }
+    }
+  }
+
+  orders = orders.filter((o) => o.id !== orderId);
   recalcStoreSold(products, orders);
 
   saveStoreOrders(orders, false);

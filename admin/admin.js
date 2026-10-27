@@ -206,7 +206,11 @@ function badge(status, type) {
   };
   const item = map[type] && map[type][status];
   if (!item) return `<span class="badge badge-gray"><span class="badge-dot"></span>${escapeHtml(status)}</span>`;
-  return `<span class="badge ${item.cls}"><span class="badge-dot"></span>${item.label}</span>`;
+  const isDone = (status === 'completed' || status === 'quoted' || status === 'resolved');
+  const dotHtml = isDone 
+    ? `<span style="font-size: 11px; font-weight: 800; margin-right: 3px;">✓</span>`
+    : `<span class="badge-dot"></span>`;
+  return `<span class="badge ${item.cls}">${dotHtml}${item.label}</span>`;
 }
 
 // ============== TOAST ==============
@@ -271,7 +275,8 @@ function buildSidebar(active) {
       id: 'orders',
       label: 'Đơn hàng',
       icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>`,
-      href: 'orders.html'
+      href: 'orders.html',
+      badge: (typeof getStoreOrders === 'function' ? getStoreOrders().filter(o => o.status === 'pending').length : 0)
     },
     {
       id: 'users',

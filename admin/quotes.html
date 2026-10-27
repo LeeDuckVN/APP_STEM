@@ -299,8 +299,12 @@
                   💬 <em>${escapeHtml(q.notes)}</em>
                 </div>
               ` : ''}
-              ${q.attachment?.data ? `
-                <a href="${q.attachment.data}" download="${escapeHtml(q.attachment.name)}" class="text-xs text-primary" style="display: inline-block; margin-top: 5px; font-weight: 700;">📎 ${escapeHtml(q.attachment.name)}</a>
+              ${q.attachment ? `
+                <div style="margin-top: 6px;">
+                  <button type="button" class="btn btn-xs btn-secondary" onclick="downloadQuoteFile('${q.id}')" style="display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; font-size: 11.5px; font-weight: 700; color: #0284c7; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 6px; cursor: pointer;">
+                    📎 Tải file: ${escapeHtml(q.attachment.name)} ${q.attachment.size ? `(${Math.round(q.attachment.size / 1024)} KB)` : ''}
+                  </button>
+                </div>
               ` : ''}
             </td>
             <td>
@@ -311,6 +315,13 @@
             </td>
             <td>
               <div class="table-actions">
+                <button class="action-btn check-done ${q.status === 'completed' || q.status === 'quoted' ? 'active' : ''}" 
+                  onclick="toggleQuoteDone('${q.id}')" 
+                  title="${q.status === 'completed' || q.status === 'quoted' ? 'Đã báo giá xong! Bấm để chuyển lại Chờ báo giá' : 'Bấm vào dấu tích: Đánh dấu ĐÃ BÁO GIÁ XONG'}">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                </button>
                 <button class="action-btn" onclick="openQuoteDetail('${q.id}')" title="Xem chi tiết & Xử lý">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                 </button>
@@ -322,6 +333,46 @@
           </tr>
         `;
       }).join('');
+    }
+
+    function toggleQuoteDone(id) {
+      const q = allQuotes.find(item => item.id === id);
+      if (!q) return;
+      const isDone = (q.status === 'completed' || q.status === 'quoted');
+      const newStatus = isDone ? 'pending' : 'completed';
+      const updated = updateStoreQuote(id, { status: newStatus });
+      if (updated) {
+        if (newStatus === 'completed') {
+          showToast('✓ Đã đánh dấu BÁO GIÁ XONG yêu cầu ' + id, 'success');
+        } else {
+          showToast('↩️ Đã chuyển lại trạng thái Chờ báo giá ' + id, 'info');
+        }
+        renderAllAdmin();
+      }
+    }
+
+    function downloadQuoteFile(quoteId) {
+      const q = allQuotes.find(item => item.id === quoteId);
+      if (!q || !q.attachment) return;
+      if (q.attachment.data) {
+        const a = document.createElement('a');
+        a.href = q.attachment.data;
+        a.download = q.attachment.name || 'file-danh-sach';
+        a.click();
+        return;
+      }
+      if (typeof getQuoteAttachmentFromIDB === 'function') {
+        getQuoteAttachmentFromIDB(quoteId, (att) => {
+          if (att && att.data) {
+            const a = document.createElement('a');
+            a.href = att.data;
+            a.download = att.name || 'file-danh-sach';
+            a.click();
+          } else {
+            alert('File: ' + (q.attachment.name || 'Tệp') + ' (' + Math.round((q.attachment.size || 0)/1024) + ' KB)');
+          }
+        });
+      }
     }
 
     function openQuoteDetail(id) {
@@ -378,10 +429,14 @@ ${escapeHtml(q.content)}
           </div>
         </div>
 
-        ${q.attachment?.data ? `
+        ${q.attachment ? `
           <div class="form-group" style="margin-bottom: 16px;">
-            <span class="text-xs text-gray">File khách hàng đính kèm</span>
-            <div style="margin-top: 6px;"><a href="${q.attachment.data}" download="${escapeHtml(q.attachment.name)}" class="btn btn-sm btn-secondary">📎 Tải ${escapeHtml(q.attachment.name)}</a></div>
+            <span class="text-xs text-gray" style="font-weight: 600;">File khách hàng đính kèm:</span>
+            <div style="margin-top: 6px;">
+              <button type="button" class="btn btn-sm btn-primary" onclick="downloadQuoteFile('${q.id}')" style="display: inline-flex; align-items: center; gap: 6px;">
+                📎 Tải file: ${escapeHtml(q.attachment.name)} ${q.attachment.size ? `(${Math.round(q.attachment.size / 1024)} KB)` : ''}
+              </button>
+            </div>
           </div>
         ` : ''}
 
@@ -406,10 +461,21 @@ ${escapeHtml(q.content)}
 
       footerEl.innerHTML = `
         <button type="button" class="btn btn-secondary" onclick="closeModal('quoteDetailModal')">Đóng</button>
+        <button type="button" class="btn btn-success" onclick="quickCompleteQuote('${q.id}')" style="display: inline-flex; align-items: center; gap: 6px; background: #059669; border-color: #059669; color: #fff; cursor: pointer;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          <span>✓ Đã báo xong</span>
+        </button>
         <button type="button" class="btn btn-primary" onclick="saveQuoteDetail('${q.id}')">💾 Lưu cập nhật</button>
       `;
 
       openModal('quoteDetailModal');
+    }
+
+    function quickCompleteQuote(id) {
+      updateStoreQuote(id, { status: 'completed' });
+      showToast('✓ Đã đánh dấu hoàn tất báo giá ' + id, 'success');
+      closeModal('quoteDetailModal');
+      renderAllAdmin();
     }
 
     function saveQuoteDetail(id) {
